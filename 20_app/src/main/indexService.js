@@ -7,6 +7,7 @@ const fs = require('fs');
 const path = require('path');
 const YAML = require('js-yaml');
 
+const TASKS_DIR = path.join(__dirname, '../../..', '30_data/tasks');
 const INDEX_PATH = path.join(__dirname, '../../..', '30_data/tasks/_index.yaml');
 
 function normalizeRelativePath(relPath) {
@@ -17,10 +18,32 @@ function normalizeRelativePath(relPath) {
     .trim();
 }
 
+function normalizeTaskFilePath(filePath) {
+  return String(filePath || '')
+    .replace(/\\/g, '/')
+    .trim();
+}
+
+function normalizeRootPath(rootPath) {
+  const normalized = normalizeTaskFilePath(rootPath);
+  if (!normalized) return '.';
+
+  if (path.isAbsolute(normalized)) {
+    const relativeFromTasks = normalizeRelativePath(path.relative(TASKS_DIR, normalized));
+    if (!relativeFromTasks || relativeFromTasks.startsWith('..')) return '.';
+    return relativeFromTasks;
+  }
+
+  return normalizeRelativePath(normalized) || '.';
+}
+
 function deriveRootsFromTasks(taskList) {
   const roots = taskList
     .map((task) => {
-      const relPath = normalizeRelativePath(task.task_file_path);
+      const pathForRoot = path.isAbsolute(task.task_file_path || '')
+        ? normalizeRelativePath(path.relative(TASKS_DIR, task.task_file_path))
+        : normalizeRelativePath(task.task_file_path);
+      const relPath = pathForRoot && !pathForRoot.startsWith('..') ? pathForRoot : '.';
       const dir = path.posix.dirname(relPath || '.');
       return dir && dir !== '/' ? dir : '.';
     })
@@ -46,13 +69,13 @@ function rebuildIndex(taskCache, taskFileRoots = ['.']) {
         sort_order: t.sort_order,
         tags: t.tags || [],
         due_date: t.due_date,
-        task_file_path: normalizeRelativePath(t.task_file_path),
+        task_file_path: normalizeTaskFilePath(t.task_file_path),
         updated_at: t.updated_at
       }))
       .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
 
     const normalizedRoots = Array.isArray(taskFileRoots) && taskFileRoots.length
-      ? Array.from(new Set(taskFileRoots.map((root) => normalizeRelativePath(root || '.')).filter(Boolean))).sort()
+      ? Array.from(new Set(taskFileRoots.map((root) => normalizeRootPath(root || '.')).filter(Boolean))).sort()
       : deriveRootsFromTasks(taskList);
 
     // インデックスデータ作成

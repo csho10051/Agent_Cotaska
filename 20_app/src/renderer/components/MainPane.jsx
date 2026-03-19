@@ -33,6 +33,7 @@ function MainPane({
   isSearchMode, onSearchChange,
   onTaskClick, onAddTask, onAddSubtask, onToggleComplete,
   onTrashTask, onRestoreTask, onDeleteTask, onDuplicateTask, onSetTaskList, onSetTaskDue,
+  onReorderTask,
   lists,
   tags = [],
   onSetTaskTags,
@@ -47,6 +48,9 @@ function MainPane({
   const [expanded, setExpanded] = useState({});
   const [completedSectionExpanded, setCompletedSectionExpanded] = useState(true);
   const [dueEditorTaskId, setDueEditorTaskId] = useState(null);
+  const [draggingTaskId, setDraggingTaskId] = useState(null);
+  const [hoveredSectionKey, setHoveredSectionKey] = useState(null);
+  const dragEnabled = Boolean(onReorderTask) && !isTrashed && !isCompleted && !isSearchMode;
 
   const handleKeyDown = (e) => {
     if (e.key !== "Enter") return;
@@ -154,11 +158,43 @@ function MainPane({
   };
 
   // タスク行を描画する関数
-  const renderTaskRow = (task, showSep, isSubtask = false, childCount = 0) => (
+  const renderTaskRow = (task, showSep, isSubtask = false, childCount = 0, sectionMeta = null) => (
     <React.Fragment key={task.id}>
       <div
-        className={`task-row${selectedTaskId === task.id ? " selected" : ""}${task.status === "done" ? " task-row--done" : ""}${isSubtask ? " task-row--subtask" : ""}`}
+        className={`task-row${selectedTaskId === task.id ? " selected" : ""}${task.status === "done" ? " task-row--done" : ""}${isSubtask ? " task-row--subtask" : ""}${draggingTaskId === task.id ? " task-row--dragging" : ""}`}
         onClick={() => onTaskClick?.(task)}
+        draggable={dragEnabled && !isSubtask && task.status !== "done"}
+        onDragStart={(e) => {
+          if (!(dragEnabled && !isSubtask && task.status !== "done")) return;
+          e.dataTransfer.effectAllowed = "move";
+          e.dataTransfer.setData("text/plain", String(task.id));
+          setDraggingTaskId(task.id);
+        }}
+        onDragEnd={() => setDraggingTaskId(null)}
+        onDragOver={(e) => {
+          if (!dragEnabled || !draggingTaskId || draggingTaskId === task.id) return;
+          e.preventDefault();
+          e.dataTransfer.dropEffect = "move";
+        }}
+        onDrop={(e) => {
+          if (!dragEnabled) return;
+          e.preventDefault();
+          e.stopPropagation();
+          const draggedTaskId = e.dataTransfer.getData("text/plain") || draggingTaskId;
+          if (!draggedTaskId || draggedTaskId === task.id) {
+            setDraggingTaskId(null);
+            setHoveredSectionKey(null);
+            return;
+          }
+          onReorderTask?.({
+            draggedTaskId,
+            targetTaskId: task.id,
+            toSectionType: sectionMeta?.type || null,
+            toSectionLabel: sectionMeta?.label || null,
+          });
+          setDraggingTaskId(null);
+          setHoveredSectionKey(null);
+        }}
         onContextMenu={(e) => {
           if (!isTrashed && !isCompleted && !isSearchMode) {
             e.preventDefault();
@@ -241,30 +277,22 @@ function MainPane({
             >✕</button>
           </span>
         )}
-        {/* 通常ビュー（完了ビュー除く）: ホバー時ゴミ箱ボタン */}
-        {!isTrashed && !isCompleted && (
-          <button
-            className="task-trash-btn"
-            title="ゴミ箱に移動"
-            onClick={(e) => { e.stopPropagation(); onTrashTask?.(task); }}
-          >🗑</button>
-        )}
       </div>
       {showSep && <div className="task-separator" />}
     </React.Fragment>
   );
 
-  const renderTaskTree = (list) => {
+  const renderTaskTree = (list, sectionMeta = null) => {
     const { roots, byParent } = buildTaskTree(list);
     const items = [];
 
     roots.forEach((parent, idx) => {
       const children = byParent[parent.id] || [];
       const parentExpanded = expanded[parent.id] || inlineInput?.parentId === parent.id;
-      items.push(renderTaskRow(parent, idx < roots.length - 1, false, children.length));
+      items.push(renderTaskRow(parent, idx < roots.length - 1, false, children.length, sectionMeta));
       if (parentExpanded) {
         children.forEach((child) => {
-          items.push(renderTaskRow(child, false, true, 0));
+          items.push(renderTaskRow(child, false, true, 0, sectionMeta));
         });
         items.push(renderInlineInput(parent));
       }
@@ -291,7 +319,7 @@ function MainPane({
       {isTrashed && tasks.length > 0 && (
         <div className="section-header">🗑️ ゴミ箱</div>
       )}
-      {renderTaskTree(tasks)}
+      {renderTaskTree(tasks, { type: "flat", label: viewTitle })}
     </>
   );
 
@@ -303,10 +331,36 @@ function MainPane({
           <div className="task-empty">タスクがありません</div>
         )}
         {progressSections.map((section) => (
-          <React.Fragment key={section.label}>
+          <div
+            key={section.label}
+            className={`drop-section${hoveredSectionKey === `progress:${section.label}` ? " drop-section--hover" : ""}`}
+            onDragOver={(e) => {
+              if (!dragEnabled || !draggingTaskId) return;
+              e.preventDefault();
+              e.dataTransfer.dropEffect = "move";
+              setHoveredSectionKey(`progress:${section.label}`);
+            }}
+            onDragLeave={() => {
+              if (hoveredSectionKey === `progress:${section.label}`) setHoveredSectionKey(null);
+            }}
+            onDrop={(e) => {
+              if (!dragEnabled) return;
+              e.preventDefault();
+              e.stopPropagation();
+              const draggedTaskId = e.dataTransfer.getData("text/plain") || draggingTaskId;
+              if (!draggedTaskId) return;
+              onReorderTask?.({
+                draggedTaskId,
+                toSectionType: "progress",
+                toSectionLabel: section.label,
+              });
+              setDraggingTaskId(null);
+              setHoveredSectionKey(null);
+            }}
+          >
             <div className="section-header">{section.label}</div>
-            {renderTaskTree(section.tasks)}
-          </React.Fragment>
+            {renderTaskTree(section.tasks, { type: "progress", label: section.label })}
+          </div>
         ))}
       </>
     );
@@ -321,12 +375,38 @@ function MainPane({
           <div className="task-empty">タスクがありません</div>
         )}
         {sections.map((section) => (
-          <React.Fragment key={section.label}>
+          <div
+            key={section.label}
+            className={`drop-section${hoveredSectionKey === `date:${section.label}` ? " drop-section--hover" : ""}`}
+            onDragOver={(e) => {
+              if (!dragEnabled || !draggingTaskId) return;
+              e.preventDefault();
+              e.dataTransfer.dropEffect = "move";
+              setHoveredSectionKey(`date:${section.label}`);
+            }}
+            onDragLeave={() => {
+              if (hoveredSectionKey === `date:${section.label}`) setHoveredSectionKey(null);
+            }}
+            onDrop={(e) => {
+              if (!dragEnabled) return;
+              e.preventDefault();
+              e.stopPropagation();
+              const draggedTaskId = e.dataTransfer.getData("text/plain") || draggingTaskId;
+              if (!draggedTaskId) return;
+              onReorderTask?.({
+                draggedTaskId,
+                toSectionType: "date",
+                toSectionLabel: section.label,
+              });
+              setDraggingTaskId(null);
+              setHoveredSectionKey(null);
+            }}
+          >
             <div className={`section-header${section.label.includes("遅延") ? " overdue" : ""}`}>
               {section.label}
             </div>
-            {renderTaskTree(section.tasks)}
-          </React.Fragment>
+            {renderTaskTree(section.tasks, { type: "date", label: section.label })}
+          </div>
         ))}
       </>
     );
@@ -390,7 +470,7 @@ function MainPane({
             >
               {completedSectionExpanded ? "▾" : "▸"} ✅ 完了 ({completedSectionTasks.length})
             </div>
-            {completedSectionExpanded && renderTaskTree(completedSectionTasks)}
+            {completedSectionExpanded && renderTaskTree(completedSectionTasks, { type: "completed", label: "完了" })}
           </>
         )}
       </div>

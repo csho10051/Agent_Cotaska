@@ -259,6 +259,11 @@ html, body, #root {
 .section-header--completed { cursor: pointer; user-select: none; }
 .section-header--completed:hover { background: rgba(255,255,255,0.04); }
 
+.drop-section--hover .section-header {
+  background: rgba(71, 114, 250, 0.08);
+  color: #3f5ed6;
+}
+
 .task-row {
   padding: 0 20px;
   height: 40px;
@@ -270,6 +275,7 @@ html, body, #root {
 }
 .task-row:hover { background: #f7f9fc; }
 .task-row.selected { background: rgba(66, 133, 244, 0.08); }
+.task-row--dragging { opacity: 0.55; }
 
 .task-row--subtask {
   padding-left: 40px;
@@ -400,20 +406,6 @@ html, body, #root {
   white-space: nowrap;
 }
 .save-indicator.saved { color: #27ae60; }
-
-/* タスク行のゴミ箱ボタン（ホバー時のみ表示） */
-.task-trash-btn {
-  display: none;
-  background: none;
-  border: none;
-  font-size: 14px;
-  cursor: pointer;
-  padding: 0 4px;
-  opacity: 0.5;
-  flex-shrink: 0;
-}
-.task-trash-btn:hover { opacity: 1; }
-.task-row:hover .task-trash-btn { display: block; }
 
 /* ゴミ箱ビューの復元・削除ボタン */
 .task-actions {
@@ -886,10 +878,15 @@ html, body, #root {
   border-bottom: 1px solid #4772fa;
   outline: none;
   font-size: 13px;
-  color: #333;
+  color: #fff;
   background: transparent;
   padding: 2px 0;
   box-sizing: border-box;
+  caret-color: #fff;
+}
+
+.list-inline-input::placeholder {
+  color: #aab4c4;
 }
 
 /* カラードット選択行 */

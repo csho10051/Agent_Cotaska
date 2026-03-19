@@ -179,3 +179,105 @@ Result:
 
 * 仕様変更として CHG-016 を追加
 * 実装タスクは CURRENT_SPRINT の T-042 で管理
+
+---
+
+## 2026-03-19
+
+### Hide Trash Icon On Task Row Hover In Main Pane
+
+Decision:
+
+メインパネルのタスク行でホバー時に表示される「ごみ箱アイコン」を非表示にする。
+
+Reasons:
+
+* ホバー操作だけで削除導線が現れるため誤操作リスクがある
+* 削除操作を右クリックメニュー等の明示操作に寄せ、意図しない削除を減らす
+
+Result:
+
+* 仕様変更として CHG-017 を追加
+* 実装タスクは CURRENT_SPRINT の T-043 で管理
+
+---
+
+## 2026-03-19
+
+### Include Subtasks In Today View When Parent Is Due Today
+
+Decision:
+
+「今日」ビューで、親タスクの期限日が今日の場合は、配下のサブタスクを期限日に関係なく表示対象に含める。
+
+Reasons:
+
+* 親タスク単位で今日対応すべき作業を一覧で把握しやすくするため
+* 子タスクの期限日だけを基準にすると、実務上の作業塊が分断されるため
+
+Result:
+
+* 仕様変更として CHG-018 を追加
+* 実装タスクは CURRENT_SPRINT の T-044 で管理
+
+---
+
+## 2026-03-19
+
+### Unify Left Pane Input Text Color To White While Editing
+
+Decision:
+
+左ペインのリスト入力・タグ入力において、入力途中（フォーカス中）の文字色を白に統一する。
+
+Reasons:
+
+* 入力完了後は白文字だが、入力途中が黒文字で視認性が低下しているため
+* 入力状態ごとに文字色が異なると操作時の一貫性が損なわれるため
+
+Result:
+
+* 仕様変更として CHG-019 を追加
+* 実装タスクは CURRENT_SPRINT の T-045 で管理
+
+---
+
+## 2026-03-19
+
+### Expand Top-Left Views To All Today Tomorrow Next7Days
+
+Decision:
+
+画面左上の固定ビューを「今日、次の7日間」から「すべて、今日、明日、次の7日間」に変更する。
+
+Reasons:
+
+* 期限未設定を含む全体把握の導線が必要なため
+* 「明日」タスクのみを素早く確認できる導線が必要なため
+
+Result:
+
+* 仕様変更として CHG-020 を追加
+
+---
+
+## 2026-03-19
+
+### Drag Reorder With Section-Semantic Auto Update
+
+Decision:
+
+メインパネルのドラッグ操作では、`sort_order` を正規の並び順キーとして扱い、セクション間移動時は移動先セクション意味に合わせて `due_date` / `progress_status` を自動更新する。
+
+Reasons:
+
+* 運用上の優先順位を手動で並び替えて保持する必要があるため
+* ビュー間移動時の手入力（二重更新）をなくし、更新漏れを減らすため
+* 逆方向遷移（明日→今日、仕掛→未着）も一貫ルールで扱うため
+
+Result:
+
+* 仕様変更として CHG-021 を追加
+* 実装タスクは CURRENT_SPRINT の T-047 で管理
+* 保存は「並び順更新 + 属性更新」を同一操作として扱い、部分反映を禁止
+* 実装タスクは CURRENT_SPRINT の T-046 で管理

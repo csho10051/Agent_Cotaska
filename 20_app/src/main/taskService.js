@@ -26,13 +26,39 @@ function normalizeRelativePath(relPath) {
     .trim();
 }
 
+function normalizeTaskFilePath(filePath) {
+  return String(filePath || '')
+    .replace(/\\/g, '/')
+    .trim();
+}
+
+function toIndexAbsolutePath(absPath) {
+  return path.resolve(absPath).replace(/\\/g, '/');
+}
+
+function normalizeRootPath(rootPath) {
+  const normalized = normalizeTaskFilePath(rootPath);
+  if (!normalized) return '.';
+
+  if (path.isAbsolute(normalized)) {
+    const relativeFromTasks = normalizeRelativePath(path.relative(TASKS_DIR, normalized));
+    if (!relativeFromTasks || relativeFromTasks.startsWith('..')) return '.';
+    return relativeFromTasks;
+  }
+
+  return normalizeRelativePath(normalized) || '.';
+}
+
 function toIndexRelativePath(absPath) {
   return path.relative(TASKS_DIR, absPath).replace(/\\/g, '/');
 }
 
-function resolveTaskFilePath(relPath, fallbackTaskId = null) {
-  const normalized = normalizeRelativePath(relPath);
-  if (normalized) return path.join(TASKS_DIR, normalized);
+function resolveTaskFilePath(taskFilePath, fallbackTaskId = null) {
+  const normalized = normalizeTaskFilePath(taskFilePath);
+  if (normalized) {
+    if (path.isAbsolute(normalized)) return path.normalize(normalized);
+    return path.join(TASKS_DIR, normalizeRelativePath(normalized));
+  }
   if (fallbackTaskId) return path.join(TASKS_DIR, `${fallbackTaskId}.md`);
   throw new Error('task_file_path or fallbackTaskId is required');
 }
@@ -55,7 +81,7 @@ function readIndexData() {
     return {
       next_task_id: indexData.next_task_id || 1,
       task_file_roots: Array.isArray(indexData.task_file_roots) && indexData.task_file_roots.length
-        ? Array.from(new Set(indexData.task_file_roots.map((root) => normalizeRelativePath(root || '.')).filter(Boolean)))
+        ? Array.from(new Set(indexData.task_file_roots.map((root) => normalizeRootPath(root || '.')).filter(Boolean)))
         : [...DEFAULT_TASK_FILE_ROOTS]
     };
   } catch (error) {
@@ -106,7 +132,7 @@ function loadTaskFromFile(filePath) {
   const task = {
     ...parsed.data,
     content: parsed.content,
-    task_file_path: normalizeRelativePath(parsed.data.task_file_path || toIndexRelativePath(filePath)),
+    task_file_path: normalizeTaskFilePath(parsed.data.task_file_path || toIndexAbsolutePath(filePath)),
     _filePath: filePath
   };
   return task;
@@ -115,7 +141,8 @@ function loadTaskFromFile(filePath) {
 function deriveTaskFileRootsFromCache(cache) {
   const roots = Object.values(cache)
     .map((task) => {
-      const relPath = normalizeRelativePath(task.task_file_path);
+      const filePath = task._filePath || resolveTaskFilePath(task.task_file_path, task.id);
+      const relPath = normalizeRelativePath(toIndexRelativePath(filePath));
       const dir = path.posix.dirname(relPath || '.');
       return dir && dir !== '/' ? dir : '.';
     })
@@ -151,9 +178,9 @@ function loadAllTasksAndMigratePath() {
     taskCache[task.id] = task;
 
     // 移行: task_file_path が未設定/不一致なら補完して書き戻し
-    const expectedRelPath = normalizeRelativePath(toIndexRelativePath(filePath));
-    if (!task.task_file_path || normalizeRelativePath(task.task_file_path) !== expectedRelPath) {
-      task.task_file_path = expectedRelPath;
+    const expectedPath = normalizeTaskFilePath(toIndexAbsolutePath(filePath));
+    if (!task.task_file_path || normalizeTaskFilePath(task.task_file_path) !== expectedPath) {
+      task.task_file_path = expectedPath;
       task._filePath = filePath;
       writeTaskFile(task);
     }
@@ -176,6 +203,23 @@ function estimateParentState(children) {
     return { progress_status: '仕掛', status: 'todo' };
   }
   return { progress_status: '未着', status: 'todo' };
+}
+
+function recomputeParentFromChildren(parentId, now) {
+  if (!parentId) return;
+  const parent = taskCache[parentId];
+  if (!parent || parent.delete_flag === 1 || parent.is_manual_progress === 1) return;
+
+  const siblings = Object.values(taskCache)
+    .filter((child) => child.parent === parentId && child.delete_flag === 0);
+  const estimatedParent = estimateParentState(siblings);
+
+  parent.progress_status = estimatedParent.progress_status;
+  parent.status = estimatedParent.status;
+  parent.completed_at = estimatedParent.status === 'done' ? (parent.completed_at || now) : null;
+  parent.updated_at = now;
+  taskCache[parent.id] = parent;
+  writeTaskFile(parent);
 }
 
 /**
@@ -270,7 +314,7 @@ function addTask(taskData) {
   const newId = `T-${String(nextTaskId).padStart(4, '0')}`;
   nextTaskId++;
 
-  const explicitPath = normalizeRelativePath(taskData.task_file_path || '');
+  const explicitPath = normalizeTaskFilePath(taskData.task_file_path || '');
   const taskFilePath = resolveTaskFilePath(explicitPath, newId);
 
   const now = new Date().toISOString();
@@ -288,7 +332,7 @@ function addTask(taskData) {
     tags: taskData.tags || [],
     sort_order: Object.keys(taskCache).length + 1,
     delete_flag: 0,
-    task_file_path: normalizeRelativePath(toIndexRelativePath(taskFilePath)),
+    task_file_path: normalizeTaskFilePath(toIndexAbsolutePath(taskFilePath)),
     created_at: now,
     updated_at: now,
     completed_at: null,
@@ -347,10 +391,10 @@ function updateTask(id, updates) {
       fs.renameSync(oldFilePath, targetFilePath);
     }
     task._filePath = targetFilePath;
-    task.task_file_path = normalizeRelativePath(toIndexRelativePath(targetFilePath));
+    task.task_file_path = normalizeTaskFilePath(toIndexAbsolutePath(targetFilePath));
   } else {
     task._filePath = oldFilePath;
-    task.task_file_path = normalizeRelativePath(task.task_file_path || toIndexRelativePath(oldFilePath));
+    task.task_file_path = normalizeTaskFilePath(task.task_file_path || toIndexAbsolutePath(oldFilePath));
   }
 
   // 親タスクが todo/doing/blocked -> done に遷移した場合、直下サブタスクを自動完了
@@ -384,20 +428,7 @@ function updateTask(id, updates) {
   }
 
   // CHG-012: 子タスク更新時に親タスクの progress_status / status を再推定
-  if (task.parent) {
-    const parent = taskCache[task.parent];
-    if (parent && parent.delete_flag === 0 && parent.is_manual_progress !== 1) {
-      const siblings = Object.values(taskCache).filter((child) => child.parent === task.parent && child.delete_flag === 0);
-      const estimatedParent = estimateParentState(siblings);
-
-      parent.progress_status = estimatedParent.progress_status;
-      parent.status = estimatedParent.status;
-      parent.completed_at = estimatedParent.status === 'done' ? (parent.completed_at || now) : null;
-      parent.updated_at = now;
-      taskCache[parent.id] = parent;
-      writeTaskFile(parent);
-    }
-  }
+  if (task.parent) recomputeParentFromChildren(task.parent, now);
 
   // キャッシュ更新
   taskCache[id] = task;
@@ -422,7 +453,7 @@ function updateTaskContent(id, content) {
 
   task.content = content;
   task.updated_at = now;
-  task.task_file_path = normalizeRelativePath(task.task_file_path || toIndexRelativePath(task._filePath || resolveTaskFilePath(null, id)));
+  task.task_file_path = normalizeTaskFilePath(task.task_file_path || toIndexAbsolutePath(task._filePath || resolveTaskFilePath(null, id)));
   task._filePath = task._filePath || resolveTaskFilePath(task.task_file_path, id);
 
   taskCache[id] = task;
@@ -448,7 +479,7 @@ function updateTaskTags(id, tags) {
 
   task.tags = normalizedTags;
   task.updated_at = now;
-  task.task_file_path = normalizeRelativePath(task.task_file_path || toIndexRelativePath(task._filePath || resolveTaskFilePath(null, id)));
+  task.task_file_path = normalizeTaskFilePath(task.task_file_path || toIndexAbsolutePath(task._filePath || resolveTaskFilePath(null, id)));
   task._filePath = task._filePath || resolveTaskFilePath(task.task_file_path, id);
 
   taskCache[id] = task;
@@ -472,7 +503,7 @@ function completeTask(id) {
   task.completed_at = now;
   task.progress_status = '完了';
   task.updated_at = now;
-  task.task_file_path = normalizeRelativePath(task.task_file_path || toIndexRelativePath(task._filePath || resolveTaskFilePath(null, id)));
+  task.task_file_path = normalizeTaskFilePath(task.task_file_path || toIndexAbsolutePath(task._filePath || resolveTaskFilePath(null, id)));
   task._filePath = task._filePath || resolveTaskFilePath(task.task_file_path, id);
 
   taskCache[id] = task;
@@ -495,7 +526,7 @@ function reopenTask(id) {
   task.status = 'todo';
   task.completed_at = null;
   task.updated_at = now;
-  task.task_file_path = normalizeRelativePath(task.task_file_path || toIndexRelativePath(task._filePath || resolveTaskFilePath(null, id)));
+  task.task_file_path = normalizeTaskFilePath(task.task_file_path || toIndexAbsolutePath(task._filePath || resolveTaskFilePath(null, id)));
   task._filePath = task._filePath || resolveTaskFilePath(task.task_file_path, id);
 
   taskCache[id] = task;
@@ -518,7 +549,7 @@ function trashTask(id) {
   task.delete_flag = 1;
   task.deleted_at = now;
   task.updated_at = now;
-  task.task_file_path = normalizeRelativePath(task.task_file_path || toIndexRelativePath(task._filePath || resolveTaskFilePath(null, id)));
+  task.task_file_path = normalizeTaskFilePath(task.task_file_path || toIndexAbsolutePath(task._filePath || resolveTaskFilePath(null, id)));
   task._filePath = task._filePath || resolveTaskFilePath(task.task_file_path, id);
 
   taskCache[id] = task;
@@ -541,7 +572,7 @@ function restoreTask(id) {
   task.delete_flag = 0;
   task.deleted_at = null;
   task.updated_at = now;
-  task.task_file_path = normalizeRelativePath(task.task_file_path || toIndexRelativePath(task._filePath || resolveTaskFilePath(null, id)));
+  task.task_file_path = normalizeTaskFilePath(task.task_file_path || toIndexAbsolutePath(task._filePath || resolveTaskFilePath(null, id)));
   task._filePath = task._filePath || resolveTaskFilePath(task.task_file_path, id);
 
   taskCache[id] = task;
@@ -602,6 +633,93 @@ function duplicateTask(id) {
 }
 
 /**
+ * タスク並び順一括更新（CHG-021）
+ * payload: {
+ *   ordered_ids: string[],
+ *   field_updates?: { [taskId]: { due_date?, progress_status? } }
+ * }
+ */
+function reorderTasks(payload = {}) {
+  const orderedIdsInput = Array.isArray(payload.ordered_ids) ? payload.ordered_ids : [];
+  const fieldUpdates = payload.field_updates && typeof payload.field_updates === 'object'
+    ? payload.field_updates
+    : {};
+
+  if (orderedIdsInput.length === 0) {
+    throw new Error('ordered_ids is required');
+  }
+
+  const now = new Date().toISOString();
+  const activeTasks = Object.values(taskCache)
+    .filter((t) => t.delete_flag === 0)
+    .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+  const activeIds = activeTasks.map((t) => t.id);
+
+  const dedupedOrderedIds = Array.from(new Set(orderedIdsInput.filter((id) => activeIds.includes(id))));
+  const missingIds = activeIds.filter((id) => !dedupedOrderedIds.includes(id));
+  const finalIds = [...dedupedOrderedIds, ...missingIds];
+
+  const changedIds = new Set();
+  const touchedParentIds = new Set();
+
+  Object.entries(fieldUpdates).forEach(([taskId, patch]) => {
+    const task = taskCache[taskId];
+    if (!task || task.delete_flag === 1) return;
+
+    const nextPatch = { ...patch };
+
+    if (task.status === 'done' && nextPatch.progress_status && nextPatch.progress_status !== '完了') {
+      throw new Error(`Task ${taskId} is done and cannot change progress_status`);
+    }
+
+    if (Object.prototype.hasOwnProperty.call(nextPatch, 'due_date')) {
+      task.due_date = nextPatch.due_date || null;
+    }
+    if (Object.prototype.hasOwnProperty.call(nextPatch, 'progress_status')) {
+      task.progress_status = nextPatch.progress_status;
+    }
+
+    if (task.status === 'done') {
+      task.progress_status = '完了';
+      task.completed_at = task.completed_at || now;
+    } else if (task.progress_status === '完了') {
+      task.progress_status = '仕掛';
+      task.completed_at = null;
+    }
+
+    task.updated_at = now;
+    taskCache[taskId] = task;
+    writeTaskFile(task);
+    changedIds.add(taskId);
+    if (task.parent) touchedParentIds.add(task.parent);
+  });
+
+  finalIds.forEach((taskId, idx) => {
+    const task = taskCache[taskId];
+    if (!task || task.delete_flag === 1) return;
+    const nextOrder = idx + 1;
+    if (task.sort_order !== nextOrder) {
+      task.sort_order = nextOrder;
+      task.updated_at = now;
+      taskCache[taskId] = task;
+      writeTaskFile(task);
+      changedIds.add(taskId);
+      if (task.parent) touchedParentIds.add(task.parent);
+    }
+  });
+
+  touchedParentIds.forEach((parentId) => recomputeParentFromChildren(parentId, now));
+
+  taskFileRoots = deriveTaskFileRootsFromCache(taskCache);
+
+  return {
+    success: true,
+    updated_count: changedIds.size,
+    updated_at: now
+  };
+}
+
+/**
  * キャッシュ再構築（watcher 経由で呼び出される）
  */
 function rebuildCache() {
@@ -628,7 +746,7 @@ function getTaskFileRoots() {
 }
 
 function getTaskSearchRoots() {
-  return taskFileRoots.map((root) => path.join(TASKS_DIR, normalizeRelativePath(root || '.')));
+  return taskFileRoots.map((root) => path.join(TASKS_DIR, normalizeRootPath(root || '.')));
 }
 
 /**
@@ -638,7 +756,7 @@ function writeTaskFile(task) {
   const filePath = task._filePath || resolveTaskFilePath(task.task_file_path, task.id);
   ensureParentDir(filePath);
   task._filePath = filePath;
-  task.task_file_path = normalizeRelativePath(toIndexRelativePath(filePath));
+  task.task_file_path = normalizeTaskFilePath(toIndexAbsolutePath(filePath));
 
   // frontmatter 用オブジェクト（content は除く）
   const frontmatter = { ...task };
@@ -669,6 +787,7 @@ module.exports = {
   restoreTask,
   deleteTask,
   duplicateTask,
+  reorderTasks,
   rebuildCache,
   getCache,
   getTaskFileRoots,

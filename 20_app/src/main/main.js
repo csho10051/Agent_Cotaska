@@ -86,6 +86,22 @@ ipcMain.handle("tasks:update", async (_e, updates) => {
   }
 });
 
+ipcMain.handle("tasks:reorder", async (_e, payload) => {
+  await servicesReady;
+  logger.debug("IPC: tasks:reorder", {
+    orderedCount: Array.isArray(payload?.ordered_ids) ? payload.ordered_ids.length : 0,
+    updatedFieldCount: payload?.field_updates ? Object.keys(payload.field_updates).length : 0,
+  });
+  try {
+    const result = taskService.reorderTasks(payload);
+    logger.info("tasks:reorder success", { updatedCount: result.updated_count });
+    return result;
+  } catch (err) {
+    logger.error("tasks:reorder failed", err);
+    return { ok: false, error: err.message };
+  }
+});
+
 ipcMain.handle("tasks:updateContent", async (_e, id, content) => {
   await servicesReady;
   logger.debug("IPC: tasks:updateContent", { id });

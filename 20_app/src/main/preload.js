@@ -11,6 +11,7 @@ contextBridge.exposeInMainWorld("cotaskerAPI", {
     getAll:           ()                                => ipcRenderer.invoke("tasks:getAll"),
     add:              (task)                            => ipcRenderer.invoke("tasks:add",               task),
     update:           (updates)                         => ipcRenderer.invoke("tasks:update",            updates),
+    reorder:          (payload)                         => ipcRenderer.invoke("tasks:reorder",           payload),
     updateContent:    (id, content)                     => ipcRenderer.invoke("tasks:updateContent",     id, content),
     completeTask:     (id)                              => ipcRenderer.invoke("tasks:completeTask",      id),
     reopenTask:       (id)                              => ipcRenderer.invoke("tasks:reopenTask",        id),

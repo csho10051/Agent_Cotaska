@@ -2,8 +2,10 @@ import React, { useState, useRef, useEffect } from "react";
 
 // 固定項目の定義（badge は props から渡す）
 const SMART_ITEMS = [
-  { label: "今日",       emoji: "☀️" },
-  { label: "次の7日間",  emoji: "📆" },
+  { label: "すべて",     emoji: "🗂️", badgeKey: "allBadge" },
+  { label: "今日",       emoji: "☀️", badgeKey: "todayBadge" },
+  { label: "明日",       emoji: "📅", badgeKey: "tomorrowBadge" },
+  { label: "次の7日間",  emoji: "📆", badgeKey: "next7DaysBadge" },
 ];
 
 // リスト用カラーパレット
@@ -15,13 +17,16 @@ const COLORS = ["#4772fa","#e67e22","#2ecc71","#e74c3c","#9b59b6","#1abc9c","#f1
  * Props:
  *   activeNav    : string — 現在選択中の項目ラベル
  *   onNavClick   : (label: string) => void
+ *   allBadge     : number — 「すべて」バッジに表示する件数
  *   todayBadge   : number — 「今日」バッジに表示する件数
+ *   tomorrowBadge: number — 「明日」バッジに表示する件数
+ *   next7DaysBadge: number — 「次の7日間」バッジに表示する件数
  *   lists        : { name, color }[] — YAMLから取得したリスト一覧
  *   onAddList    : (name: string, color: string) => Promise<void>
  *   onUpdateList : (listName: string, updates: { name, color }) => Promise<void>
  *   onDeleteList : (name: string) => Promise<void>
  */
-function NavPanel({ activeNav, onNavClick, todayBadge = 0, lists = [],
+function NavPanel({ activeNav, onNavClick, allBadge = 0, todayBadge = 0, tomorrowBadge = 0, next7DaysBadge = 0, lists = [],
                     onAddList, onUpdateList, onDeleteList,
                     tags = [], tagCounts = {}, onAddTag, onDeleteTag, tagNavPrefix = "tag:" }) {
   // 各セクションの折りたたみ状態
@@ -47,6 +52,13 @@ function NavPanel({ activeNav, onNavClick, todayBadge = 0, lists = [],
 
   // ホバー中のリストID
   const [hoveredId, setHoveredId] = useState(null);
+
+  const smartItemBadges = {
+    allBadge,
+    todayBadge,
+    tomorrowBadge,
+    next7DaysBadge,
+  };
 
   // 作成入力欄が表示されたらフォーカス
   useEffect(() => {
@@ -92,7 +104,7 @@ function NavPanel({ activeNav, onNavClick, todayBadge = 0, lists = [],
     e.stopPropagation();
     if (window.confirm(`「${list.name}」を削除しますか？\n所属タスクはリストなしに移動します。`)) {
       await onDeleteList?.(list.name);
-      if (activeNav === list.name) onNavClick?.("今日");
+      if (activeNav === list.name) onNavClick?.("すべて");
     }
   };
 
@@ -108,8 +120,8 @@ function NavPanel({ activeNav, onNavClick, todayBadge = 0, lists = [],
     <div className="nav-panel">
       <div style={{ paddingTop: 8 }} />
 
-      {/* スマートリスト（今日 / 次の7日間） */}
-      {SMART_ITEMS.map(({ label, emoji }) => (
+      {/* スマートリスト */}
+      {SMART_ITEMS.map(({ label, emoji, badgeKey }) => (
         <div
           key={label}
           className={`nav-item${activeNav === label ? " active" : ""}`}
@@ -117,8 +129,8 @@ function NavPanel({ activeNav, onNavClick, todayBadge = 0, lists = [],
         >
           <span className="icon">{emoji}</span>
           {label}
-          {label === "今日" && todayBadge > 0 && (
-            <span className="badge">{todayBadge}</span>
+          {smartItemBadges[badgeKey] > 0 && (
+            <span className="badge">{smartItemBadges[badgeKey]}</span>
           )}
         </div>
       ))}

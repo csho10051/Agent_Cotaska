@@ -16,7 +16,7 @@ function formatDue(due_date) {
 
 // T-031: frontmatterフィールドに対応（file-first architecture）
 function mapFileTask(taskData) {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = localDateString();
   const progressStatus = taskData.progress_status || (taskData.status === "done" ? "完了" : "未着");
   return {
     id:        taskData.id,
@@ -30,6 +30,7 @@ function mapFileTask(taskData) {
     parent:    taskData.parent ?? null,           // parent_idではなくparent
     list:      taskData.list ?? null,             // list_idではなくlist（文字列）
     tags:      taskData.tags || [],               // frontmatterの新フィールド
+    sort_order: taskData.sort_order ?? 0,
     due_date:  taskData.due_date || null,
     due:       formatDue(taskData.due_date),
     overdue:   taskData.due_date ? taskData.due_date < today && taskData.status !== "done" : false,
@@ -66,10 +67,15 @@ function toFileTaskPayload(task, patch = {}) {
 // ── ビュー別セクション構築ユーティリティ ────────────────────────────────
 const PRIORITY_ORDER = { high: 0, medium: 1, normal: 2 };
 
+// BUG-20260319-01 修正: ローカルタイムゾーン基準で日付文字列を返す
+function localDateString(d = new Date()) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
 function addDays(base, n) {
   const d = new Date(base + "T00:00:00");
   d.setDate(d.getDate() + n);
-  return d.toISOString().slice(0, 10);
+  return localDateString(d);  // toISOString() はUTC変換でタイムゾーンがずれるため使用しない
 }
 
 function sortByPriority(arr) {
@@ -78,19 +84,37 @@ function sortByPriority(arr) {
   );
 }
 
+const FIXED_VIEWS = new Set(["すべて", "今日", "明日", "次の7日間", "完了", "ゴミ箱", "受信トレイ", "リストなし"]);
+
 /**
  * 今日 / 次の7日間ビューでセクション配列を返す。它以外は null。
  * @returns {{ label: string, tasks: object[] }[] | null}
  */
 function buildSections(allTasks, view) {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = localDateString();
   if (view === "今日") {
-    const filtered = allTasks.filter(
-      (t) => t.due_date && t.due_date <= today && t.status !== "done"
+    const todayParentIds = new Set(
+      allTasks
+        .filter((t) => t.due_date === today && t.status !== "done")
+        .map((t) => t.id)
     );
+    const todayChildIds = new Set(
+      allTasks
+        .filter((t) => t.parent && todayParentIds.has(t.parent) && t.status !== "done")
+        .map((t) => t.id)
+    );
+    const filtered = allTasks.filter((t) => {
+      if (t.status === "done") return false;
+      if (todayChildIds.has(t.id)) return true;
+      return Boolean(t.due_date && t.due_date <= today);
+    });
     const sections = [];
-    const overdue    = sortByPriority(filtered.filter((t) => t.due_date <  today));
-    const todayTasks = sortByPriority(filtered.filter((t) => t.due_date === today));
+    const overdue = sortByPriority(
+      filtered.filter((t) => t.due_date && t.due_date < today && !todayChildIds.has(t.id))
+    );
+    const todayTasks = sortByPriority(
+      filtered.filter((t) => todayChildIds.has(t.id) || t.due_date === today)
+    );
     if (overdue.length)    sections.push({ label: "⚠️ 遅延", tasks: overdue });
     if (todayTasks.length) sections.push({ label: "☀️ 今日",   tasks: todayTasks });
     return sections;
@@ -123,7 +147,10 @@ function App() {
   const [activeNav,     setActiveNav]     = useState("今日");
   const [activeIcon,    setActiveIcon]    = useState("リスト");
   const [loading,       setLoading]       = useState(true);
+  const [allCount,      setAllCount]      = useState(0);
   const [todayCount,    setTodayCount]    = useState(0);
+  const [tomorrowCount, setTomorrowCount] = useState(0);
+  const [next7DaysCount, setNext7DaysCount] = useState(0);
   const [lists,         setLists]         = useState([]);
   const [trashedTasks,   setTrashedTasks]   = useState([]);
   const [completedTasks, setCompletedTasks] = useState([]);
@@ -184,9 +211,14 @@ function App() {
 
       setTasks(mapped);
 
-      // 今日ビューのバッジ件数（遅延含む：due_date <= 今日 AND status ≠ done）
-      const today = new Date().toISOString().slice(0, 10);
+      // 固定ビューのバッジ件数
+      const today = localDateString();
+      const tomorrow = addDays(today, 1);
+      const next7 = addDays(today, 7);
+      setAllCount(mapped.filter((t) => t.status !== "done").length);
       setTodayCount(mapped.filter(t => t.due_date && t.due_date <= today && t.status !== "done").length);
+      setTomorrowCount(mapped.filter((t) => t.due_date === tomorrow && t.status !== "done").length);
+      setNext7DaysCount(mapped.filter((t) => t.due_date && t.due_date <= next7 && t.status !== "done").length);
 
       // 選択中タスクがまだ存在する場合は最新データで上書き
       setSelectedTask(prev =>
@@ -222,10 +254,15 @@ function App() {
   // buildSections のフィルタで除外されるため、当日日付を自動設定する
   const handleAddTask = useCallback(async (title) => {
     if (!title.trim()) return;
-    const today = new Date().toISOString().slice(0, 10);
-    const due_date = (activeNav === "今日" || activeNav === "次の7日間") ? today : null;
+    const today = localDateString();
+    const tomorrow = addDays(today, 1);
+    const due_date = activeNav === "明日"
+      ? tomorrow
+      : (activeNav === "今日" || activeNav === "次の7日間")
+        ? today
+        : null;
     // T-031: list_id ではなく list（文字列）を使用
-    const list = (activeNav !== "今日" && activeNav !== "次の7日間" && activeNav !== "完了" && activeNav !== "ゴミ箱") ? activeNav : null;
+    const list = FIXED_VIEWS.has(activeNav) || activeNav.startsWith(TAG_NAV_PREFIX) ? null : activeNav;
     const defaultTags = activeNav.startsWith(TAG_NAV_PREFIX) ? [activeNav.slice(TAG_NAV_PREFIX.length)] : [];
     await window.cotaskerAPI?.tasks?.add({
       title:    title.trim(),
@@ -320,6 +357,53 @@ function App() {
     );
     await loadTasks();
   }, [loadTasks]);
+
+  const handleReorderTask = useCallback(async ({ draggedTaskId, targetTaskId = null, toSectionType = null, toSectionLabel = null }) => {
+    const dragged = tasks.find((t) => t.id === draggedTaskId);
+    if (!dragged) return;
+    if (dragged.status === "done") return;
+
+    const today = localDateString();
+    const tomorrow = addDays(today, 1);
+    const fieldUpdates = {};
+
+    if (toSectionType === "date") {
+      if (String(toSectionLabel || "").includes("明日") && dragged.due_date !== tomorrow) {
+        fieldUpdates[dragged.id] = { ...(fieldUpdates[dragged.id] || {}), due_date: tomorrow };
+      }
+      if (String(toSectionLabel || "").includes("今日") && dragged.due_date !== today) {
+        fieldUpdates[dragged.id] = { ...(fieldUpdates[dragged.id] || {}), due_date: today };
+      }
+    }
+
+    if (toSectionType === "progress") {
+      if (dragged.status === "done") return;
+      if ((toSectionLabel === "未着" || toSectionLabel === "仕掛") && dragged.progressStatus !== toSectionLabel) {
+        fieldUpdates[dragged.id] = { ...(fieldUpdates[dragged.id] || {}), progress_status: toSectionLabel };
+      }
+    }
+
+    const reorderable = tasks
+      .filter((t) => t.status !== "done")
+      .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0) || String(a.id).localeCompare(String(b.id)));
+
+    const ids = reorderable.map((t) => t.id).filter((id) => id !== draggedTaskId);
+    if (targetTaskId && ids.includes(targetTaskId)) {
+      const target = tasks.find((t) => t.id === targetTaskId);
+      if (target && dragged.parent !== target.parent) return;
+
+      const insertAt = ids.indexOf(targetTaskId);
+      ids.splice(insertAt, 0, draggedTaskId);
+    } else {
+      ids.push(draggedTaskId);
+    }
+
+    await window.cotaskerAPI?.tasks?.reorder({
+      ordered_ids: ids,
+      field_updates: fieldUpdates,
+    });
+    await loadTasks();
+  }, [loadTasks, tasks]);
 
   // T-006: リスト操作
   const loadLists = useCallback(async () => {
@@ -443,6 +527,11 @@ function App() {
     visibleTasks = completedTasks;
   } else if (loading) {
     visibleTasks = [];
+  } else if (activeNav === "すべて") {
+    visibleTasks = tasks.filter((t) => t.status !== "done");
+  } else if (activeNav === "明日") {
+    const tomorrow = addDays(localDateString(), 1);
+    visibleTasks = tasks.filter((t) => t.due_date === tomorrow && t.status !== "done");
   } else if (activeNav === "今日" || activeNav === "次の7日間") {
     visibleSections = buildSections(tasks, activeNav);
     visibleTasks    = visibleSections.flatMap((s) => s.tasks);
@@ -467,9 +556,14 @@ function App() {
   // CHG-011: 完了セクション（各ビューのリスト下部に表示する完了タスク）
   let completedSectionTasks = [];
   if (!isSearchMode && activeNav !== "ゴミ箱" && activeNav !== "完了" && !loading) {
-    const today = new Date().toISOString().slice(0, 10);
-    if (activeNav === "今日") {
+    const today = localDateString();
+    if (activeNav === "すべて") {
+      completedSectionTasks = tasks.filter((t) => t.status === "done");
+    } else if (activeNav === "今日") {
       completedSectionTasks = tasks.filter((t) => t.status === "done" && t.due_date && t.due_date <= today);
+    } else if (activeNav === "明日") {
+      const tomorrow = addDays(today, 1);
+      completedSectionTasks = tasks.filter((t) => t.status === "done" && t.due_date === tomorrow);
     } else if (activeNav === "次の7日間") {
       const today7 = addDays(today, 7);
       completedSectionTasks = tasks.filter((t) => t.status === "done" && t.due_date && t.due_date <= today7);
@@ -500,7 +594,10 @@ function App() {
         <NavPanel
           activeNav={activeNav}
           onNavClick={setActiveNav}
+          allBadge={allCount}
           todayBadge={todayCount}
+          tomorrowBadge={tomorrowCount}
+          next7DaysBadge={next7DaysCount}
           lists={lists}
           onAddList={handleAddList}
           onUpdateList={handleUpdateList}
@@ -529,6 +626,7 @@ function App() {
         onDuplicateTask={!isSearchMode && activeNav !== "ゴミ箱" && activeNav !== "完了" ? handleDuplicateTask : null}
         onSetTaskList={!isSearchMode && activeNav !== "ゴミ箱" && activeNav !== "完了" ? handleSetTaskList : null}
         onSetTaskDue={!isSearchMode && activeNav !== "ゴミ箱" ? handleSetTaskDue : null}
+        onReorderTask={!isSearchMode && activeNav !== "ゴミ箱" && activeNav !== "完了" ? handleReorderTask : null}
         onSetTaskTags={!isSearchMode && activeNav !== "ゴミ箱" ? handleSetTaskTags : null}
         lists={lists}
         tags={tags}
