@@ -1,0 +1,184 @@
+const fs = require('fs');
+const path = require('path');
+
+/**
+ * AppLogger - アプリ実行ログ
+ * アプリのシステムヘルス記録
+ * 常に有効（開発／本番環境どちらでも出力）
+ */
+class AppLogger {
+  constructor() {
+    this.logDir = path.join(__dirname, '../../../../workspace/logs');
+    this.logFile = null;
+    this.startTime = null;
+    
+    console.log('[AppLogger] Initializing', {
+      logDir: this.logDir
+    });
+    
+    this._ensureLogDir();
+    this._openLogFile();
+    console.log('[AppLogger] Logger initialized');
+  }
+
+  /**
+   * ログディレクトリを確保
+   */
+  _ensureLogDir() {
+    if (!fs.existsSync(this.logDir)) {
+      fs.mkdirSync(this.logDir, { recursive: true });
+    }
+    // 古いログファイルをクリーンアップ
+    this._cleanupOldLogs();
+  }
+
+  /**
+   * 30日以上前のログファイルをクリーンアップ
+   */
+  _cleanupOldLogs() {
+    try {
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+      fs.readdirSync(this.logDir).forEach((file) => {
+        const filePath = path.join(this.logDir, file);
+        const stat = fs.statSync(filePath);
+
+        if (stat.isFile() && stat.mtime < thirtyDaysAgo) {
+          fs.unlinkSync(filePath);
+          console.log(`[AppLogger] Deleted old log file: ${file}`);
+        }
+      });
+    } catch (err) {
+      console.error('[AppLogger] Error during log cleanup:', err.message);
+    }
+  }
+
+  /**
+   * ログファイルをオープン（本日分）
+   */
+  _openLogFile() {
+    const today = new Date().toISOString().slice(0, 10);
+    const filename = `app-${today}.log`;
+    this.logFilePath = path.join(this.logDir, filename);
+  }
+
+  /**
+   * ログメッセージを書き込み
+   */
+  _write(level, message, data = null) {
+    const timestamp = new Date().toISOString();
+    let output = `[${timestamp}] [${level}] ${message}`;
+    if (data) {
+      output += ` | ${JSON.stringify(data)}`;
+    }
+    output += '\n';
+    
+    if (this.logFilePath) {
+      try {
+        fs.appendFileSync(this.logFilePath, output);
+      } catch (err) {
+        console.error('[AppLogger] Failed to write to log file:', err);
+      }
+    }
+  }
+
+  /**
+   * アプリ起動ログ
+   * @param {object} metadata - { version, electronVersion }
+   */
+  logStartup(metadata) {
+    this.startTime = Date.now();
+    this._write('INFO', 'App startup', {
+      version: metadata.version || 'unknown',
+      nodeVersion: process.versions.node,
+      electronVersion: metadata.electronVersion || process.versions.electron,
+      platform: process.platform,
+      timestamp: new Date().toISOString(),
+    });
+  }
+
+  /**
+   * DB初期化ログ
+   * @param {object} stats - { tableCount, indexCount, duration }
+   */
+  logDbInitialization(stats) {
+    this._write('INFO', 'Database initialized', {
+      tables: stats.tableCount || 0,
+      indexes: stats.indexCount || 0,
+      duration: `${stats.duration || 0}ms`,
+    });
+  }
+
+  /**
+   * サービス初期化ログ
+   * @param {object} stats - { taskCount, listCount, duration }
+   */
+  logServiceInitialization(stats) {
+    this._write('INFO', 'Services initialized', {
+      tasks: stats.taskCount || 0,
+      lists: stats.listCount || 0,
+      duration: `${stats.duration || 0}ms`,
+    });
+  }
+
+  /**
+   * Viteサーバー起動ログ
+   */
+  logViteServerStart(port) {
+    this._write('INFO', 'Vite dev server started', {
+      port: port || 5173,
+      timestamp: new Date().toISOString(),
+    });
+  }
+
+  /**
+   * エラーログ（スタックトレース付き）
+   * @param {string} errorMsg
+   * @param {Error|null} error
+   */
+  logError(errorMsg, error = null) {
+    let output = `[${new Date().toISOString()}] [ERROR] ${errorMsg}`;
+    if (error && error.stack) {
+      output += `\n${error.stack}`;
+    }
+    output += '\n';
+    
+    if (this.logFilePath) {
+      try {
+        fs.appendFileSync(this.logFilePath, output);
+      } catch (err) {
+        console.error('[AppLogger] Failed to write to log file:', err);
+      }
+    }
+  }
+
+  /**
+   * 警告ログ
+   * @param {string} warnMsg
+   * @param {object} context
+   */
+  logWarning(warnMsg, context = null) {
+    this._write('WARN', warnMsg, context);
+  }
+
+  /**
+   * アプリシャットダウンログ
+   */
+  logShutdown() {
+    const duration = this.startTime ? (Date.now() - this.startTime) / 1000 : 0;
+    this._write('INFO', 'App shutdown', {
+      sessionTime: `${Math.floor(duration)}s`,
+      timestamp: new Date().toISOString(),
+    });
+  }
+
+  /**
+   * ログファイルをクローズ
+   */
+  destroy() {
+    // 同期書き込みなので、特別なクローズ処理は不要
+  }
+}
+
+module.exports = new AppLogger();

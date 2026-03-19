@@ -1,0 +1,55 @@
+{
+  "name": "cotasker",
+  "version": "0.1.0",
+  "description": "CoTasker - ローカルタスク管理システム",
+  "main": "src/main/main.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "start": "electron .",
+    "dist:portable": "npm run build && electron-builder --win portable --publish never",
+    "dist:dir": "npm run build && electron-builder --win dir --publish never"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@vitejs/plugin-react": "^6.0.1",
+    "electron": "^41.0.2",
+    "electron-builder": "^26.0.12",
+    "vite": "^8.0.0"
+  },
+  "build": {
+    "appId": "com.cotasker.app",
+    "productName": "CoTasker",
+    "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/renderer/**/*",
+      "src/main/**/*",
+      "package.json"
+    ],
+    "asar": true,
+    "win": {
+      "signAndEditExecutable": false,
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    }
+  },
+  "dependencies": {
+    "chokidar": "^3.6.0",
+    "gray-matter": "^4.0.3",
+    "js-yaml": "^4.1.1",
+    "markdown-it": "^14.1.1",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4"
+  }
+}

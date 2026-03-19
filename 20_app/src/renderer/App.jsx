@@ -1,0 +1,557 @@
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import "./App.css";
+import Sidebar    from "./components/Sidebar";
+import NavPanel   from "./components/NavPanel";
+import MainPane   from "./components/MainPane";
+import DetailPane from "./components/DetailPane";
+
+const TAG_NAV_PREFIX = "tag:";
+
+// ── Markdownファイル → UI オブジェクトの変換 ────────────────────────────────────
+function formatDue(due_date) {
+  if (!due_date) return "";
+  const [, m, d] = due_date.split("-");
+  return `${parseInt(m)}/${parseInt(d)}`;
+}
+
+// T-031: frontmatterフィールドに対応（file-first architecture）
+function mapFileTask(taskData) {
+  const today = new Date().toISOString().slice(0, 10);
+  const progressStatus = taskData.progress_status || (taskData.status === "done" ? "完了" : "未着");
+  return {
+    id:        taskData.id,
+    title:     taskData.title,
+    content:   taskData.content || "",
+    status:    taskData.status,
+    progressStatus,
+    isManualProgress: taskData.is_manual_progress === 1,
+    priority:  taskData.priority || "normal",
+    progress:  taskData.progress || 0,
+    parent:    taskData.parent ?? null,           // parent_idではなくparent
+    list:      taskData.list ?? null,             // list_idではなくlist（文字列）
+    tags:      taskData.tags || [],               // frontmatterの新フィールド
+    due_date:  taskData.due_date || null,
+    due:       formatDue(taskData.due_date),
+    overdue:   taskData.due_date ? taskData.due_date < today && taskData.status !== "done" : false,
+  };
+}
+
+function calcParentProgress(subtasks) {
+  const statuses = subtasks.map((t) => t.progressStatus || (t.status === "done" ? "完了" : "未着"));
+  if (statuses.length > 0 && statuses.every((status) => status === "完了")) return "完了";
+  if (statuses.some((status) => status === "仕掛" || status === "完了")) return "仕掛";
+  return "未着";
+}
+
+// T-031: frontmatter形式でのペイロード作成
+function toFileTaskPayload(task, patch = {}) {
+  return {
+    id: task.id,
+    title: task.title,
+    content: task.content || "",
+    status: task.status,
+    progress_status: task.progressStatus || (task.status === "done" ? "完了" : "未着"),
+    is_manual_progress: task.isManualProgress ? 1 : 0,
+    priority: task.priority || "normal",
+    progress: task.progress ?? 0,
+    parent: task.parent ?? null,         // parent_idではなくparent
+    list: task.list ?? null,             // list_idではなくlist（文字列）
+    tags: task.tags || [],
+    due_date: task.due_date || null,
+    ...patch,
+  };
+}
+// ─────────────────────────────────────────────────────────────────
+
+// ── ビュー別セクション構築ユーティリティ ────────────────────────────────
+const PRIORITY_ORDER = { high: 0, medium: 1, normal: 2 };
+
+function addDays(base, n) {
+  const d = new Date(base + "T00:00:00");
+  d.setDate(d.getDate() + n);
+  return d.toISOString().slice(0, 10);
+}
+
+function sortByPriority(arr) {
+  return [...arr].sort((a, b) =>
+    (PRIORITY_ORDER[a.priority] ?? 2) - (PRIORITY_ORDER[b.priority] ?? 2)
+  );
+}
+
+/**
+ * 今日 / 次の7日間ビューでセクション配列を返す。它以外は null。
+ * @returns {{ label: string, tasks: object[] }[] | null}
+ */
+function buildSections(allTasks, view) {
+  const today = new Date().toISOString().slice(0, 10);
+  if (view === "今日") {
+    const filtered = allTasks.filter(
+      (t) => t.due_date && t.due_date <= today && t.status !== "done"
+    );
+    const sections = [];
+    const overdue    = sortByPriority(filtered.filter((t) => t.due_date <  today));
+    const todayTasks = sortByPriority(filtered.filter((t) => t.due_date === today));
+    if (overdue.length)    sections.push({ label: "⚠️ 遅延", tasks: overdue });
+    if (todayTasks.length) sections.push({ label: "☀️ 今日",   tasks: todayTasks });
+    return sections;
+  }
+  if (view === "次の7日間") {
+    const today7 = addDays(today, 7);
+    const day1   = addDays(today, 1);
+    const day2   = addDays(today, 2);
+    const filtered = allTasks.filter(
+      (t) => t.due_date && t.due_date <= today7 && t.status !== "done"
+    );
+    const sections  = [];
+    const overdue    = sortByPriority(filtered.filter((t) => t.due_date <  today));
+    const todayTasks = sortByPriority(filtered.filter((t) => t.due_date === today));
+    const tomorrows  = sortByPriority(filtered.filter((t) => t.due_date === day1));
+    const later      = sortByPriority(filtered.filter((t) => t.due_date >= day2 && t.due_date <= today7));
+    if (overdue.length)    sections.push({ label: "⚠️ 遅延",   tasks: overdue });
+    if (todayTasks.length) sections.push({ label: "☀️ 今日",   tasks: todayTasks });
+    if (tomorrows.length)  sections.push({ label: "📅 明日",   tasks: tomorrows });
+    if (later.length)      sections.push({ label: "📆 以降",   tasks: later });
+    return sections;
+  }
+  return null;
+}
+// ─────────────────────────────────────────────────────────────────
+
+function App() {
+  const [tasks,         setTasks]         = useState([]);
+  const [selectedTask,  setSelectedTask]  = useState(null);
+  const [activeNav,     setActiveNav]     = useState("今日");
+  const [activeIcon,    setActiveIcon]    = useState("リスト");
+  const [loading,       setLoading]       = useState(true);
+  const [todayCount,    setTodayCount]    = useState(0);
+  const [lists,         setLists]         = useState([]);
+  const [trashedTasks,   setTrashedTasks]   = useState([]);
+  const [completedTasks, setCompletedTasks] = useState([]);
+  const [searchKeyword,  setSearchKeyword]  = useState("");
+  const [tags, setTags] = useState([]);
+
+  // T-005-02: DB からタスク一覧を読み込む
+  // T-031: tasks:changed イベントリスナー登録（リアルタイム同期）
+  useEffect(() => {
+    const handleTasksChanged = (data) => {
+      console.log('[App] tasks:changed event received', data);
+      loadTasks();
+    };
+    window.cotaskerAPI?.onTasksChanged?.(handleTasksChanged);
+    return () => {
+      // アンマウント時にリスナーを削除
+      window.cotaskerAPI?.removeTasksChangedListener?.();
+    };
+  }, []);
+
+  const loadTasks = useCallback(async () => {
+    setLoading(true);
+    try {
+      let rows   = await window.cotaskerAPI?.tasks?.getAll() ?? [];
+      let mapped = rows.map(mapFileTask);
+
+      // T-015-03: 親タスクの進捗ステータスを最悪値ストラテジで自動推定（手動設定済みは除外）
+      const byParent = {};
+      mapped.forEach((task) => {
+        const pid = task.parent;
+        if (pid === null || pid === undefined) return;
+        if (!byParent[pid]) byParent[pid] = [];
+        byParent[pid].push(task);
+      });
+
+      let parentStatusUpdated = false;
+      for (const parent of mapped) {
+        const children = byParent[parent.id] || [];
+        if (children.length === 0 || parent.isManualProgress) continue;
+        const estimated = calcParentProgress(children);
+        const estimatedTaskStatus = estimated === "完了" ? "done" : "todo";
+        if (parent.progressStatus !== estimated || parent.status !== estimatedTaskStatus) {
+          await window.cotaskerAPI?.tasks?.update(
+            toFileTaskPayload(parent, {
+              progress_status: estimated,
+              status: estimatedTaskStatus,
+              is_manual_progress: 0,
+            })
+          );
+          parentStatusUpdated = true;
+        }
+      }
+
+      if (parentStatusUpdated) {
+        rows = await window.cotaskerAPI?.tasks?.getAll() ?? [];
+        mapped = rows.map(mapFileTask);
+      }
+
+      setTasks(mapped);
+
+      // 今日ビューのバッジ件数（遅延含む：due_date <= 今日 AND status ≠ done）
+      const today = new Date().toISOString().slice(0, 10);
+      setTodayCount(mapped.filter(t => t.due_date && t.due_date <= today && t.status !== "done").length);
+
+      // 選択中タスクがまだ存在する場合は最新データで上書き
+      setSelectedTask(prev =>
+        prev ? (mapped.find(t => t.id === prev.id) ?? null) : null
+      );
+    } catch (err) {
+      console.error("[loadTasks]", err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const loadTags = useCallback(async () => {
+    const rows = await window.cotaskerAPI?.tags?.getAll() ?? [];
+    setTags(Array.isArray(rows) ? rows : []);
+  }, []);
+
+  useEffect(() => {
+    // IPC 疎通確認
+    window.cotaskerAPI?.ping().then(res => console.log("[IPC] ping →", res));
+    loadTasks(); // ← 他の useEffect に移動しました
+    // リスト一覧を起動時に取得
+    (async () => {
+      const rows = await window.cotaskerAPI?.lists?.getAll() ?? [];
+      setLists(rows);
+      const tagRows = await window.cotaskerAPI?.tags?.getAll() ?? [];
+      setTags(Array.isArray(tagRows) ? tagRows : []);
+    })();
+  }, [loadTasks]);
+
+  // T-005-03: クイック追加
+  // BUG-20260317-01 修正: 「今日」「次の7日間」ビューでは due_date=null のタスクが
+  // buildSections のフィルタで除外されるため、当日日付を自動設定する
+  const handleAddTask = useCallback(async (title) => {
+    if (!title.trim()) return;
+    const today = new Date().toISOString().slice(0, 10);
+    const due_date = (activeNav === "今日" || activeNav === "次の7日間") ? today : null;
+    // T-031: list_id ではなく list（文字列）を使用
+    const list = (activeNav !== "今日" && activeNav !== "次の7日間" && activeNav !== "完了" && activeNav !== "ゴミ箱") ? activeNav : null;
+    const defaultTags = activeNav.startsWith(TAG_NAV_PREFIX) ? [activeNav.slice(TAG_NAV_PREFIX.length)] : [];
+    await window.cotaskerAPI?.tasks?.add({
+      title:    title.trim(),
+      status:   "todo",
+      progress_status: "未着",
+      is_manual_progress: 0,
+      priority: "normal",
+      progress: 0,
+      due_date,
+      list,  // list_id ではなく list（リスト名）
+      tags: defaultTags,
+    });
+    await loadTasks();
+  }, [loadTasks, activeNav]);
+
+  // T-014-02: サブタスク追加
+  const handleAddSubtask = useCallback(async (parentTask, title) => {
+    if (!title.trim()) return;
+    await window.cotaskerAPI?.tasks?.add({
+      title:     title.trim(),
+      status:    "todo",
+      progress_status: "未着",
+      is_manual_progress: 0,
+      priority:  "normal",
+      progress:  0,
+      parent:    parentTask.id,      // parent_id ではなく parent
+      list:      parentTask.list,     // list_id ではなく list
+      due_date:  parentTask.due_date || null,
+    });
+    await loadTasks();
+  }, [loadTasks]);
+
+  // T-005-04: 完了 / 完了取消
+  const handleToggleComplete = useCallback(async (task) => {
+    const newStatus = task.status === "done" ? "todo" : "done";
+    const newProgressStatus = newStatus === "done" ? "完了" : "仕掛";
+    await window.cotaskerAPI?.tasks?.update(
+      toFileTaskPayload(task, {
+        status: newStatus,
+        progress_status: newProgressStatus,
+        // 親タスクの手動変更のみロック
+        is_manual_progress: task.parent == null ? 1 : (task.isManualProgress ? 1 : 0),
+      })
+    );
+
+    // CHG-009: 親タスク完了時はサブタスクも自動完了（カスケード）
+    if (newStatus === "done" && task.parent == null) {
+      const children = tasks.filter(t => t.parent === task.id && t.status !== "done");
+      for (const child of children) {
+        await window.cotaskerAPI?.tasks?.update(
+          toFileTaskPayload(child, {
+            status: "done",
+            progress_status: "完了",
+            is_manual_progress: 0,
+          })
+        );
+      }
+    }
+
+    await loadTasks();
+  }, [loadTasks, tasks]);
+
+  // T-005-05: 詳細ペイン保存後にリスト再取得
+  const handleSaved = useCallback(() => loadTasks(), [loadTasks]);
+
+  // T-014-03: タスク複製
+  const handleDuplicateTask = useCallback(async (task) => {
+    await window.cotaskerAPI?.tasks?.add({
+      title:     `${task.title}（コピー）`,
+      content:   task.content || "",
+      status:    "todo",
+      progress_status: "未着",
+      is_manual_progress: 0,
+      priority:  task.priority || "normal",
+      progress:  0,
+      parent:    task.parent ?? null,
+      list:      task.list ?? null,
+      due_date:  task.due_date || null,
+    });
+    await loadTasks();
+  }, [loadTasks]);
+
+  // T-014-03: リスト設定
+  const handleSetTaskList = useCallback(async (task, newList) => {
+    await window.cotaskerAPI?.tasks?.update(toFileTaskPayload(task, { list: newList }));
+    await loadTasks();
+  }, [loadTasks]);
+
+  const handleSetTaskDue = useCallback(async (task, dueDate) => {
+    await window.cotaskerAPI?.tasks?.update(
+      toFileTaskPayload(task, { due_date: dueDate || null })
+    );
+    await loadTasks();
+  }, [loadTasks]);
+
+  // T-006: リスト操作
+  const loadLists = useCallback(async () => {
+    const rows = await window.cotaskerAPI?.lists?.getAll() ?? [];
+    setLists(rows);
+  }, []);
+
+  const handleAddList = useCallback(async (name, color) => {
+    await window.cotaskerAPI?.lists?.add({ name, color });
+    await loadLists();
+  }, [loadLists]);
+
+  const handleUpdateList = useCallback(async (listName, updates) => {
+    await window.cotaskerAPI?.lists?.update(listName, updates);
+    await loadLists();
+  }, [loadLists]);
+
+  const handleDeleteList = useCallback(async (name) => {
+    // T-031: list_id ではなく name（文字列）を渡す
+    await window.cotaskerAPI?.lists?.delete(name);
+    await loadLists();
+    await loadTasks(); // 所属タスクの list を null に変更するため再取得
+  }, [loadLists, loadTasks]);
+
+  const handleAddTag = useCallback(async (name) => {
+    await window.cotaskerAPI?.tags?.add(name);
+    await loadTags();
+  }, [loadTags]);
+
+  const handleDeleteTag = useCallback(async (name) => {
+    await window.cotaskerAPI?.tags?.delete(name);
+    await loadTags();
+    await loadTasks();
+    if (activeNav === `${TAG_NAV_PREFIX}${name}`) {
+      setActiveNav("今日");
+    }
+  }, [activeNav, loadTags, loadTasks]);
+
+  const handleSetTaskTags = useCallback(async (task, nextTags) => {
+    await window.cotaskerAPI?.taskTags?.set(task.id, nextTags);
+    await loadTasks();
+    await loadTags();
+  }, [loadTasks, loadTags]);
+
+  // T-005-06: ゴミ箱移動
+  const handleTrashTask = useCallback(async (task) => {
+    await window.cotaskerAPI?.tasks?.trashTask(task.id);
+    if (selectedTask?.id === task.id) setSelectedTask(null);
+    await loadTasks();
+  }, [loadTasks, selectedTask]);
+
+  // T-005-06: ゴミ箱内タスク一覧（activeNav === "ゴミ箱" のとき使用）
+  useEffect(() => {
+    if (activeNav !== "ゴミ箱") return;
+    (async () => {
+      const rows = await window.cotaskerAPI?.tasks?.getTrashed() ?? [];
+      setTrashedTasks(rows.map(mapFileTask));
+    })();
+  }, [activeNav, tasks]); // tasks 変化時も再取得
+
+  // T-007-03: 完了ビュー
+  useEffect(() => {
+    if (activeNav !== "完了") return;
+    (async () => {
+      const rows = await window.cotaskerAPI?.tasks?.getCompleted() ?? [];
+      setCompletedTasks(rows.map(mapFileTask));
+    })();
+  }, [activeNav, tasks]); // tasks 変化時も再取得
+
+  // T-007-04: 検索モードを離れたときにキーワードをリセット
+  const isSearchMode = activeIcon === "検索";
+  useEffect(() => {
+    if (!isSearchMode) setSearchKeyword("");
+  }, [isSearchMode]);
+
+  // T-005-06: 復元
+  const handleRestoreTask = useCallback(async (task) => {
+    await window.cotaskerAPI?.tasks?.restoreTask(task.id);
+    await loadTasks();
+  }, [loadTasks]);
+
+  // T-005-06: 完全削除
+  const handleDeleteTask = useCallback(async (task) => {
+    await window.cotaskerAPI?.tasks?.deleteTask(task.id);
+    await loadTasks();
+  }, [loadTasks]);
+
+  // T-004-05: サイドバーアイコンに応じてナビパネルの表示を制御
+  const navVisible = activeIcon === "リスト";
+
+  const tagCounts = useMemo(() => {
+    const counts = {};
+    tasks.forEach((task) => {
+      (task.tags || []).forEach((tag) => {
+        counts[tag] = (counts[tag] || 0) + 1;
+      });
+    });
+    return counts;
+  }, [tasks]);
+
+  // ビュー別タスクフィルタとセクション構築
+  // T-031: list_id ではなく list（文字列）でフィルタ
+  let visibleTasks;
+  let visibleSections = null;
+  let progressSections = null;
+
+  if (isSearchMode) {
+    // T-007-04: 検索モード — delete_flag=0 の全タスクをキーワードでフィルタ
+    if (!searchKeyword.trim()) {
+      visibleTasks = [];
+    } else {
+      const kw = searchKeyword.toLowerCase();
+      visibleTasks = tasks.filter((t) =>
+        t.title.toLowerCase().includes(kw) ||
+        (t.content && t.content.toLowerCase().includes(kw))
+      );
+    }
+  } else if (activeNav === "ゴミ箱") {
+    visibleTasks = trashedTasks;
+  } else if (activeNav === "完了") {
+    visibleTasks = completedTasks;
+  } else if (loading) {
+    visibleTasks = [];
+  } else if (activeNav === "今日" || activeNav === "次の7日間") {
+    visibleSections = buildSections(tasks, activeNav);
+    visibleTasks    = visibleSections.flatMap((s) => s.tasks);
+  } else if (activeNav === "受信トレイ" || activeNav === "リストなし") {
+    // T-007-05: 完了済みタスクは完了ビューへ
+    // T-031: list_id を list に変更
+    visibleTasks = tasks.filter((t) =>
+      (t.list === null || t.list === undefined) && t.status !== "done"
+    );
+  } else {
+    if (activeNav.startsWith(TAG_NAV_PREFIX)) {
+      const activeTag = activeNav.slice(TAG_NAV_PREFIX.length);
+      // CHG-011: 完了タスクは完了セクションへ移動するため status フィルタを追加
+      visibleTasks = tasks.filter((t) => (t.tags || []).includes(activeTag) && t.status !== "done");
+    } else {
+      // T-031: list_id ではなく list（文字列）でフィルタ
+      // CHG-011: 完了タスクは完了セクションへ移動するため status フィルタを追加
+      visibleTasks = tasks.filter((t) => t.list === activeNav && t.status !== "done");
+    }
+  }
+
+  // CHG-011: 完了セクション（各ビューのリスト下部に表示する完了タスク）
+  let completedSectionTasks = [];
+  if (!isSearchMode && activeNav !== "ゴミ箱" && activeNav !== "完了" && !loading) {
+    const today = new Date().toISOString().slice(0, 10);
+    if (activeNav === "今日") {
+      completedSectionTasks = tasks.filter((t) => t.status === "done" && t.due_date && t.due_date <= today);
+    } else if (activeNav === "次の7日間") {
+      const today7 = addDays(today, 7);
+      completedSectionTasks = tasks.filter((t) => t.status === "done" && t.due_date && t.due_date <= today7);
+    } else if (activeNav === "受信トレイ" || activeNav === "リストなし") {
+      completedSectionTasks = tasks.filter((t) => t.status === "done" && (t.list === null || t.list === undefined));
+    } else if (activeNav.startsWith(TAG_NAV_PREFIX)) {
+      const activeTag = activeNav.slice(TAG_NAV_PREFIX.length);
+      completedSectionTasks = tasks.filter((t) => t.status === "done" && (t.tags || []).includes(activeTag));
+    } else {
+      completedSectionTasks = tasks.filter((t) => t.status === "done" && t.list === activeNav);
+    }
+  }
+
+  if (!isSearchMode && activeNav !== "ゴミ箱") {
+    const order = ["未着", "仕掛", "完了"];
+    progressSections = order
+      .map((label) => ({ label, tasks: visibleTasks.filter((t) => t.progressStatus === label) }))
+      .filter((section) => section.tasks.length > 0);
+  }
+
+  return (
+    <div className="app-container">
+      <Sidebar
+        activeIcon={activeIcon}
+        onIconClick={setActiveIcon}
+      />
+      {navVisible && (
+        <NavPanel
+          activeNav={activeNav}
+          onNavClick={setActiveNav}
+          todayBadge={todayCount}
+          lists={lists}
+          onAddList={handleAddList}
+          onUpdateList={handleUpdateList}
+          onDeleteList={handleDeleteList}
+          tags={tags}
+          tagCounts={tagCounts}
+          onAddTag={handleAddTag}
+          onDeleteTag={handleDeleteTag}
+          tagNavPrefix={TAG_NAV_PREFIX}
+        />
+      )}
+      <MainPane
+        viewTitle={isSearchMode ? "検索" : (activeNav.startsWith(TAG_NAV_PREFIX) ? `タグ: #${activeNav.slice(TAG_NAV_PREFIX.length)}` : activeNav)}
+        tasks={visibleTasks}
+        sections={visibleSections}
+        progressSections={progressSections}
+        completedSectionTasks={completedSectionTasks}
+        selectedTaskId={selectedTask?.id}
+        onTaskClick={setSelectedTask}
+        onAddTask={!isSearchMode && activeNav !== "ゴミ箱" && activeNav !== "完了" ? handleAddTask : null}
+        onAddSubtask={!isSearchMode && activeNav !== "ゴミ箱" && activeNav !== "完了" ? handleAddSubtask : null}
+        onToggleComplete={!isSearchMode && activeNav !== "ゴミ箱" ? handleToggleComplete : null}
+        onTrashTask={!isSearchMode && activeNav !== "ゴミ箱" && activeNav !== "完了" ? handleTrashTask : null}
+        onRestoreTask={activeNav === "ゴミ箱" ? handleRestoreTask : null}
+        onDeleteTask={activeNav === "ゴミ箱" ? handleDeleteTask : null}
+        onDuplicateTask={!isSearchMode && activeNav !== "ゴミ箱" && activeNav !== "完了" ? handleDuplicateTask : null}
+        onSetTaskList={!isSearchMode && activeNav !== "ゴミ箱" && activeNav !== "完了" ? handleSetTaskList : null}
+        onSetTaskDue={!isSearchMode && activeNav !== "ゴミ箱" ? handleSetTaskDue : null}
+        onSetTaskTags={!isSearchMode && activeNav !== "ゴミ箱" ? handleSetTaskTags : null}
+        lists={lists}
+        tags={tags}
+        isTrashed={activeNav === "ゴミ箱"}
+        isCompleted={activeNav === "完了"}
+        isSearchMode={isSearchMode}
+        searchKeyword={searchKeyword}
+        onSearchChange={setSearchKeyword}
+      />
+      <DetailPane
+        key={selectedTask?.id ?? "none"}
+        task={selectedTask}
+        onClose={() => setSelectedTask(null)}
+        onSaved={handleSaved}
+        onToggleComplete={handleToggleComplete}
+        onSetTaskDue={handleSetTaskDue}
+        lists={lists}
+        tags={tags}
+        onSetTaskTags={handleSetTaskTags}
+        onAddTag={handleAddTag}
+      />
+    </div>
+  );
+}
+
+export default App;

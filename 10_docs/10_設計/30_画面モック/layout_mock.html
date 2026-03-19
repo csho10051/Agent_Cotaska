@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CoTasker - 画面モック（TickTick参考 4カラム）</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', 'Meiryo', sans-serif; height: 100vh; display: flex; flex-direction: column; background: #f5f5f5; color: #333; }
+
+    .main { display: flex; flex: 1; overflow: hidden; }
+
+    /* === サイドバー（アイコンナビ） === */
+    .sidebar { width: 50px; min-width: 50px; background: #1c1c1c; display: flex; flex-direction: column; align-items: center; padding: 12px 0; gap: 4px; }
+    .sidebar .avatar { width: 32px; height: 32px; border-radius: 6px; background: #555; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #fff; cursor: pointer; }
+    .sidebar .sb-icon { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 8px; cursor: pointer; font-size: 18px; opacity: 0.4; transition: all 0.15s; }
+    .sidebar .sb-icon:hover { opacity: 0.7; }
+    .sidebar .sb-icon.active { opacity: 1; background: rgba(255,255,255,0.08); }
+    .sidebar .sb-spacer { flex: 1; }
+    .sidebar .sb-bottom { display: flex; flex-direction: column; gap: 4px; }
+
+    /* === ナビパネル === */
+    .nav-panel { width: 240px; min-width: 240px; background: #2b2b2b; color: #ccc; display: flex; flex-direction: column; overflow-y: auto; border-right: 1px solid #333; }
+    .nav-panel .section-label { font-size: 11px; font-weight: 700; color: #666; padding: 16px 14px 4px; letter-spacing: 1px; display: flex; align-items: center; justify-content: space-between; }
+    .nav-panel .section-label .add-btn { font-size: 14px; cursor: pointer; opacity: 0; transition: opacity 0.15s; color: #888; }
+    .nav-panel .section-label:hover .add-btn { opacity: 1; }
+    .nav-panel .nav-item { padding: 8px 14px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 13px; border-radius: 10px; margin: 1px 10px; transition: background 0.12s; }
+    .nav-panel .nav-item:hover { background: rgba(255,255,255,0.05); }
+    .nav-panel .nav-item.active { background: rgba(255,255,255,0.1); }
+    .nav-panel .nav-item .icon { width: 20px; text-align: center; font-size: 16px; flex-shrink: 0; }
+    .nav-panel .nav-item .badge { margin-left: auto; color: #666; font-size: 12px; }
+    .nav-panel .divider { border-top: 1px solid #3a3a3a; margin: 12px 10px; }
+    .nav-panel .list-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .filter-hint { margin: 4px 10px; padding: 8px 14px; background: rgba(255,255,255,0.03); border-radius: 6px; font-size: 12px; color: #555; line-height: 1.4; }
+
+    /* === メインペイン === */
+    .main-pane { flex: 1; background: #fff; display: flex; flex-direction: column; min-width: 370px; }
+    .main-header { padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; }
+    .main-header .view-title { font-size: 20px; font-weight: 600; }
+    .main-header .header-actions { display: flex; gap: 12px; }
+    .main-header .header-actions .h-icon { width: 20px; height: 20px; opacity: 0.36; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; }
+    .main-header .header-actions .h-icon:hover { opacity: 0.7; }
+
+    /* クイック追加バー */
+    .quick-add { margin: 0 20px 16px; padding: 8px 12px; background: #f5f5f5; border-radius: 10px; display: flex; align-items: center; gap: 8px; }
+    .quick-add .qa-icon { font-size: 18px; color: #ccc; }
+    .quick-add input { border: none; background: transparent; flex: 1; font-size: 14px; outline: none; color: #999; }
+    .quick-add .qa-actions { display: flex; gap: 10px; opacity: 0; transition: opacity 0.15s; }
+    .quick-add:focus-within .qa-actions { opacity: 1; }
+    .quick-add .qa-btn { font-size: 14px; color: #aaa; cursor: pointer; }
+    .quick-add .qa-btn:hover { color: #666; }
+
+    /* タスクリスト */
+    .task-list { flex: 1; overflow-y: auto; }
+    .section-header { padding: 6px 20px; font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+    .section-header.overdue { color: #e74c3c; }
+    .section-header.today { color: #2980b9; }
+
+    .task-row { padding: 0 20px; height: 40px; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: background 0.1s; position: relative; }
+    .task-row:hover { background: #f7f9fc; }
+    .task-row.selected { background: rgba(66,133,244,0.08); }
+    .task-row .drag-handle { width: 12px; font-size: 10px; color: #ccc; cursor: move; opacity: 0; flex-shrink: 0; }
+    .task-row:hover .drag-handle { opacity: 1; }
+    .task-row input[type="checkbox"] { width: 17px; height: 17px; cursor: pointer; accent-color: #3498db; flex-shrink: 0; }
+    .task-title { flex: 1; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .task-due { font-size: 12px; color: #999; white-space: nowrap; }
+    .task-due.overdue { color: #c0392b; font-weight: 600; }
+    .task-row .more-icon { font-size: 12px; color: #ccc; opacity: 0; cursor: pointer; }
+    .task-row:hover .more-icon { opacity: 1; }
+    .task-separator { height: 1px; background: #f0f0f0; margin: 0 58px 0 58px; }
+
+    /* === 詳細ペイン === */
+    .detail-pane { width: 36%; min-width: 320px; background: #fafafa; display: flex; flex-direction: column; border-left: 1px solid #eee; position: relative; }
+
+    /* 詳細ヘッダーバー */
+    .detail-header { padding: 9px 20px; display: flex; align-items: center; gap: 12px; position: relative; }
+    .detail-header .d-check { width: 17px; height: 17px; cursor: pointer; accent-color: #3498db; }
+    .detail-header .d-due { font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+    .detail-header .d-due.overdue { color: #c0392b; }
+    .detail-header .d-priority { font-size: 16px; cursor: pointer; margin-left: auto; }
+    .detail-header .close-btn { background: none; border: none; font-size: 18px; cursor: pointer; color: #aaa; margin-left: 8px; display: none; }
+
+    /* プログレスバー */
+    .progress-bar-track { height: 2px; background: #eee; position: relative; cursor: pointer; }
+    .progress-bar-fill { height: 100%; background: #4772fa; opacity: 0.85; transition: width 0.2s; }
+    .progress-labels { display: flex; justify-content: space-between; padding: 2px 20px; font-size: 10px; color: #ccc; }
+
+    /* 詳細コンテンツ */
+    .detail-body { flex: 1; overflow-y: auto; padding: 16px 20px; }
+    .detail-title { font-size: 19px; font-weight: 700; line-height: 1.4; outline: none; border: none; width: 100%; background: transparent; margin-bottom: 8px; }
+    .detail-content { font-size: 14px; line-height: 1.5; outline: none; border: none; width: 100%; min-height: 120px; background: transparent; color: #999; resize: none; font-family: inherit; }
+    .detail-content:focus { color: #333; }
+    .detail-content::placeholder { color: #ccc; }
+
+    /* タグエリア */
+    .tag-area { padding: 8px 20px; }
+    .tag { display: inline-block; background: #f0f0f0; color: #666; padding: 2px 8px; border-radius: 4px; font-size: 12px; margin-right: 4px; }
+
+    /* コメントエリア */
+    .comment-section { border-top: 1px solid #eee; padding: 12px 20px; }
+    .comment-input { width: 100%; padding: 8px 12px; border: 1px solid transparent; border-radius: 8px; background: #f0f0f0; font-size: 13px; outline: none; font-family: inherit; }
+    .comment-input:focus { border-color: #4772fa; background: transparent; }
+    .comment-input::placeholder { color: #ccc; }
+
+    /* 詳細フッター */
+    .detail-footer { padding: 0 20px; height: 48px; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #eee; }
+    .detail-footer .df-list { display: flex; align-items: center; gap: 4px; font-size: 13px; color: #666; cursor: pointer; }
+    .detail-footer .df-actions { display: flex; gap: 16px; }
+    .detail-footer .df-icon { font-size: 16px; color: #aaa; cursor: pointer; }
+    .detail-footer .df-icon:hover { color: #666; }
+  </style>
+</head>
+<body>
+
+<div class="main">
+
+  <!-- サイドバー（アイコンナビ） -->
+  <div class="sidebar">
+    <div class="avatar">U</div>
+    <div class="sb-icon active" title="リスト">📋</div>
+    <div class="sb-icon" title="カレンダー">📅</div>
+    <div class="sb-icon" title="検索">🔍</div>
+    <div class="sb-spacer"></div>
+    <div class="sb-bottom">
+      <div class="sb-icon" title="同期">🔄</div>
+      <div class="sb-icon" title="通知">🔔</div>
+      <div class="sb-icon" title="ヘルプ">❓</div>
+    </div>
+  </div>
+
+  <!-- ナビパネル -->
+  <div class="nav-panel">
+    <div style="padding-top:8px"></div>
+    <div class="nav-item">
+      <span class="icon">☀️</span> 今日
+      <span class="badge">2</span>
+    </div>
+    <div class="nav-item">
+      <span class="icon">📆</span> 次の7日間
+      <span class="badge">5</span>
+    </div>
+
+    <div class="divider"></div>
+    <div class="section-label">リスト <span class="add-btn">＋</span></div>
+    <div class="nav-item active">
+      <span class="list-dot" style="background:#4772fa"></span> 業務タスク
+      <span class="badge">1</span>
+    </div>
+    <div class="nav-item">
+      <span class="list-dot" style="background:#e67e22"></span> 開発タスク
+      <span class="badge">3</span>
+    </div>
+    <div class="nav-item">
+      <span class="list-dot" style="background:#27ae60"></span> 個人メモ
+    </div>
+
+    <div class="divider"></div>
+    <div class="section-label">タグ <span class="add-btn">＋</span></div>
+    <div class="filter-hint">タグでタスクを分類して表示します。タスクを追加する際に「＃」を入力すると、迅速にタグを選択できます。</div>
+
+    <div class="divider"></div>
+    <div class="nav-item">
+      <span class="icon">✅</span> 完了
+    </div>
+    <div class="nav-item">
+      <span class="icon">🗑️</span> ゴミ箱
+    </div>
+  </div>
+
+  <!-- メインペイン -->
+  <div class="main-pane">
+    <div class="main-header">
+      <div class="view-title">業務タスク</div>
+      <div class="header-actions">
+        <div class="h-icon" title="ソート">⇅</div>
+        <div class="h-icon" title="メニュー">⋯</div>
+      </div>
+    </div>
+
+    <!-- クイック追加バー -->
+    <div class="quick-add">
+      <span class="qa-icon">＋</span>
+      <input type="text" placeholder="タスクを追加">
+      <div class="qa-actions">
+        <span class="qa-btn" title="期限">📅</span>
+        <span class="qa-btn" title="優先度">⚑</span>
+        <span class="qa-btn" title="リスト">📋</span>
+        <span class="qa-btn" title="タグ">#</span>
+      </div>
+    </div>
+
+    <div class="task-list">
+      <!-- 遅延セクション -->
+      <div class="section-header overdue">⚠ 遅延</div>
+      <div class="task-row">
+        <span class="drag-handle">⠿</span>
+        <input type="checkbox">
+        <span class="task-title">API仕様書のレビュー</span>
+        <span class="task-due overdue">3月14日</span>
+        <span class="more-icon">⋯</span>
+      </div>
+      <div class="task-separator"></div>
+
+      <!-- 今日セクション -->
+      <div class="section-header today">● 今日</div>
+      <div class="task-row selected">
+        <span class="drag-handle">⠿</span>
+        <input type="checkbox">
+        <span class="task-title">DB設計書の作成</span>
+        <span class="task-due">3月16日</span>
+        <span class="more-icon">⋯</span>
+      </div>
+      <div class="task-separator"></div>
+      <div class="task-row">
+        <span class="drag-handle">⠿</span>
+        <input type="checkbox">
+        <span class="task-title">週次ミーティング資料準備</span>
+        <span class="task-due">3月16日</span>
+        <span class="more-icon">⋯</span>
+      </div>
+      <div class="task-separator"></div>
+      <div class="task-row">
+        <span class="drag-handle">⠿</span>
+        <input type="checkbox">
+        <span class="task-title">ライブラリバージョン確認</span>
+        <span class="task-due">3月16日</span>
+        <span class="more-icon">⋯</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 詳細ペイン -->
+  <div class="detail-pane">
+    <!-- ヘッダーバー -->
+    <div class="detail-header">
+      <input type="checkbox" class="d-check">
+      <span class="d-due overdue">📅 4日前, 3月12日</span>
+      <span class="d-priority" title="優先度なし">⚐</span>
+    </div>
+
+    <!-- プログレスバー -->
+    <div class="progress-bar-track">
+      <div class="progress-bar-fill" style="width: 30%"></div>
+    </div>
+
+    <!-- 本文 -->
+    <div class="detail-body">
+      <input type="text" class="detail-title" value="DB設計書の作成">
+      <textarea class="detail-content" placeholder="コンテンツを入力するか、「/」を入力してメニューを表示">tasks, task_logs, lists, comments テーブルの定義を作成する。
+init_schema.sql として保存。
+
+## 作業手順
+1. テーブル設計書を確認
+2. SQL文を作成
+3. テスト投入で検証</textarea>
+    </div>
+
+    <!-- タグ -->
+    <div class="tag-area">
+      <span class="tag">#設計</span>
+      <span class="tag">#DB</span>
+    </div>
+
+    <!-- コメント -->
+    <div class="comment-section">
+      <input type="text" class="comment-input" placeholder="コメントを書く">
+    </div>
+
+    <!-- フッター -->
+    <div class="detail-footer">
+      <div class="df-list">📋 業務タスク</div>
+      <div class="df-actions">
+        <span class="df-icon" title="Markdown">M↓</span>
+        <span class="df-icon" title="コメント">💬</span>
+        <span class="df-icon" title="メニュー">⋯</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

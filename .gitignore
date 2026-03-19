@@ -1,0 +1,24 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+
+# Node.js
+20_app/node_modules/
+20_app/npm-debug.log*
+20_app/yarn-error.log*
+
+# Build outputs
+20_app/dist/
+20_app/temp/
+20_app/win-unpacked/
+20_app/release/
+
+# Runtime artifacts
+20_app/db/
+*.log
+
+# Project-specific ignored folders
+00_mgmt/90_作業ログ/
+30_data/archive/
+30_data/tasks/
