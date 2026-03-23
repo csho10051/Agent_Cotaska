@@ -1,4 +1,4 @@
-# CoTasker startup script (production mode)
+﻿# Cotaska startup script (production mode)
 # Usage: run this file in 20_app directory.
 
 $ErrorActionPreference = "Stop"
@@ -12,6 +12,7 @@ $env:NODE_TLS_REJECT_UNAUTHORIZED = "0"
 
 Set-Location $scriptDir
 
-Write-Host "Starting CoTasker in production mode..." -ForegroundColor Cyan
+Write-Host "Starting Cotaska in production mode..." -ForegroundColor Cyan
 & $nodeExe $electronCli "."
-Write-Host "CoTasker exited." -ForegroundColor Cyan
+Write-Host "Cotaska exited." -ForegroundColor Cyan
+

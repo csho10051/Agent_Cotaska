@@ -7,6 +7,32 @@ const watcher = require("./watcher");
 const logger     = require("./logger");
 const appLogger  = require("./appLogger");
 
+let mainWindow = null;
+
+function focusMainWindow() {
+  if (!mainWindow || mainWindow.isDestroyed()) {
+    return;
+  }
+  if (mainWindow.isMinimized()) {
+    mainWindow.restore();
+  }
+  if (!mainWindow.isVisible()) {
+    mainWindow.show();
+  }
+  mainWindow.focus();
+}
+
+const gotSingleInstanceLock = app.requestSingleInstanceLock();
+if (!gotSingleInstanceLock) {
+  logger.info("Single instance lock not acquired, quitting duplicate process");
+  app.quit();
+}
+
+app.on("second-instance", () => {
+  logger.info("second-instance detected, focusing existing window");
+  focusMainWindow();
+});
+
 // サービス初期化 Promise（IPC ハンドラ内で await してサービスの準備完了を待つ）
 let servicesReady = null;
 
@@ -328,6 +354,7 @@ function createWindow() {
   Menu.setApplicationMenu(null);
 
   const win = new BrowserWindow({
+    show: false,
     width: 1280,
     height: 800,
     minWidth: 900,
@@ -348,6 +375,17 @@ function createWindow() {
     win.loadFile(path.join(__dirname, "../../dist/renderer/index.html"));
   }
 
+  win.once("ready-to-show", () => {
+    win.show();
+    win.focus();
+  });
+
+  win.on("closed", () => {
+    if (mainWindow === win) {
+      mainWindow = null;
+    }
+  });
+
   // ウォッチャーを起動（ファイル変更検出 → tasks:changed 通知）
   watcher.startWatcher(win).catch(err => {
     logger.error("Failed to start watcher:", err);
@@ -357,6 +395,10 @@ function createWindow() {
 }
 
 app.whenReady().then(async () => {
+  if (!gotSingleInstanceLock) {
+    return;
+  }
+
   const pkg = require("../../package.json");
   appLogger.logStartup({
     version: pkg.version,
@@ -393,7 +435,7 @@ app.whenReady().then(async () => {
     duration: svcDuration,
   });
 
-  createWindow();
+  mainWindow = createWindow();
   logger.info("Main window created");
 });
 
@@ -420,6 +462,8 @@ app.on("window-all-closed", () => {
 
 app.on("activate", () => {
   if (BrowserWindow.getAllWindows().length === 0) {
-    createWindow();
+    mainWindow = createWindow();
+  } else {
+    focusMainWindow();
   }
 });
