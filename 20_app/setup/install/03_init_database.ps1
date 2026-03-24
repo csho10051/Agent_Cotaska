@@ -9,7 +9,7 @@ $ErrorActionPreference = "Stop"
 $SetupDir = Resolve-Path (Join-Path $PSScriptRoot "..")
 $InitScript = Join-Path $SetupDir "init_db.js"
 
-Write-Host "=== CoTasker: データベース初期化 ===" -ForegroundColor Cyan
+Write-Host "=== Cotaska: データベース初期化 ===" -ForegroundColor Cyan
 
 # --- Node.js 確認 ---
 $nodeCmd = Get-Command node -ErrorAction SilentlyContinue

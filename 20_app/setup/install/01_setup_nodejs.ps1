@@ -14,7 +14,7 @@ param(
 $ErrorActionPreference = "Stop"
 $NodeVersion = "22.14.0"
 
-Write-Host "=== CoTasker: Node.js セットアップ ===" -ForegroundColor Cyan
+Write-Host "=== Cotaska: Node.js セットアップ ===" -ForegroundColor Cyan
 
 # --- nvm-windows 確認 ---
 $nvmCmd = Get-Command nvm -ErrorAction SilentlyContinue

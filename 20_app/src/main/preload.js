@@ -2,7 +2,7 @@ const { contextBridge, ipcRenderer } = require("electron");
 
 // Renderer プロセスに公開する API を最小限に制限する
 // ホワイトリスト方式: ipcRenderer を直接渡さず、呼べるチャンネルを限定する
-contextBridge.exposeInMainWorld("cotaskerAPI", {
+contextBridge.exposeInMainWorld("cotaskaAPI", {
   // 疎通確認
   ping: () => ipcRenderer.invoke("ping"),
 

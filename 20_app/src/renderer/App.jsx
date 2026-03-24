@@ -164,17 +164,17 @@ function App() {
       console.log('[App] tasks:changed event received', data);
       loadTasks();
     };
-    window.cotaskerAPI?.onTasksChanged?.(handleTasksChanged);
+    window.cotaskaAPI?.onTasksChanged?.(handleTasksChanged);
     return () => {
       // アンマウント時にリスナーを削除
-      window.cotaskerAPI?.removeTasksChangedListener?.();
+      window.cotaskaAPI?.removeTasksChangedListener?.();
     };
   }, []);
 
   const loadTasks = useCallback(async () => {
     setLoading(true);
     try {
-      let rows   = await window.cotaskerAPI?.tasks?.getAll() ?? [];
+      let rows   = await window.cotaskaAPI?.tasks?.getAll() ?? [];
       let mapped = rows.map(mapFileTask);
 
       // T-015-03: 親タスクの進捗ステータスを最悪値ストラテジで自動推定（手動設定済みは除外）
@@ -193,7 +193,7 @@ function App() {
         const estimated = calcParentProgress(children);
         const estimatedTaskStatus = estimated === "完了" ? "done" : "todo";
         if (parent.progressStatus !== estimated || parent.status !== estimatedTaskStatus) {
-          await window.cotaskerAPI?.tasks?.update(
+          await window.cotaskaAPI?.tasks?.update(
             toFileTaskPayload(parent, {
               progress_status: estimated,
               status: estimatedTaskStatus,
@@ -205,7 +205,7 @@ function App() {
       }
 
       if (parentStatusUpdated) {
-        rows = await window.cotaskerAPI?.tasks?.getAll() ?? [];
+        rows = await window.cotaskaAPI?.tasks?.getAll() ?? [];
         mapped = rows.map(mapFileTask);
       }
 
@@ -232,19 +232,19 @@ function App() {
   }, []);
 
   const loadTags = useCallback(async () => {
-    const rows = await window.cotaskerAPI?.tags?.getAll() ?? [];
+    const rows = await window.cotaskaAPI?.tags?.getAll() ?? [];
     setTags(Array.isArray(rows) ? rows : []);
   }, []);
 
   useEffect(() => {
     // IPC 疎通確認
-    window.cotaskerAPI?.ping().then(res => console.log("[IPC] ping →", res));
+    window.cotaskaAPI?.ping().then(res => console.log("[IPC] ping →", res));
     loadTasks(); // ← 他の useEffect に移動しました
     // リスト一覧を起動時に取得
     (async () => {
-      const rows = await window.cotaskerAPI?.lists?.getAll() ?? [];
+      const rows = await window.cotaskaAPI?.lists?.getAll() ?? [];
       setLists(rows);
-      const tagRows = await window.cotaskerAPI?.tags?.getAll() ?? [];
+      const tagRows = await window.cotaskaAPI?.tags?.getAll() ?? [];
       setTags(Array.isArray(tagRows) ? tagRows : []);
     })();
   }, [loadTasks]);
@@ -264,7 +264,7 @@ function App() {
     // T-031: list_id ではなく list（文字列）を使用
     const list = FIXED_VIEWS.has(activeNav) || activeNav.startsWith(TAG_NAV_PREFIX) ? null : activeNav;
     const defaultTags = activeNav.startsWith(TAG_NAV_PREFIX) ? [activeNav.slice(TAG_NAV_PREFIX.length)] : [];
-    await window.cotaskerAPI?.tasks?.add({
+    await window.cotaskaAPI?.tasks?.add({
       title:    title.trim(),
       status:   "todo",
       progress_status: "未着",
@@ -281,7 +281,7 @@ function App() {
   // T-014-02: サブタスク追加
   const handleAddSubtask = useCallback(async (parentTask, title) => {
     if (!title.trim()) return;
-    await window.cotaskerAPI?.tasks?.add({
+    await window.cotaskaAPI?.tasks?.add({
       title:     title.trim(),
       status:    "todo",
       progress_status: "未着",
@@ -299,7 +299,7 @@ function App() {
   const handleToggleComplete = useCallback(async (task) => {
     const newStatus = task.status === "done" ? "todo" : "done";
     const newProgressStatus = newStatus === "done" ? "完了" : "仕掛";
-    await window.cotaskerAPI?.tasks?.update(
+    await window.cotaskaAPI?.tasks?.update(
       toFileTaskPayload(task, {
         status: newStatus,
         progress_status: newProgressStatus,
@@ -312,7 +312,7 @@ function App() {
     if (newStatus === "done" && task.parent == null) {
       const children = tasks.filter(t => t.parent === task.id && t.status !== "done");
       for (const child of children) {
-        await window.cotaskerAPI?.tasks?.update(
+        await window.cotaskaAPI?.tasks?.update(
           toFileTaskPayload(child, {
             status: "done",
             progress_status: "完了",
@@ -330,7 +330,7 @@ function App() {
 
   // T-014-03: タスク複製
   const handleDuplicateTask = useCallback(async (task) => {
-    await window.cotaskerAPI?.tasks?.add({
+    await window.cotaskaAPI?.tasks?.add({
       title:     `${task.title}（コピー）`,
       content:   task.content || "",
       status:    "todo",
@@ -347,12 +347,12 @@ function App() {
 
   // T-014-03: リスト設定
   const handleSetTaskList = useCallback(async (task, newList) => {
-    await window.cotaskerAPI?.tasks?.update(toFileTaskPayload(task, { list: newList }));
+    await window.cotaskaAPI?.tasks?.update(toFileTaskPayload(task, { list: newList }));
     await loadTasks();
   }, [loadTasks]);
 
   const handleSetTaskDue = useCallback(async (task, dueDate) => {
-    await window.cotaskerAPI?.tasks?.update(
+    await window.cotaskaAPI?.tasks?.update(
       toFileTaskPayload(task, { due_date: dueDate || null })
     );
     await loadTasks();
@@ -398,7 +398,7 @@ function App() {
       ids.push(draggedTaskId);
     }
 
-    await window.cotaskerAPI?.tasks?.reorder({
+    await window.cotaskaAPI?.tasks?.reorder({
       ordered_ids: ids,
       field_updates: fieldUpdates,
     });
@@ -407,34 +407,34 @@ function App() {
 
   // T-006: リスト操作
   const loadLists = useCallback(async () => {
-    const rows = await window.cotaskerAPI?.lists?.getAll() ?? [];
+    const rows = await window.cotaskaAPI?.lists?.getAll() ?? [];
     setLists(rows);
   }, []);
 
   const handleAddList = useCallback(async (name, color) => {
-    await window.cotaskerAPI?.lists?.add({ name, color });
+    await window.cotaskaAPI?.lists?.add({ name, color });
     await loadLists();
   }, [loadLists]);
 
   const handleUpdateList = useCallback(async (listName, updates) => {
-    await window.cotaskerAPI?.lists?.update(listName, updates);
+    await window.cotaskaAPI?.lists?.update(listName, updates);
     await loadLists();
   }, [loadLists]);
 
   const handleDeleteList = useCallback(async (name) => {
     // T-031: list_id ではなく name（文字列）を渡す
-    await window.cotaskerAPI?.lists?.delete(name);
+    await window.cotaskaAPI?.lists?.delete(name);
     await loadLists();
     await loadTasks(); // 所属タスクの list を null に変更するため再取得
   }, [loadLists, loadTasks]);
 
   const handleAddTag = useCallback(async (name) => {
-    await window.cotaskerAPI?.tags?.add(name);
+    await window.cotaskaAPI?.tags?.add(name);
     await loadTags();
   }, [loadTags]);
 
   const handleDeleteTag = useCallback(async (name) => {
-    await window.cotaskerAPI?.tags?.delete(name);
+    await window.cotaskaAPI?.tags?.delete(name);
     await loadTags();
     await loadTasks();
     if (activeNav === `${TAG_NAV_PREFIX}${name}`) {
@@ -443,14 +443,14 @@ function App() {
   }, [activeNav, loadTags, loadTasks]);
 
   const handleSetTaskTags = useCallback(async (task, nextTags) => {
-    await window.cotaskerAPI?.taskTags?.set(task.id, nextTags);
+    await window.cotaskaAPI?.taskTags?.set(task.id, nextTags);
     await loadTasks();
     await loadTags();
   }, [loadTasks, loadTags]);
 
   // T-005-06: ゴミ箱移動
   const handleTrashTask = useCallback(async (task) => {
-    await window.cotaskerAPI?.tasks?.trashTask(task.id);
+    await window.cotaskaAPI?.tasks?.trashTask(task.id);
     if (selectedTask?.id === task.id) setSelectedTask(null);
     await loadTasks();
   }, [loadTasks, selectedTask]);
@@ -459,7 +459,7 @@ function App() {
   useEffect(() => {
     if (activeNav !== "ゴミ箱") return;
     (async () => {
-      const rows = await window.cotaskerAPI?.tasks?.getTrashed() ?? [];
+      const rows = await window.cotaskaAPI?.tasks?.getTrashed() ?? [];
       setTrashedTasks(rows.map(mapFileTask));
     })();
   }, [activeNav, tasks]); // tasks 変化時も再取得
@@ -468,7 +468,7 @@ function App() {
   useEffect(() => {
     if (activeNav !== "完了") return;
     (async () => {
-      const rows = await window.cotaskerAPI?.tasks?.getCompleted() ?? [];
+      const rows = await window.cotaskaAPI?.tasks?.getCompleted() ?? [];
       setCompletedTasks(rows.map(mapFileTask));
     })();
   }, [activeNav, tasks]); // tasks 変化時も再取得
@@ -481,13 +481,13 @@ function App() {
 
   // T-005-06: 復元
   const handleRestoreTask = useCallback(async (task) => {
-    await window.cotaskerAPI?.tasks?.restoreTask(task.id);
+    await window.cotaskaAPI?.tasks?.restoreTask(task.id);
     await loadTasks();
   }, [loadTasks]);
 
   // T-005-06: 完全削除
   const handleDeleteTask = useCallback(async (task) => {
-    await window.cotaskerAPI?.tasks?.deleteTask(task.id);
+    await window.cotaskaAPI?.tasks?.deleteTask(task.id);
     await loadTasks();
   }, [loadTasks]);
 

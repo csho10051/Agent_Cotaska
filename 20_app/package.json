@@ -1,7 +1,7 @@
 {
-  "name": "cotasker",
+  "name": "cotaska",
   "version": "0.1.0",
-  "description": "CoTasker - ローカルタスク管理システム",
+  "description": "Cotaska - ローカルタスク管理システム",
   "main": "src/main/main.js",
   "scripts": {
     "dev": "vite",
@@ -20,8 +20,8 @@
     "vite": "^8.0.0"
   },
   "build": {
-    "appId": "com.cotasker.app",
-    "productName": "CoTasker",
+    "appId": "com.cotaska.app",
+    "productName": "Cotaska",
     "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
     "directories": {
       "output": "release"
