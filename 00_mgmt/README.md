@@ -107,7 +107,7 @@ AIエージェントは以下のドキュメントを参照して作業します
 ## フォルダ構成
 
 ```text
-Agent_TaskHub/
+Agent_Cotaska/
 
   Cotaska/
     00_mgmt/                  プロジェクト管理資料
