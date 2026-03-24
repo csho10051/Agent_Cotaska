@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, Menu } = require("electron");
+const { app, BrowserWindow, ipcMain, Menu, dialog } = require("electron");
 const path = require("path");
 const { spawn } = require("child_process");
 const taskService = require("./taskService");
@@ -9,21 +9,32 @@ const appLogger  = require("./appLogger");
 
 let mainWindow = null;
 
+process.on("uncaughtException", (err) => {
+  appLogger.logError("uncaughtException in main process", err);
+});
+
+process.on("unhandledRejection", (reason) => {
+  const asError = reason instanceof Error ? reason : new Error(String(reason));
+  appLogger.logError("unhandledRejection in main process", asError);
+});
+
 function focusMainWindow() {
   if (!mainWindow || mainWindow.isDestroyed()) {
+    mainWindow = createWindow();
     return;
   }
   if (mainWindow.isMinimized()) {
     mainWindow.restore();
   }
-  if (!mainWindow.isVisible()) {
-    mainWindow.show();
-  }
-  mainWindow.focus();
+  bringWindowToFront(mainWindow);
 }
 
 const gotSingleInstanceLock = app.requestSingleInstanceLock();
 if (!gotSingleInstanceLock) {
+  appLogger.logWarning("Single instance lock not acquired. Existing instance may already be running.", {
+    appName: app.getName(),
+    exePath: process.execPath,
+  });
   logger.info("Single instance lock not acquired, quitting duplicate process");
   app.quit();
 }
@@ -349,21 +360,72 @@ ipcMain.handle("taskTags:set", async (_e, taskId, tags) => {
   }
 });
 // ──────────────────────────────────────────────────────────────
+// Windows フォアグラウンドロック回避：setAlwaysOnTop を一時的に使って
+// 別プロセスから起動された場合でも確実にウィンドウを前面に持ってくる
+function bringWindowToFront(win) {
+  if (!win || win.isDestroyed()) return;
+
+  win.setAlwaysOnTop(true);
+  win.show();
+  win.focus();
+
+  appLogger.logWarning("Window brought to front", {
+    isVisible: win.isVisible(),
+    bounds: win.getBounds(),
+  });
+
+  setTimeout(() => {
+    if (win && !win.isDestroyed()) {
+      win.setAlwaysOnTop(false);
+      appLogger.logWarning("Window after settle", {
+        isVisible: win.isVisible(),
+        isFocused: win.isFocused(),
+        bounds: win.getBounds(),
+      });
+    }
+  }, 500);
+}
+
+// ──────────────────────────────────────────────────────────────
 
 function createWindow() {
+  appLogger.logWarning("createWindow invoked", {
+    nodeEnv: process.env.NODE_ENV,
+    execPath: process.execPath,
+  });
+
   Menu.setApplicationMenu(null);
 
   const win = new BrowserWindow({
-    show: false,
+    show: true,
     width: 1280,
     height: 800,
     minWidth: 900,
     minHeight: 600,
+    backgroundColor: "#1c1c1c",
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       nodeIntegration: false,
       contextIsolation: true,
     },
+  });
+
+  let didShowWindow = false;
+
+  win.webContents.on("did-fail-load", (_event, errorCode, errorDescription, validatedURL) => {
+    appLogger.logError(
+      `Renderer load failed: code=${errorCode}, desc=${errorDescription}, url=${validatedURL || "(empty)"}`
+    );
+  });
+
+  win.webContents.on("did-finish-load", () => {
+    appLogger.logWarning("Renderer did-finish-load", {
+      url: win.webContents.getURL(),
+    });
+  });
+
+  win.webContents.on("render-process-gone", (_event, details) => {
+    appLogger.logError(`Renderer process gone: reason=${details.reason}, exitCode=${details.exitCode}`);
   });
 
   // 開発時は Vite dev server、ビルド後は dist/renderer/index.html を読み込む
@@ -372,12 +434,23 @@ function createWindow() {
     win.loadURL(`http://localhost:${port}`);
     win.webContents.openDevTools();
   } else {
-    win.loadFile(path.join(__dirname, "../../dist/renderer/index.html"));
+    const rendererPath = path.join(__dirname, "../../dist/renderer/index.html");
+    if (!require("fs").existsSync(rendererPath)) {
+      const msg = `Renderer entry not found: ${rendererPath}`;
+      appLogger.logError(msg);
+      dialog.showErrorBox("Cotaska 起動エラー", msg);
+    }
+    win.loadFile(rendererPath);
   }
 
   win.once("ready-to-show", () => {
-    win.show();
-    win.focus();
+    // show: true で先に表示済みのため、ready-to-show ではフォーカスのみ行う
+    // setAlwaysOnTop で Windows フォアグラウンドロックを回避
+    didShowWindow = true;
+    appLogger.logWarning("Window ready-to-show", {
+      url: win.webContents.getURL(),
+    });
+    bringWindowToFront(win);
   });
 
   win.on("closed", () => {
@@ -398,6 +471,9 @@ app.whenReady().then(async () => {
   if (!gotSingleInstanceLock) {
     return;
   }
+
+  app.setName("Cotaska");
+  app.setAppUserModelId("com.cotaska.app");
 
   const pkg = require("../../package.json");
   appLogger.logStartup({
@@ -437,6 +513,21 @@ app.whenReady().then(async () => {
 
   mainWindow = createWindow();
   logger.info("Main window created");
+
+  // 起動後の簡易自己診断: ウィンドウ状態と読み込みURLを遅延評価して記録する
+  setTimeout(() => {
+    if (!mainWindow || mainWindow.isDestroyed()) {
+      appLogger.logWarning("Startup self-check: mainWindow is not available");
+      return;
+    }
+    appLogger.logWarning("Startup self-check", {
+      isVisible: mainWindow.isVisible(),
+      isFocused: mainWindow.isFocused(),
+      isMinimized: mainWindow.isMinimized(),
+      bounds: mainWindow.getBounds(),
+      url: mainWindow.webContents.getURL(),
+    });
+  }, 8000);
 });
 
 app.on("window-all-closed", () => {

@@ -1,4 +1,4 @@
-# README.md
+﻿# README.md
 
 ## 概要
 
@@ -109,7 +109,7 @@ AIエージェントは以下のドキュメントを参照して作業します
 ```text
 Agent_TaskHub/
 
-  CoTasker/
+  Cotaska/
     00_mgmt/                  プロジェクト管理資料
       AGENTS.md
       CURRENT_SPRINT.md
@@ -199,3 +199,4 @@ YYYYMMDD_連番_ファイル概要.md
 このプロジェクトの最終目標は、
 
 **AIと人間が同じタスク管理基盤を共有し、効率よく作業できる環境を作ること**です。
+

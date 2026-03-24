@@ -1,4 +1,4 @@
-# DECISIONS.md
+﻿# DECISIONS.md
 
 ## Purpose
 
@@ -154,7 +154,7 @@ Result:
 * `30_data/tasks/` 配下にタスクごとの `.md` ファイルを配置（YAMLフロントマター + 本文）
 * `30_data/tasks/_index.yaml` にサマリーを自動生成（AI・人間ともに読み書き可能）
 * `30_data/lists.yaml` にリストマスタを管理
-* `20_app/db/cotasker.sqlite3` を削除（テストデータのみのため移行不要）
+* `20_app/db/Cotaska.sqlite3` を削除（テストデータのみのため移行不要）
 * `20_app/src/main/db.js` を `taskService.js` / `listService.js` / `indexService.js` に置換
 * 実装タスクは CURRENT_SPRINT の T-025〜T-033 で管理
 
@@ -281,3 +281,4 @@ Result:
 * 実装タスクは CURRENT_SPRINT の T-047 で管理
 * 保存は「並び順更新 + 属性更新」を同一操作として扱い、部分反映を禁止
 * 実装タスクは CURRENT_SPRINT の T-046 で管理
+

@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    CoTasker の npm パッケージをインストールする
+    Cotaska の npm パッケージをインストールする
 .PARAMETER Proxy
     プロキシURL（例: http://proxygate2.nic.nec.co.jp:8080）
 .EXAMPLE
@@ -14,7 +14,7 @@ param(
 $ErrorActionPreference = "Stop"
 $SetupDir = Resolve-Path (Join-Path $PSScriptRoot "..")
 
-Write-Host "=== CoTasker: npm パッケージインストール ===" -ForegroundColor Cyan
+Write-Host "=== Cotaska: npm パッケージインストール ===" -ForegroundColor Cyan
 
 # --- Node.js 確認 ---
 $nodeCmd = Get-Command node -ErrorAction SilentlyContinue
