@@ -25,11 +25,12 @@
 
 ## 次にやること
 1. T-053: 最上位フォルダ名 `Agent_TaskHub` -> `Agent_Cotaska` 変更を安全に実施し、関連設定の整合性を確認する。
-2. BUG-20260323-01: EXE ランチャー起動不具合の最終実機確認を完了し、状態を確定する。
-3. T-048: データ配置の整理と設定外部化（task フォルダ位置整理、`_index.yaml` の階層整理、`30_data` から `data` への整理方針を確定する）。
-4. T-046-04: ユーザ動作確認（左上ビュー構成変更）。
-5. T-044-04: ユーザ動作確認（今日ビューの親子表示確認）。
-6. T-047-07: ユーザ動作確認（ドラッグ並び替え確認）。
+2. **T-054**: GitHub リポジトリ `Agent_Cotaska` との SSH 連携を確立する。
+3. BUG-20260323-01: EXE ランチャー起動不具合の最終実機確認を完了し、状態を確定する。
+4. T-048: データ配置の整理と設定外部化（task フォルダ位置整理、`_index.yaml` の階層整理、`30_data` から `data` への整理方針を確定する）。
+5. T-046-04: ユーザ動作確認（左上ビュー構成変更）。
+6. T-044-04: ユーザ動作確認（今日ビューの親子表示確認）。
+7. T-047-07: ユーザ動作確認（ドラッグ並び替え確認）。
 
 ---
 
@@ -145,6 +146,34 @@ CoTasker -> Cotaska 名称変更の安全実施
   - `10_docs/30_実装・検証/10_不具合対応/20260317_06_ログが出力されない.md`（2行）
   - `10_docs/30_実装・検証/10_不具合対応/20260317_06_ログが出力されない（解決済み）.md`（1行）
 - T-053-05: ビルド確認で `npm run build` が成功（97 modules、13.20 kB CSS、327.21 kB JS）。
+
+---
+
+## T-054 [進行中]
+GitHub リポジトリ `Agent_Cotaska` との HTTPS 連携確立
+
+目的:
+- ローカル Git リポジトリを GitHub の新リポジトリ `Agent_Cotaska` に HTTPS で接続し、プッシュできる状態にする。
+- 旧リモート URL（`https://github.com/csho10051/Agent_CoTasker.git`）を新 HTTPS URL に切り替える。
+- ※企業ネットワーク環境のため SSH（22番ポート）ではなく HTTPS（443番ポート）を使用する。
+
+対象リモート:
+- `https://github.com/csho10051/Agent_Cotaska.git`
+
+現在の状態:
+- `origin` が新 HTTPS URL `https://github.com/csho10051/Agent_Cotaska.git` を指している（T-054-03 完了済み）。
+- GitHub 上のリポジトリ存在確認は未実施。
+
+完了条件:
+- `git remote -v` で `origin` が `https://github.com/csho10051/Agent_Cotaska.git` を指している。
+- `git push -u origin main` が成功し、GitHub 上にコミットが反映されている。
+
+サブタスク:
+
+1. T-054-01 [完了]: SSH キーを生成した（企業ネットワーク制約によりHTTPSに方針変更）。
+2. T-054-02 [未着]: GitHub 上に `Agent_Cotaska` リポジトリが存在するか確認（なければ作成）。
+3. T-054-03 [完了]: `git remote set-url origin https://github.com/csho10051/Agent_Cotaska.git` でリモート URL を更新。
+4. T-054-04 [未着]: `git push -u origin main` で初回プッシュを実施し、GitHub 上へ反映を確認。
 
 ---
 
