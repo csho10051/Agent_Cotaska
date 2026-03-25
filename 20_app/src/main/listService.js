@@ -8,7 +8,7 @@ const path = require('path');
 const YAML = require('js-yaml');
 const taskService = require('./taskService');
 
-const LISTS_PATH = path.join(__dirname, '../../..', '30_data/lists.yaml');
+const LISTS_PATH = path.join(process.cwd(), '../data/lists.yaml');
 
 let listsData = { lists: [], tags: [], last_updated: null };
 

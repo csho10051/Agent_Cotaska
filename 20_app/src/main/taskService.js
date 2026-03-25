@@ -9,9 +9,9 @@ const path = require('path');
 const matter = require('gray-matter');
 const YAML = require('js-yaml');
 
-const TASKS_DIR = path.join(__dirname, '../../..', '30_data/tasks');
+const TASKS_DIR = path.join(process.cwd(), '../data/tasks');
 const INDEX_PATH = path.join(TASKS_DIR, '_index.yaml');
-const ARCHIVE_DIR = path.join(__dirname, '../../..', '30_data/archive');
+const ARCHIVE_DIR = path.join(process.cwd(), '../data/archive');
 const DEFAULT_TASK_FILE_ROOTS = ['.'];
 
 let taskCache = {};  // メモリキャッシュ

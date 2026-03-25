@@ -8,7 +8,7 @@ const path = require('path');
  */
 class AppLogger {
   constructor() {
-    this.logDir = path.join(__dirname, '../../../../workspace/logs');
+    this.logDir = path.join(process.cwd(), '../logs');
     this.logFile = null;
     this.startTime = null;
     

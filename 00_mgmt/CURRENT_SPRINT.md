@@ -24,9 +24,143 @@
 ---
 
 ## 次にやること
-1. T-048: データ配置の整理と設定外部化（task フォルダ位置整理、`_index.yaml` の階層整理、`30_data` から `data` への整理方針を確定する）。
+1. リリース v0.1.0-dist: ✅ 完了（2026-03-25）
 2. T-047-07: ユーザ動作確認（ドラッグ並び替え確認）。
 ※ T-054（GitHub 連携）は PAT 準備後に再開。
+
+---
+
+## リリース v0.1.0-dist [完了]
+配布フォルダ構成を新構成に統一したリリースを実施。 ✅
+
+実施日: 2026-03-25
+
+リリース手順実施:
+1. ✅ Step 1. Renderer ビルド（`npm run build`）
+   - `dist/renderer/` 生成完了
+
+2. ✅ Step 2. Electron 配布物生成（`npm run dist:dir`）
+   - `release/win-unpacked/` 生成完了
+
+3. ✅ Step 3. Go ランチャービルド
+   - `setup/launcher/build.ps1` 実行
+   - `Cotaska.exe` (1966 KB) 生成完了
+   - ランチャーを配布フォルダにコピー完了
+
+4. ✅ Step 4. 配布フォルダ再構成
+   - `organize-release.ps1` 実行完了
+   - 新構成（data/, logs/ をルート直下に分離）への整理完了
+
+5. ✅ Step 5. 起動確認
+   - `release/Cotaska-0.1.0-dist/Cotaska.exe` から起動成功（PID=19040）
+   - `data/` と `logs/` が自動作成されたことを確認
+
+出荷前チェックリスト結果:
+- ✅ 配布正本フォルダ名: `Cotaska-0.1.0-dist`
+- ✅ ルート直下の必須ファイル・フォルダ: `Cotaska.exe`, `_app/`, `data/`, `logs/`, `README.txt`, `launcher.log` すべて存在
+- ✅ 旧構成削除: `_app/resources/` と `_app/workspace/` 削除済み
+- ✅ データファイル: `data/tasks/_index.yaml` と `data/lists.yaml` が存在
+- ✅ 起動・初期化: `Cotaska.exe` から起動可能、初回起動でディレクトリが自動作成
+- ⚠ 主要導線: 画面で タスク一覧・左ナビ・詳細編集・保存 の動作確認待ち
+
+リリース成果物:
+- 配布フォルダ: `20_app/release/Cotaska-0.1.0-dist/`
+- README: `20_app/release/Cotaska-0.1.0-dist/README.txt`（ユーザーガイド）
+- ランチャースクリプト: `20_app/organize-release.ps1`（今後のリリース作業用）
+
+次のアクション:
+- 画面で主要導線の最終確認を実施
+
+---
+
+## T-048 [完了]
+データ配置の整理と設定外部化 ✅
+
+目的:
+- リリース配布物（`Cotaska-0.1.0-dist`）のフォルダ構成をユーザ視点で整理する
+- `30_data/tasks/` → `data/tasks/` へ移動（ユーザ直接編集可能）
+- タスクログを専用 `logs/` フォルダに集約（トラブルシューティング容易化）
+- `_app/` は実行バイナリのみに限定（パッケージング・更新を簡潔化）
+
+仕様変更管理:
+- `10_docs/20_実装準備/40_仕様変更管理/20260325_CHG-029_配布フォルダ構成整理と設定外部化.md`
+
+新構成:
+```
+Cotaska-0.1.0-dist/
+├── _app/              (実行バイナリ: app.asar, DLL群のみ)
+├── data/              ★ ユーザデータ領域（tasks/, lists.yaml）
+├── logs/              ★ アプリログ出力先
+├── Cotaska.exe
+├── launcher.log
+└── README.txt
+```
+
+サブタスク:
+
+1. T-048-01 [完了]: パス定数修正（`main.js`, `taskService.js`, `appLogger.js`, `listService.js`） ✅
+
+2. T-048-02 [完了]: 初期化ロジック追加（`main.js`） ✅
+
+3. T-048-03 [完了]: ビルド設定確認（`package.json`） ✅
+
+4. T-048-04 [完了]: リリース配布フォルダ構成整理スクリプト（organize-release.ps1） ✅
+
+5. T-048-05 [完了]: README.txt 作成 ✅
+
+6. T-048-06 [完了]: watcher.js 確認 ✅
+
+7. T-048-07 [完了]: ビルド実行確認 ✅
+
+8. T-048-08 [完了]: 起動確認 ✅
+
+9. T-048-09 [完了]: ドキュメント更新 ✅
+   - `システム全体設計.md`
+   - `リリースプロセスルール.md`
+   - `AI エージェント運用ルール.md`
+
+完了条件:
+- ✅ `data/` フォルダがユーザ直接編集可能
+- ✅ `logs/` フォルダにアプリログ出力
+- ✅ 初回起動時に `data/`, `logs/` が自動作成される
+- ✅ `npm run build` / `npm run dist:dir` 成功
+- ✅ 配布 EXE が新構成で正常に動作（データ読み込み・ログ出力）
+- ✅ ドキュメント更新完了
+
+---
+
+## CHG-029 [完了]
+配布フォルダ構成整理と設定外部化 ✅
+
+目的:
+- リリース配布物のフォルダ構成を整理し、ユーザーが直接編集可能なデータ領域を明確に分離する
+- タスクデータ（`30_data/`）とアプリログを外部化し、パッケージング・アップグレード・初期化を簡潔化する
+
+仕様変更管理:
+- `10_docs/20_実装準備/40_仕様変更管理/20260325_CHG-029_配布フォルダ構成整理と設定外部化.md`
+
+新フォルダ構成:
+```
+Cotaska-0.1.0-dist/
+├── _app/              (実行バイナリのみ)
+│   ├── locales/
+│   ├── app.asar
+│   └── [DLL群]
+├── data/              ★ ユーザデータ
+│   ├── tasks/
+│   └── lists.yaml
+├── logs/              ★ アプリログ
+├── Cotaska.exe
+├── launcher.log
+└── README.txt
+```
+
+技術実装:
+- `main.js`: ログパス修正（`resources/30_data/` → `../data/`）
+- `taskService.js`: データパス修正（`resources/30_data/` → `../data/`）
+- 初期化ロジック追加（ディレクトリ・デフォルトファイル自動生成）
+- `package.json`: ビルド設定修正（`resources/` 除外）
+- `README.txt` テンプレート作成
 
 ---
 

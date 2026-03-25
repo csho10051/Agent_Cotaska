@@ -387,6 +387,54 @@ function bringWindowToFront(win) {
 }
 
 // ──────────────────────────────────────────────────────────────
+// データディレクトリ初期化関数（T-048-02）
+// ──────────────────────────────────────────────────────────────
+
+async function ensureDataDirectories() {
+  const dataDir = path.join(process.cwd(), '../data');
+  const tasksDir = path.join(dataDir, 'tasks');
+  const archiveDir = path.join(dataDir, 'archive');
+  const logsDir = path.join(process.cwd(), '../logs');
+
+  // ディレクトリ存在確認・作成
+  [dataDir, tasksDir, archiveDir, logsDir].forEach(dir => {
+    if (!require('fs').existsSync(dir)) {
+      logger.debug(`Creating directory: ${dir}`);
+      require('fs').mkdirSync(dir, { recursive: true });
+    }
+  });
+
+  // デフォルト lists.yaml 作成（存在しない場合）
+  const listsPath = path.join(dataDir, 'lists.yaml');
+  if (!require('fs').existsSync(listsPath)) {
+    const defaultLists = { lists: [], tags: [] };
+    const yaml = require('js-yaml');
+    const listsContent = yaml.dump(defaultLists, { indent: 2 });
+    logger.debug(`Creating default lists.yaml at ${listsPath}`);
+    require('fs').writeFileSync(listsPath, listsContent, 'utf8');
+    appLogger.logInfo('Default lists.yaml created');
+  }
+
+  // デフォルト _index.yaml 作成（存在しない場合）
+  const indexPath = path.join(tasksDir, '_index.yaml');
+  if (!require('fs').existsSync(indexPath)) {
+    const defaultIndex = { tasks: [], next_task_id: 1 };
+    const yaml = require('js-yaml');
+    const indexContent = yaml.dump(defaultIndex, { indent: 2 });
+    logger.debug(`Creating default _index.yaml at ${indexPath}`);
+    require('fs').writeFileSync(indexPath, indexContent, 'utf8');
+    appLogger.logInfo('Default _index.yaml created');
+  }
+
+  logger.info('Data directories ensured', {
+    dataDir,
+    tasksDir,
+    archiveDir,
+    logsDir,
+  });
+}
+
+// ──────────────────────────────────────────────────────────────
 
 function createWindow() {
   appLogger.logWarning("createWindow invoked", {
@@ -498,6 +546,11 @@ app.whenReady().then(async () => {
     electronVersion: process.versions.electron,
     platform: process.platform,
   });
+
+  // データディレクトリの初期化（T-048-02）
+  logger.info("Ensuring data directories...");
+  await ensureDataDirectories();
+  appLogger.logInfo("Data directories ensured");
 
   // 開発時は Vite を子プロセスで起動してから BrowserWindow を開く
   if (process.env.NODE_ENV === "development") {
