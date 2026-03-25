@@ -134,7 +134,7 @@ function MainPane({
           ref={inlineInputRef}
           className="inline-add-input"
           type="text"
-          placeholder="サブタスクを追加（Enter で保存）"
+          placeholder="サブタスクを追加（確定キーで保存）"
           value={inlineInput.value}
           onChange={(e) => setInlineInput((prev) => ({ ...prev, value: e.target.value }))}
           onKeyDown={async (e) => {
@@ -452,7 +452,7 @@ function MainPane({
           <input
             ref={inputRef}
             type="text"
-            placeholder="タスクを追加（Enter で保存）"
+            placeholder="タスクを追加（確定キーで保存）"
             onKeyDown={handleKeyDown}
           />
         </div>

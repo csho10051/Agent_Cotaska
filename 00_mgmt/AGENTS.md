@@ -40,6 +40,20 @@ Agents must execute work in this order:
 
 ---
 
+## Spec Change Protocol
+
+When the user requests a specification change (仕様変更), agents must follow
+`10_docs/20_実装準備/10_運用ルール/仕様変更管理ルール.md` before implementation.
+
+Minimum required tasks to register in `00_mgmt/CURRENT_SPRINT.md`:
+1. Check whether design-doc updates are required; if required, add and execute design update tasks.
+2. Add and execute implementation tasks.
+3. Add and execute user confirmation tasks.
+
+Do not mark a spec change complete until these task groups are reflected and tracked.
+
+---
+
 ## Editing Rules
 
 Allowed:

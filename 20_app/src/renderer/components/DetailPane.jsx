@@ -2,10 +2,27 @@ import React, { useEffect, useState, useRef } from "react";
 import MarkdownIt from "markdown-it";
 import DueDatePopover from "./DueDatePopover";
 
-const PRIORITIES = ["normal", "medium", "high"];
-const PRIORITY_ICON = { normal: "N", medium: "M", high: "H" };
+const PRIORITY_LABEL = { normal: "低", medium: "中", high: "高" };
 const PRIORITY_COLOR = { normal: "#aaa", medium: "#f39c12", high: "#e74c3c" };
 const markdown = new MarkdownIt({ html: false, linkify: true, breaks: true });
+
+function formatCompletedAt(value) {
+  if (!value) return "";
+
+  const raw = String(value);
+  const parsed = new Date(raw);
+  const fallbackParsed = Number.isNaN(parsed.getTime()) ? new Date(raw.replace(" ", "T")) : parsed;
+  if (Number.isNaN(fallbackParsed.getTime())) {
+    return raw.replace("T", " ").slice(0, 16);
+  }
+
+  const y = fallbackParsed.getFullYear();
+  const m = String(fallbackParsed.getMonth() + 1).padStart(2, "0");
+  const d = String(fallbackParsed.getDate()).padStart(2, "0");
+  const hh = String(fallbackParsed.getHours()).padStart(2, "0");
+  const mm = String(fallbackParsed.getMinutes()).padStart(2, "0");
+  return `${y}-${m}-${d} ${hh}:${mm}`;
+}
 
 function useDebounce(fn, delay) {
   const timer = useRef(null);
@@ -29,7 +46,7 @@ function DetailPane({
   if (!task) {
     return (
       <div className="detail-pane detail-pane--empty">
-        <span className="detail-empty-msg">Select a task</span>
+        <span className="detail-empty-msg">タスクを選択してください</span>
       </div>
     );
   }
@@ -51,7 +68,6 @@ function DetailPane({
 
 function DetailPaneBody({
   task,
-  onClose,
   onSaved,
   onToggleComplete,
   onSetTaskDue,
@@ -60,31 +76,24 @@ function DetailPaneBody({
   onSetTaskTags,
   onAddTag,
 }) {
-  const [progress, setProgress] = useState(task.progress ?? 0);
   const [priority, setPriority] = useState(task.priority ?? "normal");
   const [status, setStatus] = useState(task.status);
   const [completed, setCompleted] = useState(task.status === "done");
   const [progressStatus, setProgressStatus] = useState(
-    task.progressStatus || (task.status === "done" ? "完亁E" : "未着")
+    task.progressStatus || (task.status === "done" ? "完了" : "未着")
   );
   const [titleText, setTitleText] = useState(task.title || "");
   const [contentText, setContentText] = useState(task.content || "");
   const [listName, setListName] = useState(task.list ?? "");
   const [taskTags, setTaskTags] = useState(task.tags || []);
   const [newTagName, setNewTagName] = useState("");
-  const [saveState, setSaveState] = useState("idle");
   const [previewMode, setPreviewMode] = useState(false);
   const [dueEditorOpen, setDueEditorOpen] = useState(false);
+  const [completedAt, setCompletedAt] = useState(task.completed_at || null);
   const dueAnchorRef = useRef(null);
 
-  const showSaved = (delay = 1200) => {
-    setSaveState("saving");
-    setTimeout(() => setSaveState("saved"), 300);
-    setTimeout(() => setSaveState("idle"), delay);
-  };
-
   const persist = async (patch) => {
-    await window.CotaskaAPI?.tasks?.update({
+    await window.cotaskaAPI?.tasks?.update({
       id: task.id,
       title: titleText,
       content: contentText,
@@ -92,7 +101,6 @@ function DetailPaneBody({
       progress_status: progressStatus,
       is_manual_progress: task.parent == null ? 1 : (task.isManualProgress ? 1 : 0),
       priority,
-      progress,
       list: listName || null,
       parent: task.parent ?? null,
       tags: taskTags,
@@ -100,39 +108,30 @@ function DetailPaneBody({
       ...patch,
     });
     onSaved?.();
-    showSaved();
   };
 
   const debouncedSave = useDebounce(async (nextTitle, nextContent) => {
     await persist({ title: nextTitle, content: nextContent });
   }, 500);
 
-  const handleProgressClick = async (e) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const pct = Math.round(((e.clientX - rect.left) / rect.width) * 100);
-    const newPct = Math.max(0, Math.min(100, pct));
-    setProgress(newPct);
-    await persist({ progress: newPct });
-  };
-
-  const cyclePriority = async () => {
-    const idx = PRIORITIES.indexOf(priority);
-    const newPrio = PRIORITIES[(idx + 1) % PRIORITIES.length];
-    setPriority(newPrio);
-    await persist({ priority: newPrio });
+  const handlePriorityChange = async (e) => {
+    const nextPriority = e.target.value;
+    setPriority(nextPriority);
+    await persist({ priority: nextPriority });
   };
 
   const handleComplete = async (e) => {
     const done = e.target.checked;
     const nextStatus = done ? "done" : "todo";
+    const nextCompletedAt = done ? (completedAt || new Date().toISOString()) : null;
     setCompleted(done);
-    const nextProgressStatus = done ? "完亁E" : "仕掛";
+    setCompletedAt(nextCompletedAt);
+    const nextProgressStatus = done ? "完了" : "仕掛";
     setProgressStatus(nextProgressStatus);
     setStatus(nextStatus);
 
     if (onToggleComplete) {
       await onToggleComplete(task);
-      showSaved();
       return;
     }
 
@@ -142,11 +141,16 @@ function DetailPaneBody({
   const handleProgressStatusChange = async (e) => {
     const next = e.target.value;
     setProgressStatus(next);
-    const nextStatus = next === "完亁E" ? "done" : "todo";
+    const nextStatus = next === "完了" ? "done" : "todo";
+    const nextCompletedAt = nextStatus === "done" ? (completedAt || new Date().toISOString()) : null;
     setCompleted(nextStatus === "done");
+    setCompletedAt(nextCompletedAt);
     setStatus(nextStatus);
     await persist({ progress_status: next, status: nextStatus });
   };
+
+  const isDone = status === "done" || progressStatus === "完了";
+  const completedAtText = isDone ? formatCompletedAt(completedAt || task.completed_at) : "";
 
   const handleDueDateChange = async (nextDue) => {
     if (onSetTaskDue) {
@@ -213,7 +217,7 @@ function DetailPaneBody({
             className={`d-due${task.overdue ? " overdue" : ""}`}
             onClick={() => setDueEditorOpen((prev) => !prev)}
           >
-            Due: {task.due || "No due date"}
+            期限: {task.due || "期限未設定"}
           </span>
           {dueEditorOpen && (
             <DueDatePopover
@@ -226,45 +230,31 @@ function DetailPaneBody({
           )}
         </span>
 
-        <span
-          className="d-priority"
-          title="Change priority"
-          style={{ color: PRIORITY_COLOR[priority], cursor: "pointer" }}
-          onClick={cyclePriority}
-        >
-          {PRIORITY_ICON[priority]}
+        <span className="d-priority-group">
+          <span className="d-priority-label">優先度：</span>
+          <select
+            className="d-priority-select"
+            value={priority}
+            onChange={handlePriorityChange}
+            style={{ color: PRIORITY_COLOR[priority] }}
+            title="優先度を変更"
+          >
+            <option value="normal">{PRIORITY_LABEL.normal}</option>
+            <option value="medium">{PRIORITY_LABEL.medium}</option>
+            <option value="high">{PRIORITY_LABEL.high}</option>
+          </select>
         </span>
 
         <button type="button" className="preview-toggle-btn" onClick={() => setPreviewMode((prev) => !prev)}>
-          {previewMode ? "Edit" : "Preview"}
+          {previewMode ? "編集" : "プレビュー"}
         </button>
-
-        {saveState === "saving" && <span className="save-indicator">Saving...</span>}
-        {saveState === "saved" && <span className="save-indicator saved">Saved</span>}
-
-        <button className="close-btn" onClick={onClose}>x</button>
-      </div>
-
-      <div
-        className="progress-bar-track"
-        onClick={handleProgressClick}
-        title={`Progress: ${progress}% (click to set)`}
-        style={{ cursor: "pointer" }}
-      >
-        <div className="progress-bar-fill" style={{ width: `${progress}%` }} />
-      </div>
-
-      <div className="progress-labels">
-        <span>0%</span>
-        <span style={{ color: progress > 0 ? "#4772fa" : undefined }}>{progress}%</span>
-        <span>100%</span>
       </div>
 
       <div className="detail-body">
         <input
           className={`detail-title${completed ? " completed" : ""}`}
           value={titleText}
-          placeholder="Task title"
+          placeholder="タスク名"
           onChange={(e) => {
             const nextTitle = e.target.value;
             setTitleText(nextTitle);
@@ -276,14 +266,14 @@ function DetailPaneBody({
           <div
             className={`detail-preview${contentText ? "" : " detail-preview--empty"}`}
             dangerouslySetInnerHTML={{
-              __html: contentText ? markdown.render(contentText) : "<p>No preview content.</p>",
+              __html: contentText ? markdown.render(contentText) : "<p>プレビューはありません。</p>",
             }}
           />
         ) : (
           <textarea
             className="detail-content"
             value={contentText}
-            placeholder="Write notes..."
+            placeholder="メモを入力..."
             onChange={(e) => {
               const nextContent = e.target.value;
               setContentText(nextContent);
@@ -298,12 +288,12 @@ function DetailPaneBody({
           {taskTags.map((tag) => (
             <span key={tag} className="tag">
               #{tag}
-              <button className="tag-remove-btn" onClick={() => handleRemoveTagFromTask(tag)} title="Remove tag">
+              <button className="tag-remove-btn" onClick={() => handleRemoveTagFromTask(tag)} title="タグを削除">
                 x
               </button>
             </span>
           ))}
-          {taskTags.length === 0 && <span className="tag-empty">No tags</span>}
+          {taskTags.length === 0 && <span className="tag-empty">タグを追加してください</span>}
         </div>
 
         <div className="tag-editor-row">
@@ -314,7 +304,7 @@ function DetailPaneBody({
               if (e.target.value) handleAddTagToTask(e.target.value);
             }}
           >
-            <option value="">Select tag...</option>
+            <option value="">タグ選択...</option>
             {tags
               .filter((t) => !taskTags.includes(t))
               .map((tag) => (
@@ -327,7 +317,7 @@ function DetailPaneBody({
           <input
             className="tag-input"
             type="text"
-            placeholder="New tag"
+            placeholder="新しいタグ"
             value={newTagName}
             onChange={(e) => setNewTagName(e.target.value)}
             onKeyDown={(e) => {
@@ -336,34 +326,30 @@ function DetailPaneBody({
           />
 
           <button className="tag-add-btn" onClick={() => handleAddTagToTask(newTagName)}>
-            Add
+            追加
           </button>
         </div>
       </div>
 
       <div className="progress-status-row">
-        <span className="progress-status-label">Progress status</span>
+        <span className="progress-status-label">進捗ステータス</span>
         <select className="progress-status-select" value={progressStatus} onChange={handleProgressStatusChange}>
           <option value="未着">未着</option>
           <option value="仕掛">仕掛</option>
-          <option value="完亁E">完亁E</option>
+          <option value="完了">完了</option>
         </select>
+        {completedAtText && <span className="completed-at-label">完了日時: {completedAtText}</span>}
       </div>
 
       <div className="detail-footer">
-        <select className="df-list-select" value={listName} onChange={handleListChange} title="Set list">
-          <option value="">No list</option>
+        <select className="df-list-select" value={listName} onChange={handleListChange} title="リストを設定">
+          <option value="">リストなし</option>
           {lists.map((l) => (
             <option key={l.name} value={l.name}>
               {l.name}
             </option>
           ))}
         </select>
-
-        <div className="df-actions">
-          <span className="df-icon">L</span>
-          <span className="df-icon">M</span>
-        </div>
       </div>
     </div>
   );

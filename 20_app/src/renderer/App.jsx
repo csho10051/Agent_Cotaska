@@ -31,6 +31,7 @@ function mapFileTask(taskData) {
     list:      taskData.list ?? null,             // list_idではなくlist（文字列）
     tags:      taskData.tags || [],               // frontmatterの新フィールド
     sort_order: taskData.sort_order ?? 0,
+    completed_at: taskData.completed_at || null,
     due_date:  taskData.due_date || null,
     due:       formatDue(taskData.due_date),
     overdue:   taskData.due_date ? taskData.due_date < today && taskData.status !== "done" : false,
@@ -93,28 +94,12 @@ const FIXED_VIEWS = new Set(["すべて", "今日", "明日", "次の7日間", "
 function buildSections(allTasks, view) {
   const today = localDateString();
   if (view === "今日") {
-    const todayParentIds = new Set(
-      allTasks
-        .filter((t) => t.due_date === today && t.status !== "done")
-        .map((t) => t.id)
+    const filtered = allTasks.filter(
+      (t) => t.due_date && t.due_date <= today && t.status !== "done"
     );
-    const todayChildIds = new Set(
-      allTasks
-        .filter((t) => t.parent && todayParentIds.has(t.parent) && t.status !== "done")
-        .map((t) => t.id)
-    );
-    const filtered = allTasks.filter((t) => {
-      if (t.status === "done") return false;
-      if (todayChildIds.has(t.id)) return true;
-      return Boolean(t.due_date && t.due_date <= today);
-    });
     const sections = [];
-    const overdue = sortByPriority(
-      filtered.filter((t) => t.due_date && t.due_date < today && !todayChildIds.has(t.id))
-    );
-    const todayTasks = sortByPriority(
-      filtered.filter((t) => todayChildIds.has(t.id) || t.due_date === today)
-    );
+    const overdue    = sortByPriority(filtered.filter((t) => t.due_date < today));
+    const todayTasks = sortByPriority(filtered.filter((t) => t.due_date === today));
     if (overdue.length)    sections.push({ label: "⚠️ 遅延", tasks: overdue });
     if (todayTasks.length) sections.push({ label: "☀️ 今日",   tasks: todayTasks });
     return sections;
@@ -126,6 +111,7 @@ function buildSections(allTasks, view) {
     const filtered = allTasks.filter(
       (t) => t.due_date && t.due_date <= today7 && t.status !== "done"
     );
+    
     const sections  = [];
     const overdue    = sortByPriority(filtered.filter((t) => t.due_date <  today));
     const todayTasks = sortByPriority(filtered.filter((t) => t.due_date === today));
@@ -378,9 +364,10 @@ function App() {
 
     if (toSectionType === "progress") {
       if (dragged.status === "done") return;
-      if ((toSectionLabel === "未着" || toSectionLabel === "仕掛") && dragged.progressStatus !== toSectionLabel) {
-        fieldUpdates[dragged.id] = { ...(fieldUpdates[dragged.id] || {}), progress_status: toSectionLabel };
+      if (toSectionLabel === "完了" && dragged.progressStatus !== "完了") {
+        fieldUpdates[dragged.id] = { ...(fieldUpdates[dragged.id] || {}), progress_status: "完了" };
       }
+      // 「未着・仕掛」セクションへのドラッグは progress_status を変更しない
     }
 
     const reorderable = tasks
@@ -577,11 +564,14 @@ function App() {
     }
   }
 
-  if (!isSearchMode && activeNav !== "ゴミ箱") {
-    const order = ["未着", "仕掛", "完了"];
-    progressSections = order
-      .map((label) => ({ label, tasks: visibleTasks.filter((t) => t.progressStatus === label) }))
-      .filter((section) => section.tasks.length > 0);
+  const useProgressSections = !isSearchMode && activeNav !== "ゴミ箱";
+
+  if (useProgressSections) {
+    const merged = visibleTasks.filter((t) => t.progressStatus === "未着" || t.progressStatus === "仕掛");
+    const completedProg = visibleTasks.filter((t) => t.progressStatus === "完了");
+    progressSections = [];
+    if (merged.length > 0) progressSections.push({ label: "未着・仕掛", tasks: merged });
+    if (completedProg.length > 0) progressSections.push({ label: "完了", tasks: completedProg });
   }
 
   return (

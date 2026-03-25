@@ -325,7 +325,6 @@ function addTask(taskData) {
     priority: taskData.priority || 'medium',
     progress_status: '未着',
     is_manual_progress: 0,
-    progress: 0,
     due_date: taskData.due_date || null,
     list: taskData.list || null,
     parent: taskData.parent || null,

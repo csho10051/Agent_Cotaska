@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, Menu, dialog } = require("electron");
+const { app, BrowserWindow, ipcMain, Menu, dialog, globalShortcut } = require("electron");
 const path = require("path");
 const { spawn } = require("child_process");
 const taskService = require("./taskService");
@@ -451,6 +451,18 @@ function createWindow() {
       url: win.webContents.getURL(),
     });
     bringWindowToFront(win);
+  });
+
+  // Developer Tools を開くショートカット（Ctrl+Shift+I）を登録
+  win.webContents.on("before-input-event", (event, input) => {
+    if (input.control && input.shift && input.key.toLowerCase() === "i") {
+      if (win.webContents.isDevToolsOpened()) {
+        win.webContents.closeDevTools();
+      } else {
+        win.webContents.openDevTools();
+      }
+      event.preventDefault();
+    }
   });
 
   win.on("closed", () => {
