@@ -90,6 +90,7 @@ function DetailPaneBody({
   const [previewMode, setPreviewMode] = useState(false);
   const [dueEditorOpen, setDueEditorOpen] = useState(false);
   const [completedAt, setCompletedAt] = useState(task.completed_at || null);
+  const [metaOpen, setMetaOpen] = useState(true);
   const dueAnchorRef = useRef(null);
 
   const persist = async (patch) => {
@@ -208,50 +209,12 @@ function DetailPaneBody({
 
   return (
     <div className="detail-pane">
+      {/* === detail-header: チェック + タイトル + プレビュー === */}
       <div className="detail-header">
         <input type="checkbox" className="d-check" checked={completed} onChange={handleComplete} />
 
-        <span className="detail-due-anchor" ref={dueAnchorRef} onClick={(e) => e.stopPropagation()}>
-          <span
-            className={`d-due${task.overdue ? " overdue" : ""}`}
-            onClick={() => setDueEditorOpen((prev) => !prev)}
-          >
-            期限: {task.due || "未設定"}
-          </span>
-          {dueEditorOpen && (
-            <DueDatePopover
-              className="due-popover--detail"
-              value={task.due_date}
-              onChange={handleDueDateChange}
-              onClear={() => handleDueDateChange(null)}
-              onClose={() => setDueEditorOpen(false)}
-            />
-          )}
-        </span>
-
-        <span className="d-priority-group">
-          <span className="d-priority-label">優先度：</span>
-          <select
-            className="d-priority-select"
-            value={priority}
-            onChange={handlePriorityChange}
-            style={{ color: PRIORITY_COLOR[priority] }}
-            title="優先度を変更"
-          >
-            <option value="normal">{PRIORITY_LABEL.normal}</option>
-            <option value="medium">{PRIORITY_LABEL.medium}</option>
-            <option value="high">{PRIORITY_LABEL.high}</option>
-          </select>
-        </span>
-
-        <button type="button" className="preview-toggle-btn" onClick={() => setPreviewMode((prev) => !prev)}>
-          {previewMode ? "編集" : "プレビュー"}
-        </button>
-      </div>
-
-      <div className="detail-body">
         <input
-          className={`detail-title${completed ? " completed" : ""}`}
+          className={`header-title${completed ? " completed" : ""}`}
           value={titleText}
           placeholder="タスク名"
           onChange={(e) => {
@@ -260,6 +223,128 @@ function DetailPaneBody({
             debouncedSave(nextTitle, contentText);
           }}
         />
+
+        <button type="button" className="preview-toggle-btn" onClick={() => setPreviewMode((prev) => !prev)}>
+          {previewMode ? "編集" : "プレビュー"}
+        </button>
+      </div>
+
+      {/* === detail-meta: メタ情報集約セクション === */}
+      <div className="detail-meta">
+        <span className="meta-section-header" onClick={() => setMetaOpen((prev) => !prev)}>
+          {metaOpen ? "▼" : "▶"} メタ情報
+        </span>
+
+        {metaOpen && (
+          <>
+            {/* Row 1: 進捗 + 期限 + 優先度 */}
+            <div className="meta-row">
+              <div className="meta-item">
+                <span className="meta-item-label">進捗:</span>
+                <select className="meta-select" value={progressStatus} onChange={handleProgressStatusChange}>
+                  <option value="未着">未着</option>
+                  <option value="仕掛">仕掛</option>
+                  <option value="完了">完了</option>
+                </select>
+              </div>
+              <span className="meta-due-anchor" ref={dueAnchorRef} onClick={(e) => e.stopPropagation()}>
+                <span className="meta-item-label">期限:</span>
+                <span
+                  className={`meta-due${task.overdue ? " overdue" : ""}`}
+                  onClick={() => setDueEditorOpen((prev) => !prev)}
+                >
+                  {task.due || "未設定"}
+                </span>
+                {dueEditorOpen && (
+                  <DueDatePopover
+                    className="due-popover--detail"
+                    value={task.due_date}
+                    onChange={handleDueDateChange}
+                    onClear={() => handleDueDateChange(null)}
+                    onClose={() => setDueEditorOpen(false)}
+                  />
+                )}
+              </span>
+              <div className="meta-item">
+                <span className="meta-item-label">優先度:</span>
+                <select
+                  className="meta-select"
+                  value={priority}
+                  onChange={handlePriorityChange}
+                  style={{ color: PRIORITY_COLOR[priority] }}
+                  title="優先度を変更"
+                >
+                  <option value="normal">{PRIORITY_LABEL.normal}</option>
+                  <option value="medium">{PRIORITY_LABEL.medium}</option>
+                  <option value="high">{PRIORITY_LABEL.high}</option>
+                </select>
+              </div>
+              {completedAtText && <span style={{ fontSize: 11, color: "#666" }}>完了: {completedAtText}</span>}
+            </div>
+
+            {/* Row 2: リスト + タグ選択 + タグ入力 */}
+            <div className="meta-row">
+              <select className="meta-select" value={listName} onChange={handleListChange} title="リストを設定" style={{ minWidth: 90 }}>
+                <option value="">リストなし</option>
+                {lists.map((l) => (
+                  <option key={l.name} value={l.name}>
+                    {l.name}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                className="meta-tag-select"
+                value=""
+                onChange={(e) => {
+                  if (e.target.value) handleAddTagToTask(e.target.value);
+                }}
+              >
+                <option value="">タグ選択...</option>
+                {tags
+                  .filter((t) => !taskTags.includes(t))
+                  .map((tag) => (
+                    <option key={tag} value={tag}>
+                      #{tag}
+                    </option>
+                  ))}
+              </select>
+
+              <input
+                className="meta-tag-input"
+                type="text"
+                placeholder="新タグ"
+                value={newTagName}
+                onChange={(e) => setNewTagName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleAddTagToTask(newTagName);
+                }}
+              />
+
+              <button className="meta-tag-add-btn" onClick={() => handleAddTagToTask(newTagName)}>
+                追加
+              </button>
+            </div>
+
+            {/* Row 3: タグチップス */}
+            <div className="meta-tag-row">
+              {taskTags.map((tag) => (
+                <span key={tag} className="tag">
+                  #{tag}
+                  <button className="tag-remove-btn" onClick={() => handleRemoveTagFromTask(tag)} title="タグを削除">
+                    x
+                  </button>
+                </span>
+              ))}
+              {taskTags.length === 0 && <span className="tag-empty">タグを追加してください</span>}
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* === detail-body: メモ本文 === */}
+      <div className="detail-body">
+        <div className="body-section-header">▼ タスク詳細</div>
 
         {previewMode ? (
           <div
@@ -282,73 +367,8 @@ function DetailPaneBody({
         )}
       </div>
 
-      <div className="tag-area">
-        <div className="tag-chips">
-          {taskTags.map((tag) => (
-            <span key={tag} className="tag">
-              #{tag}
-              <button className="tag-remove-btn" onClick={() => handleRemoveTagFromTask(tag)} title="タグを削除">
-                x
-              </button>
-            </span>
-          ))}
-          {taskTags.length === 0 && <span className="tag-empty">タグを追加してください</span>}
-        </div>
-
-        <div className="tag-editor-row">
-          <select
-            className="tag-select"
-            value=""
-            onChange={(e) => {
-              if (e.target.value) handleAddTagToTask(e.target.value);
-            }}
-          >
-            <option value="">タグ選択...</option>
-            {tags
-              .filter((t) => !taskTags.includes(t))
-              .map((tag) => (
-                <option key={tag} value={tag}>
-                  #{tag}
-                </option>
-              ))}
-          </select>
-
-          <input
-            className="tag-input"
-            type="text"
-            placeholder="新しいタグ"
-            value={newTagName}
-            onChange={(e) => setNewTagName(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") handleAddTagToTask(newTagName);
-            }}
-          />
-
-          <button className="tag-add-btn" onClick={() => handleAddTagToTask(newTagName)}>
-            追加
-          </button>
-        </div>
-      </div>
-
-      <div className="progress-status-row">
-        <span className="progress-status-label">進捗ステータス</span>
-        <select className="progress-status-select" value={progressStatus} onChange={handleProgressStatusChange}>
-          <option value="未着">未着</option>
-          <option value="仕掛">仕掛</option>
-          <option value="完了">完了</option>
-        </select>
-        {completedAtText && <span className="completed-at-label">完了日時: {completedAtText}</span>}
-      </div>
-
+      {/* === detail-footer: IDのみ === */}
       <div className="detail-footer">
-        <select className="df-list-select" value={listName} onChange={handleListChange} title="リストを設定">
-          <option value="">リストなし</option>
-          {lists.map((l) => (
-            <option key={l.name} value={l.name}>
-              {l.name}
-            </option>
-          ))}
-        </select>
         <span className="d-task-id">ID: {task.id}</span>
       </div>
     </div>

@@ -246,25 +246,24 @@
       flex-direction: column;
       overflow: hidden;
     }
+
+    /* detail-header: チェック + タイトル + プレビュー */
     .detail-header {
-      padding: 9px 20px;
+      padding: 10px 16px;
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       border-bottom: 1px solid #eee;
       font-size: 13px;
     }
-    .detail-header .d-due { color: #999; }
-    .detail-header .d-priority-group { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; }
-    .detail-header .d-priority-label { font-size: 12px; color: #777; white-space: nowrap; }
-    .detail-header .d-priority-select {
-      border: 1px solid #d0d7e2;
-      border-radius: 6px;
-      background: #fff;
-      color: #4b5b73;
-      font-size: 12px;
-      padding: 4px 8px;
-      min-width: 66px;
+    .detail-header .header-title {
+      flex: 1;
+      font-size: 16px;
+      font-weight: 700;
+      border: none;
+      outline: none;
+      background: transparent;
+      min-width: 0;
     }
     .preview-toggle-btn {
       border: 1px solid #d0d7e2;
@@ -273,25 +272,107 @@
       color: #4b5b73;
       font-size: 12px;
       padding: 4px 10px;
+      flex-shrink: 0;
     }
 
+    /* detail-meta: メタ情報集約セクション */
+    .detail-meta {
+      padding: 10px 16px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex-shrink: 0;
+      background: #f7f9fb;
+    }
+    .meta-section-header {
+      font-size: 11px;
+      color: #999;
+      letter-spacing: 0.04em;
+      margin-bottom: 2px;
+    }
+    .meta-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: #666;
+    }
+    .meta-item-label {
+      color: #888;
+      white-space: nowrap;
+      min-width: 42px;
+    }
+    .meta-select,
+    .meta-tag-select,
+    .meta-tag-input {
+      border: 1px solid #d0d7e2;
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 12px;
+      background: #fff;
+      color: #444;
+    }
+    .meta-select { min-width: 66px; }
+    .meta-tag-select { min-width: 80px; font-size: 11px; padding: 2px 6px; }
+    .meta-tag-input { flex: 1; min-width: 50px; font-size: 11px; padding: 2px 6px; }
+    .meta-tag-add-btn {
+      border: 1px solid #d0d7e2;
+      border-radius: 6px;
+      background: #f7f9ff;
+      color: #2d78b7;
+      font-size: 11px;
+      padding: 2px 8px;
+    }
+    .meta-tag-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      border-radius: 4px;
+      background: #e8ecf0;
+      color: #555;
+      padding: 2px 8px;
+      font-size: 11px;
+    }
+    .tag-remove-btn {
+      border: none;
+      background: transparent;
+      color: #999;
+      cursor: pointer;
+      font-size: 11px;
+      padding: 0;
+    }
+
+    /* detail-body: メモ本文のみ */
     .detail-body {
       flex: 1;
       overflow-y: auto;
-      padding: 16px 20px;
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
     }
-    .detail-title {
-      width: 100%;
-      border: none;
-      background: transparent;
-      font-size: 19px;
-      font-weight: 700;
-      margin-bottom: 8px;
-      outline: none;
+    .body-section-header {
+      font-size: 11px;
+      color: #999;
+      letter-spacing: 0.04em;
+      margin-bottom: 6px;
+      flex-shrink: 0;
     }
     .detail-content {
       width: 100%;
-      min-height: 140px;
+      flex: 1;
+      min-height: 0;
       border: none;
       background: transparent;
       outline: none;
@@ -302,84 +383,15 @@
       font-family: inherit;
     }
 
-    .tag-area {
-      padding: 8px 20px;
-      border-top: 1px solid #f0f0f0;
-    }
-    .tag-chips {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-bottom: 8px;
-    }
-    .tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      border-radius: 4px;
-      background: #f0f0f0;
-      color: #666;
-      padding: 2px 8px;
-      font-size: 12px;
-    }
-    .tag-editor-row {
-      display: flex;
-      gap: 6px;
-    }
-    .tag-select,
-    .tag-input,
-    .progress-status-select,
-    .df-list-select {
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      font-size: 12px;
-      padding: 4px 8px;
-      background: #fff;
-      color: #444;
-    }
-    .tag-input { flex: 1; }
-    .tag-add-btn {
-      border: 1px solid #d0d7e2;
-      border-radius: 6px;
-      background: #f7f9ff;
-      color: #2d78b7;
-      font-size: 12px;
-      padding: 4px 10px;
-    }
-
-    .progress-status-row {
-      padding: 8px 20px 12px;
-      border-top: 1px solid #f0f0f0;
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    .completed-at-label {
-      font-size: 12px;
-      color: #666;
-    }
-    .progress-status-label {
-      font-size: 12px;
-      color: #777;
-    }
-
+    /* detail-footer: IDのみ */
     .detail-footer {
-      height: 48px;
-      padding: 0 20px;
+      height: 32px;
+      padding: 0 16px;
       border-top: 1px solid #eee;
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: flex-end;
     }
-    .df-list-select {
-      border: none;
-      background: transparent;
-      padding: 0;
-      font-size: 13px;
-    }
-    .df-actions { display: flex; gap: 16px; color: #aaa; }
     .d-task-id {
       font-size: 11px;
       color: #bbb;
@@ -477,15 +489,60 @@
     </div>
 
     <div class="detail-pane">
+      <!-- detail-header: チェック + タイトル + プレビュー -->
       <div class="detail-header">
-        <input type="checkbox" />
-        <span class="d-due">期限: 3/24</span>
-        <span class="d-priority-group"><span class="d-priority-label">優先度：</span><select class="d-priority-select"><option>低</option><option selected>中</option><option>高</option></select></span>
+        <input type="checkbox" style="width:17px;height:17px;accent-color:#3498db;" />
+        <input class="header-title" type="text" value="DB設計書の作成" />
         <button class="preview-toggle-btn">プレビュー</button>
       </div>
 
+      <!-- detail-meta: メタ情報集約 -->
+      <div class="detail-meta">
+        <div class="meta-section-header">▼ メタ情報</div>
+        <!-- Row 1: 進捗 + 期限 + 優先度 -->
+        <div class="meta-row">
+          <div class="meta-item">
+            <span class="meta-item-label">進捗:</span>
+            <select class="meta-select">
+              <option>未着</option>
+              <option selected>仕掛</option>
+              <option>完了</option>
+            </select>
+          </div>
+          <div class="meta-item">
+            <span class="meta-item-label">期限:</span>
+            <span style="font-size:12px;color:#999;cursor:pointer;">3/24</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-item-label">優先度:</span>
+            <select class="meta-select" style="color:#f39c12;">
+              <option>低</option>
+              <option selected>中</option>
+              <option>高</option>
+            </select>
+          </div>
+        </div>
+        <!-- Row 2: リスト + タグ選択 + タグ入力 -->
+        <div class="meta-row">
+          <select class="meta-select" style="min-width:90px;">
+            <option>業務タスク</option>
+            <option>開発タスク</option>
+            <option>個人メモ</option>
+          </select>
+          <select class="meta-tag-select"><option>タグ選択...</option></select>
+          <input class="meta-tag-input" type="text" value="" placeholder="新タグ" />
+          <button class="meta-tag-add-btn">追加</button>
+        </div>
+        <!-- Row 3: タグチップス -->
+        <div class="meta-tag-row">
+          <span class="tag">#設計 <button class="tag-remove-btn">x</button></span>
+          <span class="tag">#DB <button class="tag-remove-btn">x</button></span>
+        </div>
+      </div>
+
+      <!-- detail-body: メモ本文のみ -->
       <div class="detail-body">
-        <input class="detail-title" type="text" value="DB設計書の作成" />
+        <div class="body-section-header">▼ タスク詳細</div>
         <textarea class="detail-content">tasks, task_logs, lists の定義を作成する。
 
 - カラム定義
@@ -493,34 +550,8 @@
 - 初期データ確認</textarea>
       </div>
 
-      <div class="tag-area">
-        <div class="tag-chips">
-          <span class="tag">#設計 <span>x</span></span>
-          <span class="tag">#DB <span>x</span></span>
-        </div>
-        <div class="tag-editor-row">
-          <select class="tag-select"><option>タグ選択...</option></select>
-          <input class="tag-input" type="text" value="" placeholder="新しいタグ" />
-          <button class="tag-add-btn">追加</button>
-        </div>
-      </div>
-
-      <div class="progress-status-row">
-        <span class="progress-status-label">進捗ステータス</span>
-        <select class="progress-status-select">
-          <option>未着</option>
-          <option selected>仕掛</option>
-          <option>完了</option>
-        </select>
-        <span class="completed-at-label">完了日時: 2026-03-25 10:30</span>
-      </div>
-
+      <!-- detail-footer: IDのみ -->
       <div class="detail-footer">
-        <select class="df-list-select">
-          <option>業務タスク</option>
-          <option>開発タスク</option>
-          <option>個人メモ</option>
-        </select>
         <span class="d-task-id">ID: T-0028</span>
       </div>
     </div>
