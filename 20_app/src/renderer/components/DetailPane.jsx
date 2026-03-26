@@ -349,6 +349,7 @@ function DetailPaneBody({
             </option>
           ))}
         </select>
+        <span className="d-task-id">ID: {task.id}</span>
       </div>
     </div>
   );

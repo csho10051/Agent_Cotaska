@@ -811,6 +811,14 @@ html, body, #root {
   cursor: pointer;
 }
 
+.d-task-id {
+  font-size: 11px;
+  color: #bbb;
+  font-family: "Consolas", "Courier New", monospace;
+  letter-spacing: 0.04em;
+  user-select: text;
+}
+
 
 
 /* =====================
