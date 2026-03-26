@@ -1,12 +1,12 @@
 ﻿# Cotaska release-all.ps1
-# Step 1: npm run dist:dir (renderer build + Electron packaging)
-# Step 2: Go launcher build (setup/launcher/build.ps1)
-# Step 3: organize-release.ps1 (restructure dist folder)
-# Step 4: Copy launcher EXE to dist root
-# Step 5: Pre-ship verification
+# ステップ 1: npm run dist:dir (レンダラービルド + Electron パッケージング)
+# ステップ 2: Go ランチャービルド (setup/launcher/build.ps1)
+# ステップ 3: organize-release.ps1 (配布フォルダの再構成)
+# ステップ 4: ランチャー EXE を配布ルートへコピー
+# ステップ 5: 出荷前検証
 #
-# Usage:  cd 20_app  ;  .\release-all.ps1
-#         .\release-all.ps1 -Version "0.2.0"
+# 使い方:  cd 20_app  ;  .\release-all.ps1
+#          .\release-all.ps1 -Version "0.2.0"
 
 param(
     [string]$Version = "0.1.0"
@@ -27,7 +27,7 @@ Write-Host " Cotaska Release All  v$Version" -ForegroundColor Green
 Write-Host "=======================================" -ForegroundColor Green
 
 # -------------------------------------------------------
-# Step 1: Renderer build + Electron packaging
+# ステップ 1: レンダラービルド + Electron パッケージング
 # -------------------------------------------------------
 Write-Host "`n[Step 1/4] npm run dist:dir ..." -ForegroundColor Cyan
 Set-Location $scriptDir
@@ -41,10 +41,10 @@ if (-not (Test-Path $winUnpacked)) {
     Write-Host "[FAILED] win-unpacked\Cotaska.exe not found" -ForegroundColor Red
     exit 1
 }
-Write-Host "  OK: Electron packaging complete" -ForegroundColor Green
+Write-Host "  OK: Electron パッケージング完了" -ForegroundColor Green
 
 # -------------------------------------------------------
-# Step 2: Go launcher build
+# ステップ 2: Go ランチャービルド
 # -------------------------------------------------------
 Write-Host "`n[Step 2/4] Building Go launcher ..." -ForegroundColor Cyan
 $buildPs1 = Join-Path $launcherDir "build.ps1"
@@ -56,11 +56,11 @@ if (-not (Test-Path $buildPs1)) {
         Write-Host "[FAILED] Launcher build failed" -ForegroundColor Red
         exit 1
     }
-    Write-Host "  OK: Launcher build complete" -ForegroundColor Green
+    Write-Host "  OK: ランチャービルド完了" -ForegroundColor Green
 }
 
 # -------------------------------------------------------
-# Step 3: Reorganize dist folder
+# ステップ 3: 配布フォルダの再構成
 # -------------------------------------------------------
 Write-Host "`n[Step 3/4] Organizing release folder ..." -ForegroundColor Cyan
 Set-Location $scriptDir
@@ -69,10 +69,10 @@ if ($LASTEXITCODE -ne 0) {
     Write-Host "[FAILED] organize-release.ps1 failed" -ForegroundColor Red
     exit 1
 }
-Write-Host "  OK: Release folder organized" -ForegroundColor Green
+Write-Host "  OK: リリースフォルダ整理完了" -ForegroundColor Green
 
 # -------------------------------------------------------
-# Step 4: Copy launcher EXE to dist root
+# ステップ 4: ランチャー EXE を配布ルートへコピー
 # -------------------------------------------------------
 Write-Host "`n[Step 4/4] Copying launcher to dist root ..." -ForegroundColor Cyan
 $launcherExe  = Join-Path $launcherDir "Cotaska.exe"
@@ -86,7 +86,7 @@ if (Test-Path $launcherExe) {
 }
 
 # -------------------------------------------------------
-# Step 5: Pre-ship verification
+# ステップ 5: 出荷前検証
 # -------------------------------------------------------
 Write-Host "`n[Step 5] Pre-ship verification ..." -ForegroundColor Cyan
 

@@ -1,10 +1,10 @@
 # sync-task-master-release.ps1
-# Purpose:
-# 1) Backup task-master distribution folder with timestamp suffix
-# 2) Replace Cotaska.exe from latest release output
-# 3) Replace _app folder from latest release output
+# 目的:
+# 1) タスクマスター配布フォルダをタイムスタンプ付きでバックアップ
+# 2) 最新リリース出力から Cotaska.exe を差し替え
+# 3) 最新リリース出力から _app フォルダを差し替え
 #
-# Usage:
+# 使い方:
 #   cd 20_app
 #   .\sync-task-master-release.ps1
 
@@ -37,7 +37,9 @@ $dstExe = Join-Path $taskMasterRoot "Cotaska.exe"
 $dstApp = Join-Path $taskMasterRoot "_app"
 
 $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
-$backupRoot = "${taskMasterRoot}_$timestamp"
+$backupDir = Join-Path (Split-Path $taskMasterRoot) "backup"
+if (-not (Test-Path -LiteralPath $backupDir)) { New-Item -ItemType Directory -Path $backupDir | Out-Null }
+$backupRoot = Join-Path $backupDir "Cotaska-0.1.0-dist_$timestamp"
 
 if ($StopRunningCotaska) {
     Write-Host "[1/5] Stopping related processes..."

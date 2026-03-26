@@ -1,5 +1,5 @@
-﻿# Cotaska startup script (production mode)
-# Usage: run this file in 20_app directory.
+﻿# Cotaska 起動スクリプト（本番モード）
+# 使い方: 20_app ディレクトリでこのファイルを実行してください。
 
 $ErrorActionPreference = "Stop"
 
