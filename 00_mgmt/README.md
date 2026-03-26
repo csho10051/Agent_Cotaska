@@ -9,7 +9,7 @@
 主な特徴：
 
 * ローカルファースト設計
-* Markdownタスクファイル（`30_data/tasks/`）
+* Markdownタスクファイル（`data/tasks/`）
 * デスクトップアプリケーション（Electron + React）
 * AIエージェントと共有可能なタスク管理
 * Markdownベースの運用ドキュメント
@@ -27,9 +27,9 @@
 アプリケーションロジック（taskService / listService / indexService）
       │  fs read/write
       ▼
-30_data/tasks/T-XXX.md  ← タスクファイル（正本）
-30_data/tasks/_index.yaml  ← 自動生成サマリー
-30_data/lists.yaml      ← リストマスタ
+data/tasks/T-XXX.md  ← タスクファイル（正本）
+data/tasks/_index.yaml  ← 自動生成サマリー
+data/lists.yaml      ← リストマスタ
 ```
 
 補助ファイル：
@@ -61,7 +61,7 @@ DECISIONS.md       設計判断の記録
 
 ### 2. タスクファイルを正本とする
 
-タスク情報の正本は **`30_data/tasks/` 配下の個別Markdownファイル**です。
+タスク情報の正本は **`data/tasks/` 配下の個別Markdownファイル**です。
 
 各タスクは `T-001.md`, `T-002.md` のような形式で保存され、YAMLフロントマター + Markdown本文で構成されます。
 
@@ -82,6 +82,9 @@ AIエージェントは以下のドキュメントを参照して作業します
 
 * `AGENTS.md`
   AIの作業ルール
+
+* `10_task/Cotaska-0.1.0-dist/Cotaska_AIエージェント運用ルール.md`
+  タスク管理の運用ルール正本
 
 * `CURRENT_SPRINT.md`
   現在取り組むタスク

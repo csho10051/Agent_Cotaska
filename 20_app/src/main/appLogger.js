@@ -133,6 +133,15 @@ class AppLogger {
   }
 
   /**
+   * 一般情報ログ
+   * @param {string} message
+   * @param {object|null} data
+   */
+  logInfo(message, data = null) {
+    this._write('INFO', message, data);
+  }
+
+  /**
    * エラーログ（スタックトレース付き）
    * @param {string} errorMsg
    * @param {Error|null} error

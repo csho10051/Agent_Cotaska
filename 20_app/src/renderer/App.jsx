@@ -24,7 +24,6 @@ function mapFileTask(taskData) {
     content:   taskData.content || "",
     status:    taskData.status,
     progressStatus,
-    isManualProgress: taskData.is_manual_progress === 1,
     priority:  taskData.priority || "normal",
     progress:  taskData.progress || 0,
     parent:    taskData.parent ?? null,           // parent_idではなくparent
@@ -53,7 +52,6 @@ function toFileTaskPayload(task, patch = {}) {
     content: task.content || "",
     status: task.status,
     progress_status: task.progressStatus || (task.status === "done" ? "完了" : "未着"),
-    is_manual_progress: task.isManualProgress ? 1 : 0,
     priority: task.priority || "normal",
     progress: task.progress ?? 0,
     parent: task.parent ?? null,         // parent_idではなくparent
@@ -163,7 +161,8 @@ function App() {
       let rows   = await window.cotaskaAPI?.tasks?.getAll() ?? [];
       let mapped = rows.map(mapFileTask);
 
-      // T-015-03: 親タスクの進捗ステータスを最悪値ストラテジで自動推定（手動設定済みは除外）
+      // T-015-03: 親タスクの進捗ステータスを最悪値ストラテジで自動推定
+      // 子タスクを持つ親は常に子タスク連動で進捗を再計算する。
       const byParent = {};
       mapped.forEach((task) => {
         const pid = task.parent;
@@ -175,7 +174,7 @@ function App() {
       let parentStatusUpdated = false;
       for (const parent of mapped) {
         const children = byParent[parent.id] || [];
-        if (children.length === 0 || parent.isManualProgress) continue;
+        if (children.length === 0) continue;
         const estimated = calcParentProgress(children);
         const estimatedTaskStatus = estimated === "完了" ? "done" : "todo";
         if (parent.progressStatus !== estimated || parent.status !== estimatedTaskStatus) {
@@ -183,7 +182,6 @@ function App() {
             toFileTaskPayload(parent, {
               progress_status: estimated,
               status: estimatedTaskStatus,
-              is_manual_progress: 0,
             })
           );
           parentStatusUpdated = true;
@@ -289,8 +287,6 @@ function App() {
       toFileTaskPayload(task, {
         status: newStatus,
         progress_status: newProgressStatus,
-        // 親タスクの手動変更のみロック
-        is_manual_progress: task.parent == null ? 1 : (task.isManualProgress ? 1 : 0),
       })
     );
 

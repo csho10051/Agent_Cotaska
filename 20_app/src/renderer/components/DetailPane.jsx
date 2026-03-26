@@ -99,7 +99,6 @@ function DetailPaneBody({
       content: contentText,
       status,
       progress_status: progressStatus,
-      is_manual_progress: task.parent == null ? 1 : (task.isManualProgress ? 1 : 0),
       priority,
       list: listName || null,
       parent: task.parent ?? null,
@@ -217,7 +216,7 @@ function DetailPaneBody({
             className={`d-due${task.overdue ? " overdue" : ""}`}
             onClick={() => setDueEditorOpen((prev) => !prev)}
           >
-            期限: {task.due || "期限未設定"}
+            期限: {task.due || "未設定"}
           </span>
           {dueEditorOpen && (
             <DueDatePopover

@@ -7,8 +7,8 @@ const fs = require('fs');
 const path = require('path');
 const YAML = require('js-yaml');
 
-const TASKS_DIR = path.join(__dirname, '../../..', '30_data/tasks');
-const INDEX_PATH = path.join(__dirname, '../../..', '30_data/tasks/_index.yaml');
+const TASKS_DIR = path.join(process.cwd(), '../data/tasks');
+const INDEX_PATH = path.join(TASKS_DIR, '_index.yaml');
 
 function normalizeRelativePath(relPath) {
   return String(relPath || '')

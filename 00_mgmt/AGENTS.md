@@ -11,20 +11,24 @@ Goals:
 - Preserve task data integrity.
 - Make AI work auditable for humans.
 
+Primary task management rule reference:
+- `00_mgmt/10_task/Cotaska-0.1.0-dist/Cotaska_AIエージェント運用ルール.md`
+- For task management behavior, this rule has priority over this file when guidance overlaps.
+
 ---
 
 ## System Overview
 
 Main components:
 - Desktop app: Electron + React
-- Task source of truth: `30_data/tasks/T-XXX.md`
-- YAML index mirror: `30_data/tasks/_index.yaml`
-- List master: `30_data/lists.yaml`
+- Task source of truth: `data/tasks/T-XXX.md`
+- YAML index mirror: `data/tasks/_index.yaml`
+- List master: `data/lists.yaml`
 - Management docs: `00_mgmt/`
 
 Critical rule:
-- Task files under `30_data/tasks/` are the source of truth.
-- `30_data/tasks/_index.yaml` is generated output. Do not edit it manually.
+- Task files under `data/tasks/` are the source of truth.
+- `data/tasks/_index.yaml` is generated output. Do not edit it manually.
 
 ---
 
@@ -33,7 +37,7 @@ Critical rule:
 Agents must execute work in this order:
 1. Read `00_mgmt/CURRENT_SPRINT.md`.
 2. Identify target task(s).
-3. Open corresponding task file(s) under `30_data/tasks/`.
+3. Open corresponding task file(s) under `data/tasks/`.
 4. Work only on tasks with `status: todo` or `status: doing` unless explicitly instructed.
 5. After work, update task frontmatter and `00_mgmt/CURRENT_SPRINT.md`.
 6. Record important technical decisions in `00_mgmt/DECISIONS.md`.
@@ -59,15 +63,15 @@ Do not mark a spec change complete until these task groups are reflected and tra
 Allowed:
 - Source code changes in application folders
 - Documentation updates
-- Task file read/write in `30_data/tasks/`
-- List master update in `30_data/lists.yaml`
+- Task file read/write in `data/tasks/`
+- List master update in `data/lists.yaml`
 - Sprint update in `00_mgmt/CURRENT_SPRINT.md`
 
 Not allowed:
-- Manual edits to `30_data/tasks/_index.yaml`
+- Manual edits to `data/tasks/_index.yaml`
 - Creating duplicate task IDs
 - Breaking YAML frontmatter syntax
-- Deleting task files without moving them to `30_data/archive/`
+- Deleting task files without moving them to `data/archive/`
 - Deleting historical logs or management records
 
 ---
@@ -86,7 +90,7 @@ When a task is completed:
 
 ## Task File Format
 
-Each task file is `30_data/tasks/T-XXX.md` with YAML frontmatter.
+Each task file is `data/tasks/T-XXX.md` with YAML frontmatter.
 
 ```yaml
 ---
@@ -117,12 +121,12 @@ deleted_at: null
 
 Use the following labels in `00_mgmt/CURRENT_SPRINT.md`.
 
-- `[未着手]`: not started yet
-- `[進行中]`: currently in progress
+- `[未着]`: not started yet
+- `[仕掛]`: currently in progress
 - `[完了]`: fully finished
 
 Subtask status must be consistent with parent task status:
-- If any subtask is in progress, parent should be `[進行中]`.
+- If any subtask is in progress, parent should be `[仕掛]`.
 - If all subtasks are complete, parent should be `[完了]`.
 
 ---
@@ -173,18 +177,18 @@ Security assumptions:
 - Renderer should use only the exposed bridge API
 
 Bridge namespace:
-- `window.CotaskaAPI`
+- `window.cotaskaAPI`
 
 ### Task API Examples
 
 Get all active tasks:
 ```javascript
-window.CotaskaAPI.tasks.getAll()
+window.cotaskaAPI.tasks.getAll()
 ```
 
 Add a task:
 ```javascript
-window.CotaskaAPI.tasks.add({
+window.cotaskaAPI.tasks.add({
   title: "タスク名",
   priority: "medium",
   due_date: "2026-03-20",
@@ -195,7 +199,7 @@ window.CotaskaAPI.tasks.add({
 
 Update a task:
 ```javascript
-window.CotaskaAPI.tasks.update({
+window.cotaskaAPI.tasks.update({
   id: "T-001",
   title: "更新後タイトル",
   status: "doing",

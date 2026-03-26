@@ -13,10 +13,24 @@ $distDir = Join-Path $BuildDir "Cotaska-$Version-dist"
 $appDir = Join-Path $distDir "_app"
 $dataDir = Join-Path $distDir "data"
 $logsDir = Join-Path $distDir "logs"
+$winUnpackedDir = Join-Path $BuildDir "win-unpacked"
 
 Write-Host "=== Cotaska Release Structure Organization ===" -ForegroundColor Green
 Write-Host "Distribution Dir: $distDir" -ForegroundColor Gray
 Write-Host "App Dir: $appDir" -ForegroundColor Gray
+
+# 0. _app を最新ビルドから再同期
+Write-Host "`n[Step 0] Refreshing _app from win-unpacked..."
+if (Test-Path $winUnpackedDir) {
+  if (Test-Path $appDir) {
+    Remove-Item $appDir -Recurse -Force
+  }
+  New-Item -ItemType Directory -Path $appDir -Force | Out-Null
+  Copy-Item -Path (Join-Path $winUnpackedDir "*") -Destination $appDir -Recurse -Force
+  Write-Host "  Synced: win-unpacked/* → _app/"
+} else {
+  Write-Host "  Warning: $winUnpackedDir not found, using existing _app" -ForegroundColor Yellow
+}
 
 # 1. data/, logs/ ディレクトリを作成
 Write-Host "`n[Step 1] Creating data/ and logs/ directories..."
@@ -77,14 +91,14 @@ if (Test-Path $workspaceLogsDir) {
   }
 }
 
-# 4. resources/ と workspace/ を削除
+# 4. 旧データディレクトリのみ削除（app.asar を保持）
 Write-Host "`n[Step 4] Cleaning up old directories from _app/..."
-$resourcesDir = Join-Path $appDir "resources"
+$resourcesDataDir = Join-Path $appDir "resources\30_data"
 $workspaceDir = Join-Path $appDir "workspace"
 
-if (Test-Path $resourcesDir) {
-  Remove-Item $resourcesDir -Recurse -Force
-  Write-Host "  Removed: _app/resources/"
+if (Test-Path $resourcesDataDir) {
+  Remove-Item $resourcesDataDir -Recurse -Force
+  Write-Host "  Removed: _app/resources/30_data/"
 }
 
 if (Test-Path $workspaceDir) {
@@ -98,7 +112,7 @@ $finalStructure = @"
 $distDir/
   ├── _app/          (実行バイナリのみ)
   │   ├── locales/
-  │   ├── app.asar
+  │   ├── resources/app.asar
   │   ├── Cotaska.exe
   │   └── [DLL群]
   ├── data/          (ユーザーデータ)

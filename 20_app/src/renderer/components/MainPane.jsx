@@ -244,7 +244,7 @@ function MainPane({
             onMouseLeave={() => setDueEditorTaskId((prev) => (prev === task.id ? null : prev))}
           >
             <span className={`task-due${task.overdue ? " overdue" : ""}${task.due ? "" : " task-due--empty"}`}>
-              {task.due || "期限未設定"}
+              {task.due || "未設定"}
             </span>
             {onSetTaskDue && dueEditorTaskId === task.id && (
               <DueDatePopover
