@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import "./App.css";
 import Sidebar    from "./components/Sidebar";
 import NavPanel   from "./components/NavPanel";
@@ -141,6 +141,11 @@ function App() {
   const [searchKeyword,  setSearchKeyword]  = useState("");
   const [tags, setTags] = useState([]);
 
+  // CHG-032: ペイン幅リサイズ
+  const [navWidth,    setNavWidth]    = useState(240);
+  const [detailWidth, setDetailWidth] = useState(380);
+  const resizeDragRef = useRef(null);
+
   // T-005-02: DB からタスク一覧を読み込む
   // T-031: tasks:changed イベントリスナー登録（リアルタイム同期）
   useEffect(() => {
@@ -152,6 +157,27 @@ function App() {
     return () => {
       // アンマウント時にリスナーを削除
       window.cotaskaAPI?.removeTasksChangedListener?.();
+    };
+  }, []);
+
+  // CHG-032: ペイン幅ドラッグリサイズ
+  useEffect(() => {
+    const onMove = (e) => {
+      const drag = resizeDragRef.current;
+      if (!drag) return;
+      const delta = e.clientX - drag.startX;
+      if (drag.type === "nav") {
+        setNavWidth(Math.max(160, Math.min(480, drag.startWidth + delta)));
+      } else {
+        setDetailWidth(Math.max(280, Math.min(640, drag.startWidth - delta)));
+      }
+    };
+    const onUp = () => { resizeDragRef.current = null; };
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
     };
   }, []);
 
@@ -573,23 +599,34 @@ function App() {
         onIconClick={setActiveIcon}
       />
       {navVisible && (
-        <NavPanel
-          activeNav={activeNav}
-          onNavClick={setActiveNav}
-          allBadge={allCount}
-          todayBadge={todayCount}
-          tomorrowBadge={tomorrowCount}
-          next7DaysBadge={next7DaysCount}
-          lists={lists}
-          onAddList={handleAddList}
-          onUpdateList={handleUpdateList}
-          onDeleteList={handleDeleteList}
-          tags={tags}
-          tagCounts={tagCounts}
-          onAddTag={handleAddTag}
-          onDeleteTag={handleDeleteTag}
-          tagNavPrefix={TAG_NAV_PREFIX}
-        />
+        <>
+          <div style={{ width: navWidth, flexShrink: 0, overflow: "hidden", display: "flex", alignSelf: "stretch" }}>
+            <NavPanel
+              activeNav={activeNav}
+              onNavClick={setActiveNav}
+              allBadge={allCount}
+              todayBadge={todayCount}
+              tomorrowBadge={tomorrowCount}
+              next7DaysBadge={next7DaysCount}
+              lists={lists}
+              onAddList={handleAddList}
+              onUpdateList={handleUpdateList}
+              onDeleteList={handleDeleteList}
+              tags={tags}
+              tagCounts={tagCounts}
+              onAddTag={handleAddTag}
+              onDeleteTag={handleDeleteTag}
+              tagNavPrefix={TAG_NAV_PREFIX}
+            />
+          </div>
+          <div
+            className="resize-handle"
+            onMouseDown={(e) => {
+              e.preventDefault();
+              resizeDragRef.current = { type: "nav", startX: e.clientX, startWidth: navWidth };
+            }}
+          />
+        </>
       )}
       <MainPane
         viewTitle={isSearchMode ? "検索" : (activeNav.startsWith(TAG_NAV_PREFIX) ? `タグ: #${activeNav.slice(TAG_NAV_PREFIX.length)}` : activeNav)}
@@ -618,18 +655,27 @@ function App() {
         searchKeyword={searchKeyword}
         onSearchChange={setSearchKeyword}
       />
-      <DetailPane
-        key={selectedTask?.id ?? "none"}
-        task={selectedTask}
-        onClose={() => setSelectedTask(null)}
-        onSaved={handleSaved}
-        onToggleComplete={handleToggleComplete}
-        onSetTaskDue={handleSetTaskDue}
-        lists={lists}
-        tags={tags}
-        onSetTaskTags={handleSetTaskTags}
-        onAddTag={handleAddTag}
+      <div
+        className="resize-handle"
+        onMouseDown={(e) => {
+          e.preventDefault();
+          resizeDragRef.current = { type: "detail", startX: e.clientX, startWidth: detailWidth };
+        }}
       />
+      <div style={{ width: detailWidth, flexShrink: 0, overflow: "hidden", display: "flex", alignSelf: "stretch" }}>
+        <DetailPane
+          key={selectedTask?.id ?? "none"}
+          task={selectedTask}
+          onClose={() => setSelectedTask(null)}
+          onSaved={handleSaved}
+          onToggleComplete={handleToggleComplete}
+          onSetTaskDue={handleSetTaskDue}
+          lists={lists}
+          tags={tags}
+          onSetTaskTags={handleSetTaskTags}
+          onAddTag={handleAddTag}
+        />
+      </div>
     </div>
   );
 }
