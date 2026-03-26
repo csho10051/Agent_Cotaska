@@ -35,11 +35,11 @@ Critical rule:
 ## Required Workflow
 
 Agents must execute work in this order:
-1. Read `00_mgmt/CURRENT_SPRINT.md`.
+1. Read `data/tasks/_index.yaml` to get the current task list.
 2. Identify target task(s).
 3. Open corresponding task file(s) under `data/tasks/`.
 4. Work only on tasks with `status: todo` or `status: doing` unless explicitly instructed.
-5. After work, update task frontmatter and `00_mgmt/CURRENT_SPRINT.md`.
+5. After work, update task frontmatter (and `_index.yaml` if app is not running).
 6. Record important technical decisions in `00_mgmt/DECISIONS.md`.
 
 ---
@@ -49,7 +49,7 @@ Agents must execute work in this order:
 When the user requests a specification change (仕様変更), agents must follow
 `10_docs/20_実装準備/10_運用ルール/仕様変更管理ルール.md` before implementation.
 
-Minimum required tasks to register in `00_mgmt/CURRENT_SPRINT.md`:
+Minimum required task files to create in `data/tasks/`:
 1. Check whether design-doc updates are required; if required, add and execute design update tasks.
 2. Add and execute implementation tasks.
 3. Add and execute user confirmation tasks.
@@ -65,7 +65,6 @@ Allowed:
 - Documentation updates
 - Task file read/write in `data/tasks/`
 - List master update in `data/lists.yaml`
-- Sprint update in `00_mgmt/CURRENT_SPRINT.md`
 
 Not allowed:
 - Manual edits to `data/tasks/_index.yaml`

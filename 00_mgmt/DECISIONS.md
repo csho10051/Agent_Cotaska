@@ -324,3 +324,27 @@ Result:
 * 内部データキー（`normal` / `medium` / `high`）・ソート順は変更しない
 * 表示ラベルのみ変更: `normal` → 低, `medium` → 中, `high` → 高
 
+---
+
+## 2026-03-26
+
+### CURRENT_SPRINT.md の廃止（タスク管理一本化）
+
+Decision:
+
+`CURRENT_SPRINT.md` をタスク状態管理ツールとして廃止し、過去ログとして凍結する。
+
+Reasons:
+
+* タスクファイルとの二重管理により実際に不整合が発生したため
+* タスク状態の正本は `data/tasks/*.md` で完全に代替できるため
+* AI にとって単一正本の方が判断誤りが起きにくいため
+
+Result:
+
+* `CURRENT_SPRINT.md` を廃止済みアーカイブとして凍結（以後更新しない）
+* AI 作業前確認: `AGENTS.md` → `data/tasks/_index.yaml` + 対象タスクファイル
+* 個別ルール（バグ/仕様変更/リリース）から CURRENT_SPRINT 更新要件を削除済み
+* AI 運用ルール正本の Section 9（CURRENT_SPRINT 役割と更新ルール）を削除済み
+* `AGENTS.md` の Required Workflow / Spec Change Protocol / Editing Rules を更新済み
+
