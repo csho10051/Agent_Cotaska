@@ -135,6 +135,8 @@ function loadTaskFromFile(filePath) {
     task_file_path: normalizeTaskFilePath(parsed.data.task_file_path || toIndexAbsolutePath(filePath)),
     _filePath: filePath
   };
+  // 廃止済みフィールドを読み込み時に除去
+  delete task.is_manual_progress;
   return task;
 }
 
@@ -208,7 +210,7 @@ function estimateParentState(children) {
 function recomputeParentFromChildren(parentId, now) {
   if (!parentId) return;
   const parent = taskCache[parentId];
-  if (!parent || parent.delete_flag === 1 || parent.is_manual_progress === 1) return;
+  if (!parent || parent.delete_flag === 1) return;
 
   const siblings = Object.values(taskCache)
     .filter((child) => child.parent === parentId && child.delete_flag === 0);
@@ -324,7 +326,6 @@ function addTask(taskData) {
     status: 'todo',
     priority: taskData.priority || 'medium',
     progress_status: '未着',
-    is_manual_progress: 0,
     due_date: taskData.due_date || null,
     list: taskData.list || null,
     parent: taskData.parent || null,
@@ -363,6 +364,11 @@ function updateTask(id, updates) {
   const prevStatus = task.status;
   const prevProgressStatus = task.progress_status;
   const now = new Date().toISOString();
+
+  // 廃止済みフィールドは入力されても無視する
+  if (Object.prototype.hasOwnProperty.call(updates, 'is_manual_progress')) {
+    delete updates.is_manual_progress;
+  }
 
   // 全フィールドを更新（content を含む）
   Object.keys(updates).forEach(key => {
@@ -761,6 +767,7 @@ function writeTaskFile(task) {
   const frontmatter = { ...task };
   delete frontmatter.content;
   delete frontmatter._filePath;
+  delete frontmatter.is_manual_progress;
 
   // gray-matter で frontmatter + content を生成
   const markdown = matter.stringify(task.content || '', frontmatter);

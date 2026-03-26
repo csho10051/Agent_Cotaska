@@ -252,7 +252,6 @@ function App() {
       title:    title.trim(),
       status:   "todo",
       progress_status: "未着",
-      is_manual_progress: 0,
       priority: "normal",
       progress: 0,
       due_date,
@@ -269,7 +268,6 @@ function App() {
       title:     title.trim(),
       status:    "todo",
       progress_status: "未着",
-      is_manual_progress: 0,
       priority:  "normal",
       progress:  0,
       parent:    parentTask.id,      // parent_id ではなく parent
@@ -298,7 +296,6 @@ function App() {
           toFileTaskPayload(child, {
             status: "done",
             progress_status: "完了",
-            is_manual_progress: 0,
           })
         );
       }
@@ -317,7 +314,6 @@ function App() {
       content:   task.content || "",
       status:    "todo",
       progress_status: "未着",
-      is_manual_progress: 0,
       priority:  task.priority || "normal",
       progress:  0,
       parent:    task.parent ?? null,
