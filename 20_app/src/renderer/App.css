@@ -273,6 +273,7 @@ html, body, #root {
 }
 .section-header.overdue { color: #e74c3c; }
 .section-header.today { color: #2980b9; }
+.section-header--collapsible { cursor: pointer; user-select: none; }
 .section-header--completed { cursor: pointer; user-select: none; }
 .section-header--completed:hover { background: rgba(255,255,255,0.04); }
 

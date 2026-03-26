@@ -47,6 +47,7 @@ function MainPane({
   const [inlineInput, setInlineInput] = useState(null); // { parentId, value }
   const [expanded, setExpanded] = useState({});
   const [completedSectionExpanded, setCompletedSectionExpanded] = useState(true);
+  const [sectionCollapsed, setSectionCollapsed] = useState({});
   const [dueEditorTaskId, setDueEditorTaskId] = useState(null);
   const [draggingTaskId, setDraggingTaskId] = useState(null);
   const [hoveredSectionKey, setHoveredSectionKey] = useState(null);
@@ -358,8 +359,13 @@ function MainPane({
               setHoveredSectionKey(null);
             }}
           >
-            <div className="section-header">{section.label}</div>
-            {renderTaskTree(section.tasks, { type: "progress", label: section.label })}
+            <div
+              className="section-header section-header--collapsible"
+              onClick={() => setSectionCollapsed((prev) => ({ ...prev, [`progress:${section.label}`]: !prev[`progress:${section.label}`] }))}
+            >
+              {sectionCollapsed[`progress:${section.label}`] ? "▸" : "▾"} {section.label} ({section.tasks.length})
+            </div>
+            {!sectionCollapsed[`progress:${section.label}`] && renderTaskTree(section.tasks, { type: "progress", label: section.label })}
           </div>
         ))}
       </>
@@ -402,10 +408,13 @@ function MainPane({
               setHoveredSectionKey(null);
             }}
           >
-            <div className={`section-header${section.label.includes("遅延") ? " overdue" : ""}`}>
-              {section.label}
+            <div
+              className={`section-header section-header--collapsible${section.label.includes("遅延") ? " overdue" : ""}`}
+              onClick={() => setSectionCollapsed((prev) => ({ ...prev, [`date:${section.label}`]: !prev[`date:${section.label}`] }))}
+            >
+              {sectionCollapsed[`date:${section.label}`] ? "▸" : "▾"} {section.label} ({section.tasks.length})
             </div>
-            {renderTaskTree(section.tasks, { type: "date", label: section.label })}
+            {!sectionCollapsed[`date:${section.label}`] && renderTaskTree(section.tasks, { type: "date", label: section.label })}
           </div>
         ))}
       </>
