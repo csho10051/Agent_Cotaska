@@ -4,21 +4,21 @@
 
 この文書は、AIエージェントが Cotaska のタスクリストとタスクファイルを安全に生成・更新・保守するための実務ルールを定義する。
 
-**タスクの正本は `data/tasks/*.md` に一本化する。**
-開発タスク・アプリ運用タスクを問わず、すべてのタスクを `data/tasks/T-XXXX.md` で管理する。
+**タスクの正本は `00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/*.md` に一本化する。**
+開発タスク・アプリ運用タスクを問わず、すべてのタスクを `00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-XXXX.md` で管理する。
 開発タスクは `list` または `tags` で識別する（例: `list: 開発管理`）。
 
 対象ファイルは以下の 1 系統とする。
 
 1. タスクファイル（正本）
-   - `data/tasks/*.md`
-   - `data/tasks/_index.yaml`（アプリ用インデックス、AIが同期維持）
-   - `data/lists.yaml`
+   - `00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/*.md`
+   - `00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/_index.yaml`（アプリ用インデックス、AIが同期維持）
+   - `00_mgmt/10_task/Cotaska-0.1.0-dist/data/lists.yaml`
 2. 判断ログ（参照用・正本ではない）
    - `00_mgmt/DECISIONS.md`
    - `10_docs/20_実装準備/40_仕様変更管理/*.md`
 
-`data/tasks/_index.yaml` はアプリ起動中は自動再構築される。
+`00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/_index.yaml` はアプリ起動中は自動再構築される。
 アプリ未起動時に AI がタスクファイルを追加・変更した場合は、**AI が `_index.yaml` を手動で同期しなければならない**（詳細はセクション 11 参照）。
 
 ---
@@ -26,7 +26,7 @@
 ## 2. 基本原則
 
 1. 正本を優先する
-   - **全タスク（開発タスク含む）の正本は `data/tasks/*.md`**
+   - **全タスク（開発タスク含む）の正本は `00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/*.md`**
 2. `_index.yaml` をアプリと同じ規則で同期する
    - アプリ起動中は watcher が自動再構築するため AI は `*.md` 操作のみでよい
    - アプリ未起動時は `*.md` 操作後に必ず `_index.yaml` を手動同期する
@@ -45,9 +45,9 @@
 AIエージェントは作業前に、最低限以下を読む。
 
 1. `00_mgmt/AGENTS.md`
-2. `data/tasks/_index.yaml`（全タスクの概要確認）
+2. `00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/_index.yaml`（全タスクの概要確認）
 3. `00_mgmt/DECISIONS.md`
-4. 対象タスクファイル（該当する `data/tasks/*.md`）
+4. 対象タスクファイル（該当する `00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/*.md`）
 5. 必要な設計書（`10_docs/10_設計/` 配下）
 
 ---
@@ -58,19 +58,19 @@ AIエージェントは作業前に、最低限以下を読む。
 
 本ルールでいう「タスクリスト」は次を指す。
 
-1. **全タスクの正本**: `data/tasks/*.md` 群（開発タスク・アプリ運用タスクの両方を含む）
-2. **インデックス（参照用）**: `data/tasks/_index.yaml`（アプリ用。AIは参照のみ）
+1. **全タスクの正本**: `00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/*.md` 群（開発タスク・アプリ運用タスクの両方を含む）
+2. **インデックス（参照用）**: `00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/_index.yaml`（アプリ用。AIは参照のみ）
 
 開発タスクは `list: 開発管理` または `tags: ["開発管理"]` で識別するのを推奨する。
 
 ### 4.2 タスクファイル
 
-本ルールでいう「タスクファイル」は `data/tasks/` 配下の Markdown ファイルを指す。
+本ルールでいう「タスクファイル」は `00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/` 配下の Markdown ファイルを指す。
 
 例:
 
-1. `data/tasks/T-0001.md`
-2. `data/tasks/sub/feature/T-0100.md`
+1. `00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0001.md`
+2. `00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/sub/feature/T-0100.md`
 
 分散配置する場合でも、`task_file_path` は `_index.yaml` に自動反映される前提で扱う。
 
@@ -121,7 +121,7 @@ AIエージェントは作業前に、最低限以下を読む。
 
 ## 6. AIがやってはいけないこと
 
-1. `data/tasks/_index.yaml` を理由なく全面再生成・一括上書きする
+1. `00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/_index.yaml` を理由なく全面再生成・一括上書きする
 2. タスク ID を重複生成する
 3. 既存タスクファイルを無断削除する
 4. `delete_flag` や `status` を根拠なくまとめて書き換える
@@ -150,7 +150,7 @@ AIエージェントは作業前に、最低限以下を読む。
 
 ### 7.3 ファイル配置ルール
 
-1. 原則は `data/tasks/T-XXXX.md`
+1. 原則は `00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-XXXX.md`
 2. 分類上必要な場合はサブフォルダ配置可
 3. サブフォルダ配置時もファイル名は `T-XXXX.md` 形式を維持する
 4. 配置ルールを変えた場合はユーザーに意図を明示する
@@ -257,7 +257,7 @@ deleted_at: null
 1. 変更要求を要約する
 2. 必要なら仕様変更管理ファイルを起票する
 3. `DECISIONS.md` に設計判断を記録する
-4. `data/tasks/` に実装タスクを追加する
+4. `00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/` に実装タスクを追加する
 5. 設計書と実装を同期する
 
 仕様変更だけ登録して実装や設計同期を忘れてはならない。
@@ -287,7 +287,7 @@ deleted_at: null
   sort_order: N       # 既存最大値 + 1
   tags: []
   due_date: null
-  task_file_path: C:/WorkDevelop/Agent_Cotaska/Cotaska/data/tasks/T-XXXX.md
+  task_file_path: C:/WorkDevelop/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-XXXX.md
   updated_at: 'YYYY-MM-DDTHH:mm:ss.sssZ'
 ```
 
@@ -315,7 +315,7 @@ deleted_at: null
 
 ### 10.5 _index.yaml のフォーマット規則
 
-- `task_file_path` は**絶対パス**（Windows スラッシュ区切り）: `C:/WorkDevelop/Agent_Cotaska/Cotaska/data/tasks/T-XXXX.md`
+- `task_file_path` は**絶対パス**（Windows スラッシュ区切り）: `C:/WorkDevelop/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-XXXX.md`
 - `tasks` 配列は `sort_order` 昇順で並べる
 - `task_file_roots` は通常 `['.']` のまま維持する
 - `progress` フィールドは `0` の場合は省略してよい（`0` 以外は記載）
@@ -343,7 +343,7 @@ deleted_at: null
 
 ### 12.2 開発タスクを AI に追加させる場合
 
-1. `data/tasks/T-XXXX.md` を `list: 開発管理`（または同等のタグ）で作成
+1. `00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-XXXX.md` を `list: 開発管理`（または同等のタグ）で作成
 2. アプリ未起動時は `_index.yaml` を同期（セクション 10.2）
 3. 必要なら仕様変更管理を起票
 4. 実装後: taskファイルの frontmatter を更新 → `_index.yaml` 同期
@@ -363,7 +363,7 @@ deleted_at: null
 ### 13.1 新規アプリタスク作成
 
 ```text
-data/tasks/ に新しいタスクを1件作成してください。
+00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/ に新しいタスクを1件作成してください。
 タイトル: ○○
 期限: 2026-03-25
 リスト: リストなし
@@ -374,7 +374,7 @@ data/tasks/ に新しいタスクを1件作成してください。
 ### 13.2 開発管理タスク追加
 
 ```text
-data/tasks/ に開発管理タスクを1件作成してください。
+00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/ に開発管理タスクを1件作成してください。
 タイトル: ○○
 list: 開発管理
 親タスク: T-0XX（必要な場合）
@@ -396,7 +396,7 @@ frontmatter は壊さず、updated_at を更新してください。
 
 AIエージェントは作業完了前に、必ず次を確認する。
 
-1. `data/tasks/T-XXXX.md`（正本）を更新したか
+1. `00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-XXXX.md`（正本）を更新したか
 2. **アプリ未起動時**: `_index.yaml` を同期したか
    - 追加: tasksエントリ追加・next_task_id・last_updated 更新
    - 変更: 該当エントリの対象フィールド・updated_at・last_updated 更新
@@ -413,7 +413,7 @@ AIエージェントは作業完了前に、必ず次を確認する。
 ルールが衝突する場合の優先順位は次とする。
 
 1. ユーザーの明示指示
-2. 実データの整合性維持（`data/tasks/*.md` と `_index.yaml` の整合）
+2. 実データの整合性維持（`00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/*.md` と `_index.yaml` の整合）
 3. `00_mgmt/AGENTS.md`
 4. 本文書
 
