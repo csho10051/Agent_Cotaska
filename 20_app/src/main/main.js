@@ -1,5 +1,6 @@
 const { app, BrowserWindow, ipcMain, Menu, dialog, globalShortcut } = require("electron");
 const path = require("path");
+const crypto = require("crypto");
 const { spawn } = require("child_process");
 const taskService = require("./taskService");
 const listService = require("./listService");
@@ -28,6 +29,14 @@ function focusMainWindow() {
   }
   bringWindowToFront(mainWindow);
 }
+
+// --- CHG-035: 起動パス別のシングルインスタンスロック ---
+// 異なるパス（開発環境 / リリース環境）からの同時起動を許可し、
+// 同一パスからの二重起動のみブロックする。
+// app.name を変更すると named pipe 名と userData パスが自動で分離される。
+const appDir = path.resolve(__dirname, "../..");
+const instanceHash = crypto.createHash("md5").update(appDir).digest("hex").slice(0, 8);
+app.name = `Cotaska-${instanceHash}`;
 
 const gotSingleInstanceLock = app.requestSingleInstanceLock();
 if (!gotSingleInstanceLock) {
