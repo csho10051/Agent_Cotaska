@@ -113,7 +113,7 @@ $distDir/
   ├── _app/          (実行バイナリのみ)
   │   ├── locales/
   │   ├── resources/app.asar
-  │   ├── Cotaska.exe
+  │   ├── CotaskaCore.exe
   │   └── [DLL群]
   ├── data/          (ユーザーデータ)
   │   ├── tasks/

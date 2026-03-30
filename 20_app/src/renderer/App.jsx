@@ -565,7 +565,8 @@ function App() {
     if (activeNav === "すべて") {
       completedSectionTasks = tasks.filter((t) => t.status === "done");
     } else if (activeNav === "今日") {
-      completedSectionTasks = tasks.filter((t) => t.status === "done" && t.due_date && t.due_date <= today);
+      // BUG-20260330-01: 「今日」完了セクションは今日期限の完了タスクのみ表示する
+      completedSectionTasks = tasks.filter((t) => t.status === "done" && t.due_date === today);
     } else if (activeNav === "明日") {
       const tomorrow = addDays(today, 1);
       completedSectionTasks = tasks.filter((t) => t.status === "done" && t.due_date === tomorrow);

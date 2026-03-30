@@ -21,7 +21,7 @@
   },
   "build": {
     "appId": "com.cotaska.app",
-    "productName": "Cotaska",
+    "productName": "CotaskaCore",
     "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
     "directories": {
       "output": "release"

@@ -386,3 +386,21 @@ Result:
 * 仕様変更として CHG-035 を追加
 * 実装タスク T-0042、ユーザ確認タスク T-0043
 
+## 2026-03-30
+
+### Electron 本体 EXE 名変更（CHG-036）
+
+Decision:
+
+`_app/Cotaska.exe`（Electron 本体）を `CotaskaCore.exe` にリネームする。ルートの `Cotaska.exe`（Go ランチャー）は変更しない。
+
+Reasons:
+
+* 同名 EXE が2箇所に存在し、AI エージェントが誤って _app 内の EXE を直接起動してしまう
+* ランチャー経由の正規起動フローがバイパスされる問題を解消する
+
+Result:
+
+* 仕様変更として CHG-036 を追加
+* 実装タスク T-0051、ユーザ確認タスク T-0052
+

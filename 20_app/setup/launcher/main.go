@@ -54,11 +54,11 @@ func main() {
 	launcherLogPath := filepath.Join(launcherDir, "launcher.log")
 	appendLauncherLog(launcherLogPath, "Launcher start: exePath="+exePath)
 
-	target := filepath.Join(launcherDir, "_app", "Cotaska.exe")
+	target := filepath.Join(launcherDir, "_app", "CotaskaCore.exe")
 	appendLauncherLog(launcherLogPath, "Target resolved: "+target)
 	if _, err := os.Stat(target); err != nil {
 		appendLauncherLog(launcherLogPath, "Target missing: "+err.Error())
-		showError("Cotaska Launcher Error", "_app\\Cotaska.exe was not found. Please rebuild release package.")
+		showError("Cotaska Launcher Error", "_app\\CotaskaCore.exe was not found. Please rebuild release package.")
 		os.Exit(1)
 	}
 
