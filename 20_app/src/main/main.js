@@ -37,6 +37,7 @@ function focusMainWindow() {
 const appDir = path.resolve(__dirname, "../..");
 const instanceHash = crypto.createHash("md5").update(appDir).digest("hex").slice(0, 8);
 app.name = `Cotaska-${instanceHash}`;
+app.disableHardwareAcceleration();
 
 const gotSingleInstanceLock = app.requestSingleInstanceLock();
 if (!gotSingleInstanceLock) {

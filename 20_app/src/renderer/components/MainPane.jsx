@@ -41,7 +41,6 @@ function MainPane({
   const inputRef    = useRef(null);
   const inlineInputRef = useRef(null);
   const searchTimer = useRef(null);
-  const duePopoverRef = useRef(null);
   const [localSearch, setLocalSearch] = useState("");
   const [contextMenu, setContextMenu] = useState(null);
   const [inlineInput, setInlineInput] = useState(null); // { parentId, value }
@@ -82,26 +81,6 @@ function MainPane({
     window.addEventListener("mousedown", close);
     return () => window.removeEventListener("mousedown", close);
   }, [contextMenu]);
-
-  useEffect(() => {
-    if (!dueEditorTaskId) return undefined;
-
-    const handleMouseDown = (e) => {
-      if (!duePopoverRef.current) return;
-      if (!duePopoverRef.current.contains(e.target)) setDueEditorTaskId(null);
-    };
-
-    const handleKeyDown = (e) => {
-      if (e.key === "Escape") setDueEditorTaskId(null);
-    };
-
-    window.addEventListener("mousedown", handleMouseDown);
-    window.addEventListener("keydown", handleKeyDown);
-    return () => {
-      window.removeEventListener("mousedown", handleMouseDown);
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [dueEditorTaskId]);
 
   useEffect(() => {
     if (!inlineInput) return;
@@ -225,12 +204,12 @@ function MainPane({
             onClick={(e) => e.stopPropagation()}
           />
         )}
-        <span className="task-title">{task.title}</span>
         {!isTrashed && (
           <span className={`progress-status-badge ${task.progressStatus === "完了" ? "done" : task.progressStatus === "仕掛" ? "in-progress" : "not-started"}`}>
             {task.progressStatus || "未着"}
           </span>
         )}
+        <span className="task-title">{task.title}</span>
         {!isTrashed && PRIORITY[task.priority] && (
           <span className={`priority-icon ${PRIORITY[task.priority].cls}`}>
             {PRIORITY[task.priority].label}
@@ -239,16 +218,18 @@ function MainPane({
         {!isTrashed && (
           <span
             className="task-due-anchor"
-            ref={dueEditorTaskId === task.id ? duePopoverRef : null}
-            onClick={(e) => e.stopPropagation()}
-            onMouseEnter={() => onSetTaskDue && setDueEditorTaskId(task.id)}
-            onMouseLeave={() => setDueEditorTaskId((prev) => (prev === task.id ? null : prev))}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (onSetTaskDue) setDueEditorTaskId(task.id);
+            }}
           >
             <span className={`task-due${task.overdue ? " overdue" : ""}${task.due ? "" : " task-due--empty"}`}>
               {task.due || "未設定"}
             </span>
             {onSetTaskDue && dueEditorTaskId === task.id && (
               <DueDatePopover
+                className="due-dialog--floating"
+                placementMode="main-auto"
                 value={task.due_date}
                 onChange={async (nextDue) => {
                   await onSetTaskDue(task, nextDue);

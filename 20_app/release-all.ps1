@@ -36,9 +36,10 @@ if ($LASTEXITCODE -ne 0) {
     Write-Host "[FAILED] npm run dist:dir" -ForegroundColor Red
     exit 1
 }
-$winUnpacked = Join-Path $scriptDir "release\win-unpacked\Cotaska.exe"
-if (-not (Test-Path $winUnpacked)) {
-    Write-Host "[FAILED] win-unpacked\Cotaska.exe not found" -ForegroundColor Red
+$winUnpackedCore = Join-Path $scriptDir "release\win-unpacked\CotaskaCore.exe"
+$winUnpackedLegacy = Join-Path $scriptDir "release\win-unpacked\Cotaska.exe"
+if (-not (Test-Path $winUnpackedCore) -and -not (Test-Path $winUnpackedLegacy)) {
+    Write-Host "[FAILED] win-unpacked\CotaskaCore.exe (or Cotaska.exe) not found" -ForegroundColor Red
     exit 1
 }
 Write-Host "  OK: Electron パッケージング完了" -ForegroundColor Green

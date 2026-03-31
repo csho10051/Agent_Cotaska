@@ -6,7 +6,7 @@ const PRIORITY_LABEL = { normal: "低", medium: "中", high: "高" };
 const PRIORITY_COLOR = { normal: "#aaa", medium: "#f39c12", high: "#e74c3c" };
 const markdown = new MarkdownIt({ html: false, linkify: true, breaks: true });
 
-function formatCompletedAt(value) {
+function formatDatetime(value) {
   if (!value) return "";
 
   const raw = String(value);
@@ -19,10 +19,11 @@ function formatCompletedAt(value) {
   const y = fallbackParsed.getFullYear();
   const m = String(fallbackParsed.getMonth() + 1).padStart(2, "0");
   const d = String(fallbackParsed.getDate()).padStart(2, "0");
-  const hh = String(fallbackParsed.getHours()).padStart(2, "0");
-  const mm = String(fallbackParsed.getMinutes()).padStart(2, "0");
-  return `${y}-${m}-${d} ${hh}:${mm}`;
+  return `${y}/${m}/${d}`;
 }
+
+// 後方互換のためエイリアスを維持
+const formatCompletedAt = formatDatetime;
 
 function useDebounce(fn, delay) {
   const timer = useRef(null);
@@ -91,7 +92,6 @@ function DetailPaneBody({
   const [dueEditorOpen, setDueEditorOpen] = useState(false);
   const [completedAt, setCompletedAt] = useState(task.completed_at || null);
   const [metaOpen, setMetaOpen] = useState(true);
-  const dueAnchorRef = useRef(null);
 
   const persist = async (patch) => {
     await window.cotaskaAPI?.tasks?.update({
@@ -161,26 +161,6 @@ function DetailPaneBody({
     setDueEditorOpen(false);
   };
 
-  useEffect(() => {
-    if (!dueEditorOpen) return undefined;
-
-    const handleMouseDown = (e) => {
-      if (!dueAnchorRef.current) return;
-      if (!dueAnchorRef.current.contains(e.target)) setDueEditorOpen(false);
-    };
-
-    const handleKeyDown = (e) => {
-      if (e.key === "Escape") setDueEditorOpen(false);
-    };
-
-    window.addEventListener("mousedown", handleMouseDown);
-    window.addEventListener("keydown", handleKeyDown);
-    return () => {
-      window.removeEventListener("mousedown", handleMouseDown);
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [dueEditorOpen]);
-
   const handleListChange = async (e) => {
     const newListName = e.target.value;
     setListName(newListName);
@@ -247,17 +227,17 @@ function DetailPaneBody({
                   <option value="完了">完了</option>
                 </select>
               </div>
-              <span className="meta-due-anchor" ref={dueAnchorRef} onClick={(e) => e.stopPropagation()}>
+              <span className="meta-due-anchor" onClick={(e) => e.stopPropagation()}>
                 <span className="meta-item-label">期限:</span>
                 <span
                   className={`meta-due${task.overdue ? " overdue" : ""}`}
-                  onClick={() => setDueEditorOpen((prev) => !prev)}
+                  onClick={() => setDueEditorOpen(true)}
                 >
                   {task.due || "未設定"}
                 </span>
                 {dueEditorOpen && (
                   <DueDatePopover
-                    className="due-popover--detail"
+                    className="due-dialog--detail"
                     value={task.due_date}
                     onChange={handleDueDateChange}
                     onClear={() => handleDueDateChange(null)}
@@ -279,7 +259,6 @@ function DetailPaneBody({
                   <option value="high">{PRIORITY_LABEL.high}</option>
                 </select>
               </div>
-              {completedAtText && <span style={{ fontSize: 11, color: "#666" }}>完了: {completedAtText}</span>}
             </div>
 
             {/* Row 2: リスト + タグ選択 + タグ入力 */}
@@ -367,8 +346,14 @@ function DetailPaneBody({
         )}
       </div>
 
-      {/* === detail-footer: IDのみ === */}
+      {/* === detail-footer: 登録日時・完了日時・ID === */}
       <div className="detail-footer">
+        {task.created_at && (
+          <span className="d-task-id" style={{ marginRight: "auto" }}>登録日時：{formatDatetime(task.created_at)}</span>
+        )}
+        {completedAtText && (
+          <span className="d-task-id" style={{ marginRight: 12 }}>完了日時：{completedAtText}</span>
+        )}
         <span className="d-task-id">ID: {task.id}</span>
       </div>
     </div>

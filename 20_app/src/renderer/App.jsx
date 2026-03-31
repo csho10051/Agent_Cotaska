@@ -10,8 +10,21 @@ const TAG_NAV_PREFIX = "tag:";
 // ── Markdownファイル → UI オブジェクトの変換 ────────────────────────────────────
 function formatDue(due_date) {
   if (!due_date) return "";
-  const [, m, d] = due_date.split("-");
-  return `${parseInt(m)}/${parseInt(d)}`;
+
+  const raw = String(due_date).trim();
+  const match = raw.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T\s](\d{2}:\d{2}))?/);
+  if (!match) return raw;
+
+  const [, , m, d, hhmm] = match;
+  const base = `${parseInt(m, 10)}/${parseInt(d, 10)}`;
+  return hhmm ? `${base} ${hhmm}` : base;
+}
+
+function dueDatePart(due_date) {
+  if (!due_date) return null;
+  const raw = String(due_date).trim();
+  const match = raw.match(/^(\d{4}-\d{2}-\d{2})/);
+  return match ? match[1] : null;
 }
 
 // T-031: frontmatterフィールドに対応（file-first architecture）
@@ -30,10 +43,11 @@ function mapFileTask(taskData) {
     list:      taskData.list ?? null,             // list_idではなくlist（文字列）
     tags:      taskData.tags || [],               // frontmatterの新フィールド
     sort_order: taskData.sort_order ?? 0,
+    created_at: taskData.created_at || null,
     completed_at: taskData.completed_at || null,
     due_date:  taskData.due_date || null,
     due:       formatDue(taskData.due_date),
-    overdue:   taskData.due_date ? taskData.due_date < today && taskData.status !== "done" : false,
+    overdue:   taskData.due_date ? dueDatePart(taskData.due_date) < today && taskData.status !== "done" : false,
   };
 }
 
@@ -93,11 +107,11 @@ function buildSections(allTasks, view) {
   const today = localDateString();
   if (view === "今日") {
     const filtered = allTasks.filter(
-      (t) => t.due_date && t.due_date <= today && t.status !== "done"
+      (t) => dueDatePart(t.due_date) && dueDatePart(t.due_date) <= today && t.status !== "done"
     );
     const sections = [];
-    const overdue    = sortByPriority(filtered.filter((t) => t.due_date < today));
-    const todayTasks = sortByPriority(filtered.filter((t) => t.due_date === today));
+    const overdue    = sortByPriority(filtered.filter((t) => dueDatePart(t.due_date) < today));
+    const todayTasks = sortByPriority(filtered.filter((t) => dueDatePart(t.due_date) === today));
     if (overdue.length)    sections.push({ label: "⚠️ 遅延", tasks: overdue });
     if (todayTasks.length) sections.push({ label: "☀️ 今日",   tasks: todayTasks });
     return sections;
@@ -107,14 +121,14 @@ function buildSections(allTasks, view) {
     const day1   = addDays(today, 1);
     const day2   = addDays(today, 2);
     const filtered = allTasks.filter(
-      (t) => t.due_date && t.due_date <= today7 && t.status !== "done"
+      (t) => dueDatePart(t.due_date) && dueDatePart(t.due_date) <= today7 && t.status !== "done"
     );
     
     const sections  = [];
-    const overdue    = sortByPriority(filtered.filter((t) => t.due_date <  today));
-    const todayTasks = sortByPriority(filtered.filter((t) => t.due_date === today));
-    const tomorrows  = sortByPriority(filtered.filter((t) => t.due_date === day1));
-    const later      = sortByPriority(filtered.filter((t) => t.due_date >= day2 && t.due_date <= today7));
+    const overdue    = sortByPriority(filtered.filter((t) => dueDatePart(t.due_date) <  today));
+    const todayTasks = sortByPriority(filtered.filter((t) => dueDatePart(t.due_date) === today));
+    const tomorrows  = sortByPriority(filtered.filter((t) => dueDatePart(t.due_date) === day1));
+    const later      = sortByPriority(filtered.filter((t) => dueDatePart(t.due_date) >= day2 && dueDatePart(t.due_date) <= today7));
     if (overdue.length)    sections.push({ label: "⚠️ 遅延",   tasks: overdue });
     if (todayTasks.length) sections.push({ label: "☀️ 今日",   tasks: todayTasks });
     if (tomorrows.length)  sections.push({ label: "📅 明日",   tasks: tomorrows });
@@ -135,6 +149,7 @@ function App() {
   const [todayCount,    setTodayCount]    = useState(0);
   const [tomorrowCount, setTomorrowCount] = useState(0);
   const [next7DaysCount, setNext7DaysCount] = useState(0);
+  const [noListCount,   setNoListCount]   = useState(0);
   const [lists,         setLists]         = useState([]);
   const [trashedTasks,   setTrashedTasks]   = useState([]);
   const [completedTasks, setCompletedTasks] = useState([]);
@@ -226,9 +241,10 @@ function App() {
       const tomorrow = addDays(today, 1);
       const next7 = addDays(today, 7);
       setAllCount(mapped.filter((t) => t.status !== "done").length);
-      setTodayCount(mapped.filter(t => t.due_date && t.due_date <= today && t.status !== "done").length);
-      setTomorrowCount(mapped.filter((t) => t.due_date === tomorrow && t.status !== "done").length);
-      setNext7DaysCount(mapped.filter((t) => t.due_date && t.due_date <= next7 && t.status !== "done").length);
+      setTodayCount(mapped.filter(t => dueDatePart(t.due_date) && dueDatePart(t.due_date) <= today && t.status !== "done").length);
+      setTomorrowCount(mapped.filter((t) => dueDatePart(t.due_date) === tomorrow && t.status !== "done").length);
+      setNext7DaysCount(mapped.filter((t) => dueDatePart(t.due_date) && dueDatePart(t.due_date) <= next7 && t.status !== "done").length);
+      setNoListCount(mapped.filter((t) => (t.list === null || t.list === undefined) && t.status !== "done").length);
 
       // 選択中タスクがまだ存在する場合は最新データで上書き
       setSelectedTask(prev =>
@@ -372,10 +388,10 @@ function App() {
     const fieldUpdates = {};
 
     if (toSectionType === "date") {
-      if (String(toSectionLabel || "").includes("明日") && dragged.due_date !== tomorrow) {
+      if (String(toSectionLabel || "").includes("明日") && dueDatePart(dragged.due_date) !== tomorrow) {
         fieldUpdates[dragged.id] = { ...(fieldUpdates[dragged.id] || {}), due_date: tomorrow };
       }
-      if (String(toSectionLabel || "").includes("今日") && dragged.due_date !== today) {
+      if (String(toSectionLabel || "").includes("今日") && dueDatePart(dragged.due_date) !== today) {
         fieldUpdates[dragged.id] = { ...(fieldUpdates[dragged.id] || {}), due_date: today };
       }
     }
@@ -536,7 +552,7 @@ function App() {
     visibleTasks = tasks.filter((t) => t.status !== "done");
   } else if (activeNav === "明日") {
     const tomorrow = addDays(localDateString(), 1);
-    visibleTasks = tasks.filter((t) => t.due_date === tomorrow && t.status !== "done");
+    visibleTasks = tasks.filter((t) => dueDatePart(t.due_date) === tomorrow && t.status !== "done");
   } else if (activeNav === "今日" || activeNav === "次の7日間") {
     visibleSections = buildSections(tasks, activeNav);
     visibleTasks    = visibleSections.flatMap((s) => s.tasks);
@@ -566,13 +582,13 @@ function App() {
       completedSectionTasks = tasks.filter((t) => t.status === "done");
     } else if (activeNav === "今日") {
       // BUG-20260330-01: 「今日」完了セクションは今日期限の完了タスクのみ表示する
-      completedSectionTasks = tasks.filter((t) => t.status === "done" && t.due_date === today);
+      completedSectionTasks = tasks.filter((t) => t.status === "done" && dueDatePart(t.due_date) === today);
     } else if (activeNav === "明日") {
       const tomorrow = addDays(today, 1);
-      completedSectionTasks = tasks.filter((t) => t.status === "done" && t.due_date === tomorrow);
+      completedSectionTasks = tasks.filter((t) => t.status === "done" && dueDatePart(t.due_date) === tomorrow);
     } else if (activeNav === "次の7日間") {
       const today7 = addDays(today, 7);
-      completedSectionTasks = tasks.filter((t) => t.status === "done" && t.due_date && t.due_date <= today7);
+      completedSectionTasks = tasks.filter((t) => t.status === "done" && dueDatePart(t.due_date) && dueDatePart(t.due_date) <= today7);
     } else if (activeNav === "受信トレイ" || activeNav === "リストなし") {
       completedSectionTasks = tasks.filter((t) => t.status === "done" && (t.list === null || t.list === undefined));
     } else if (activeNav.startsWith(TAG_NAV_PREFIX)) {
@@ -609,6 +625,7 @@ function App() {
               todayBadge={todayCount}
               tomorrowBadge={tomorrowCount}
               next7DaysBadge={next7DaysCount}
+              noListBadge={noListCount}
               lists={lists}
               onAddList={handleAddList}
               onUpdateList={handleUpdateList}
@@ -663,7 +680,7 @@ function App() {
           resizeDragRef.current = { type: "detail", startX: e.clientX, startWidth: detailWidth };
         }}
       />
-      <div style={{ width: detailWidth, flexShrink: 0, overflow: "hidden", display: "flex", alignSelf: "stretch" }}>
+      <div style={{ width: detailWidth, flexShrink: 0, overflow: "visible", display: "flex", alignSelf: "stretch", position: "relative", zIndex: 20 }}>
         <DetailPane
           key={selectedTask?.id ?? "none"}
           task={selectedTask}

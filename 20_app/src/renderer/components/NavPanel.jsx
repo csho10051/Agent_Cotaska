@@ -26,7 +26,7 @@ const COLORS = ["#4772fa","#e67e22","#2ecc71","#e74c3c","#9b59b6","#1abc9c","#f1
  *   onUpdateList : (listName: string, updates: { name, color }) => Promise<void>
  *   onDeleteList : (name: string) => Promise<void>
  */
-function NavPanel({ activeNav, onNavClick, allBadge = 0, todayBadge = 0, tomorrowBadge = 0, next7DaysBadge = 0, lists = [],
+function NavPanel({ activeNav, onNavClick, allBadge = 0, todayBadge = 0, tomorrowBadge = 0, next7DaysBadge = 0, noListBadge = 0, lists = [],
                     onAddList, onUpdateList, onDeleteList,
                     tags = [], tagCounts = {}, onAddTag, onDeleteTag, tagNavPrefix = "tag:" }) {
   // 各セクションの折りたたみ状態
@@ -149,6 +149,16 @@ function NavPanel({ activeNav, onNavClick, allBadge = 0, todayBadge = 0, tomorro
 
       {!listCollapsed && (
         <>
+          {/* リストなし（固定） */}
+          <div
+            className={`nav-item nav-item--list${activeNav === "リストなし" ? " active" : ""}`}
+            onClick={() => onNavClick?.("リストなし")}
+          >
+            <span className="icon">📂</span>
+            <span className="list-name">リストなし</span>
+            {noListBadge > 0 && <span className="badge">{noListBadge}</span>}
+          </div>
+
           {/* 既存リスト */}
           {lists.map((list) => (
             <div
