@@ -17,6 +17,7 @@ Thumbs.db
 # Runtime artifacts
 20_app/db/
 *.log
+/data/
 
 # Project-specific ignored folders
 00_mgmt/90_作業ログ/
