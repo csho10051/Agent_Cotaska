@@ -92,6 +92,7 @@ function DetailPaneBody({
   const [dueEditorOpen, setDueEditorOpen] = useState(false);
   const [completedAt, setCompletedAt] = useState(task.completed_at || null);
   const [metaOpen, setMetaOpen] = useState(true);
+  const [openExternalError, setOpenExternalError] = useState("");
 
   const persist = async (patch) => {
     await window.cotaskaAPI?.tasks?.update({
@@ -187,9 +188,29 @@ function DetailPaneBody({
     await onSetTaskTags?.(task, next);
   };
 
+  const handleOpenInExternalApp = async () => {
+    setOpenExternalError("");
+
+    const taskFilePath = String(task.task_file_path || "").trim();
+
+    if (!taskFilePath) {
+      setOpenExternalError("対象ファイルパスが見つかりません。");
+      return;
+    }
+
+    try {
+      const result = await window.cotaskaAPI?.shell?.openPath?.(taskFilePath);
+      if (!result?.ok) {
+        setOpenExternalError(result?.error || "既定アプリで開けませんでした。");
+      }
+    } catch (error) {
+      setOpenExternalError(error?.message || "既定アプリ起動に失敗しました。");
+    }
+  };
+
   return (
     <div className="detail-pane">
-      {/* === detail-header: チェック + タイトル + プレビュー === */}
+      {/* === detail-header: チェック + タイトル + 右上アクション === */}
       <div className="detail-header">
         <input type="checkbox" className="d-check" checked={completed} onChange={handleComplete} />
 
@@ -204,10 +225,28 @@ function DetailPaneBody({
           }}
         />
 
-        <button type="button" className="preview-toggle-btn" onClick={() => setPreviewMode((prev) => !prev)}>
-          {previewMode ? "編集" : "プレビュー"}
-        </button>
+        <div className="detail-actions">
+          <button
+            type="button"
+            className="icon-action-btn"
+            onClick={() => setPreviewMode((prev) => !prev)}
+            title={previewMode ? "編集モードへ切替" : "プレビュー表示へ切替"}
+            aria-label={previewMode ? "編集モードへ切替" : "プレビュー表示へ切替"}
+          >
+            {previewMode ? "✏" : "🔍"}
+          </button>
+          <button
+            type="button"
+            className="icon-action-btn external"
+            onClick={handleOpenInExternalApp}
+            title="新しいアプリで開く"
+            aria-label="新しいアプリで開く"
+          >
+            ↗
+          </button>
+        </div>
       </div>
+      {openExternalError && <div className="detail-open-error">{openExternalError}</div>}
 
       {/* === detail-meta: メタ情報集約セクション === */}
       <div className="detail-meta">

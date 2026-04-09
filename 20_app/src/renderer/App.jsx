@@ -35,6 +35,7 @@ function mapFileTask(taskData) {
     id:        taskData.id,
     title:     taskData.title,
     content:   taskData.content || "",
+    task_file_path: taskData.task_file_path || null,
     status:    taskData.status,
     progressStatus,
     priority:  taskData.priority || "normal",

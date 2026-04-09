@@ -247,7 +247,7 @@
       overflow: hidden;
     }
 
-    /* detail-header: チェック + タイトル + プレビュー */
+    /* detail-header: チェック + タイトル + 右上アクション */
     .detail-header {
       padding: 10px 16px;
       display: flex;
@@ -265,13 +265,37 @@
       background: transparent;
       min-width: 0;
     }
-    .preview-toggle-btn {
+    .detail-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+    .icon-action-btn {
       border: 1px solid #d0d7e2;
       border-radius: 6px;
       background: #fff;
       color: #4b5b73;
-      font-size: 12px;
-      padding: 4px 10px;
+      font-size: 13px;
+      line-height: 1;
+      width: 30px;
+      height: 28px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .icon-action-btn:hover {
+      background: #f2f6fb;
+      border-color: #b9c5d7;
+    }
+    .icon-action-btn.external {
+      color: #2d6ea5;
+      border-color: #c2d4e8;
+      background: #f7fbff;
+    }
+    .icon-action-btn.external:hover {
+      background: #eaf4ff;
       flex-shrink: 0;
     }
 
@@ -490,11 +514,14 @@
     </div>
 
     <div class="detail-pane">
-      <!-- detail-header: チェック + タイトル + プレビュー -->
+      <!-- detail-header: チェック + タイトル + 右上アクション -->
       <div class="detail-header">
         <input type="checkbox" style="width:17px;height:17px;accent-color:#3498db;" />
         <input class="header-title" type="text" value="DB設計書の作成" />
-        <button class="preview-toggle-btn">プレビュー</button>
+        <div class="detail-actions">
+          <button class="icon-action-btn" title="プレビュー切替">🔍</button>
+          <button class="icon-action-btn external" title="新しいアプリで開く">↗</button>
+        </div>
       </div>
 
       <!-- detail-meta: メタ情報集約 -->

@@ -40,9 +40,11 @@ function MainPane({
 }) {
   const inputRef    = useRef(null);
   const inlineInputRef = useRef(null);
+  const contextMenuRef = useRef(null);
   const searchTimer = useRef(null);
   const [localSearch, setLocalSearch] = useState("");
   const [contextMenu, setContextMenu] = useState(null);
+  const [contextMenuPos, setContextMenuPos] = useState(null);
   const [inlineInput, setInlineInput] = useState(null); // { parentId, value }
   const [expanded, setExpanded] = useState({});
   const [completedSectionExpanded, setCompletedSectionExpanded] = useState(true);
@@ -78,8 +80,31 @@ function MainPane({
   useEffect(() => {
     if (!contextMenu) return;
     const close = () => setContextMenu(null);
+    setContextMenuPos({ top: contextMenu.y, left: contextMenu.x });
     window.addEventListener("mousedown", close);
     return () => window.removeEventListener("mousedown", close);
+  }, [contextMenu]);
+
+  useEffect(() => {
+    if (!contextMenu || !contextMenuRef.current) return;
+    const MARGIN = 8;
+    const rect = contextMenuRef.current.getBoundingClientRect();
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+
+    let top = contextMenu.y;
+    let left = contextMenu.x;
+
+    if (rect.bottom > viewportHeight - MARGIN) {
+      top = Math.max(MARGIN, top - (rect.bottom - (viewportHeight - MARGIN)));
+    }
+    if (rect.right > viewportWidth - MARGIN) {
+      left = Math.max(MARGIN, left - (rect.right - (viewportWidth - MARGIN)));
+    }
+
+    if (top !== contextMenu.y || left !== contextMenu.x) {
+      setContextMenuPos({ top, left });
+    }
   }, [contextMenu]);
 
   useEffect(() => {
@@ -468,8 +493,9 @@ function MainPane({
       {/* T-014-04: コンテキストメニュー */}
       {contextMenu && (
         <div
+          ref={contextMenuRef}
           className="context-menu"
-          style={{ top: contextMenu.y, left: contextMenu.x }}
+          style={{ top: contextMenuPos?.top ?? contextMenu.y, left: contextMenuPos?.left ?? contextMenu.x }}
           onClick={(e) => e.stopPropagation()}
           onMouseDown={(e) => e.stopPropagation()}
         >

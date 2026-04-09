@@ -486,7 +486,7 @@ html, body, #root {
   font-size: 14px;
 }
 
-/* === detail-header: チェック + タイトル + プレビュー === */
+/* === detail-header: チェック + タイトル + 右上アクション === */
 .detail-header {
   padding: 10px 16px;
   display: flex;
@@ -521,19 +521,52 @@ html, body, #root {
   color: #aaa;
 }
 
-.preview-toggle-btn {
+.detail-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.icon-action-btn {
   border: 1px solid #d0d7e2;
   background: #fff;
   color: #4b5b73;
   border-radius: 6px;
-  padding: 4px 10px;
-  font-size: 12px;
+  width: 30px;
+  height: 28px;
+  font-size: 13px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
   flex-shrink: 0;
 }
 
-.preview-toggle-btn:hover {
+.icon-action-btn:hover {
   background: #f5f8fc;
+  border-color: #b9c5d7;
+}
+
+.icon-action-btn.external {
+  color: #2d6ea5;
+  border-color: #c2d4e8;
+  background: #f7fbff;
+}
+
+.icon-action-btn.external:hover {
+  background: #eaf4ff;
+}
+
+.detail-open-error {
+  margin: 8px 16px 0;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: #fff1f1;
+  border: 1px solid #f1c8c8;
+  color: #b04848;
+  font-size: 12px;
 }
 
 /* === detail-meta: メタ情報集約セクション === */

@@ -43,6 +43,11 @@ contextBridge.exposeInMainWorld("cotaskaAPI", {
     set: (taskId, tags) => ipcRenderer.invoke("taskTags:set", taskId, tags),
   },
 
+  // OS 既定アプリでファイルを開く
+  shell: {
+    openPath: (targetPath) => ipcRenderer.invoke("shell:openPath", targetPath),
+  },
+
   // イベントリスナー（ファイルウォッチャーから通知）
   onTasksChanged: (callback) => {
     ipcRenderer.on("tasks:changed", (_event, data) => {

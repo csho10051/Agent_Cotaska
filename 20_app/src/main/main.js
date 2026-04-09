@@ -1,7 +1,8 @@
-const { app, BrowserWindow, ipcMain, Menu, dialog, globalShortcut } = require("electron");
+const { app, BrowserWindow, ipcMain, Menu, dialog, globalShortcut, shell } = require("electron");
 const path = require("path");
 const crypto = require("crypto");
 const { spawn } = require("child_process");
+const fs = require("fs");
 const taskService = require("./taskService");
 const listService = require("./listService");
 const watcher = require("./watcher");
@@ -369,6 +370,34 @@ ipcMain.handle("taskTags:set", async (_e, taskId, tags) => {
     return { ok: false, error: err.message };
   }
 });
+
+ipcMain.handle("shell:openPath", async (_e, targetPath) => {
+  await servicesReady;
+  const rawPath = String(targetPath || "").trim();
+  if (!rawPath) {
+    return { ok: false, error: "ファイルパスが未指定です。" };
+  }
+
+  const normalizedPath = path.normalize(rawPath);
+  if (!fs.existsSync(normalizedPath)) {
+    logger.warn("shell:openPath target not found", { path: normalizedPath });
+    return { ok: false, error: "対象ファイルが見つかりません。" };
+  }
+
+  try {
+    const openResult = await shell.openPath(normalizedPath);
+    if (openResult) {
+      logger.error("shell:openPath failed", { path: normalizedPath, detail: openResult });
+      return { ok: false, error: `既定アプリで開けませんでした: ${openResult}` };
+    }
+
+    logger.info("shell:openPath success", { path: normalizedPath });
+    return { ok: true };
+  } catch (err) {
+    logger.error("shell:openPath exception", err);
+    return { ok: false, error: err.message || "既定アプリ起動に失敗しました。" };
+  }
+});
 // ──────────────────────────────────────────────────────────────
 // Windows フォアグラウンドロック回避：setAlwaysOnTop を一時的に使って
 // 別プロセスから起動された場合でも確実にウィンドウを前面に持ってくる
@@ -511,9 +540,13 @@ function createWindow() {
     bringWindowToFront(win);
   });
 
-  // Developer Tools を開くショートカット（Ctrl+Shift+I）を登録
+  // Developer Tools を開くショートカット（Ctrl+Shift+I / F12）を登録
   win.webContents.on("before-input-event", (event, input) => {
-    if (input.control && input.shift && input.key.toLowerCase() === "i") {
+    const key = String(input.key || "").toLowerCase();
+    const isCtrlShiftI = input.control && input.shift && key === "i";
+    const isF12 = key === "f12";
+
+    if (isCtrlShiftI || isF12) {
       if (win.webContents.isDevToolsOpened()) {
         win.webContents.closeDevTools();
       } else {
