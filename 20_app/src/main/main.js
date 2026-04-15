@@ -10,6 +10,107 @@ const logger     = require("./logger");
 const appLogger  = require("./appLogger");
 
 let mainWindow = null;
+let hasShownCloudSyncWarning = false;
+let hasShownLaunchFailedGuidance = false;
+
+const CLOUD_SYNC_PATH_MARKERS = [
+  { token: "\\\\box\\\\", provider: "Box" },
+  { token: "\\\\onedrive\\\\", provider: "OneDrive" },
+  { token: "\\\\dropbox\\\\", provider: "Dropbox" },
+  { token: "\\\\google drive\\\\", provider: "Google Drive" },
+  { token: "\\\\googledrive\\\\", provider: "Google Drive" },
+  { token: "\\\\icloud drive\\\\", provider: "iCloud Drive" },
+  { token: "\\\\icloud\\\\", provider: "iCloud" },
+];
+
+function normalizePathForCompare(targetPath) {
+  return String(targetPath || "")
+    .replace(/\//g, "\\\\")
+    .toLowerCase();
+}
+
+function detectCloudSyncProvider(targetPath) {
+  const normalized = normalizePathForCompare(targetPath);
+  const marker = CLOUD_SYNC_PATH_MARKERS.find((x) => normalized.includes(x.token));
+  return marker ? marker.provider : null;
+}
+
+function getRuntimeRootPath() {
+  if (app.isPackaged) {
+    return path.dirname(process.execPath);
+  }
+  return path.resolve(__dirname, "../..");
+}
+
+async function maybeShowCloudSyncWarning() {
+  if (hasShownCloudSyncWarning || !app.isPackaged) {
+    return;
+  }
+
+  const runtimeRoot = getRuntimeRootPath();
+  const provider = detectCloudSyncProvider(runtimeRoot);
+  if (!provider) {
+    return;
+  }
+
+  hasShownCloudSyncWarning = true;
+  appLogger.logWarning("Cloud sync path detected", {
+    provider,
+    runtimeRoot,
+    exePath: process.execPath,
+  });
+
+  await dialog.showMessageBox({
+    type: "warning",
+    buttons: ["OK"],
+    defaultId: 0,
+    noLink: true,
+    title: "Cotaska 利用上の注意",
+    message: `${provider} 配下で実行されています。`,
+    detail:
+      "クラウド同期フォルダ上では Cotaska が起動失敗する場合があります。\n\n" +
+      "推奨:\n" +
+      "- Cotaska-0.1.0-dist をローカル固定パスへ移動して起動してください\n" +
+      "- どうしてもクラウド配下で使う場合は、対象フォルダをオフライン固定にしてください",
+  });
+}
+
+function showLaunchFailedGuidance(details) {
+  if (hasShownLaunchFailedGuidance) {
+    return;
+  }
+
+  hasShownLaunchFailedGuidance = true;
+
+  const runtimeRoot = getRuntimeRootPath();
+  const provider = detectCloudSyncProvider(runtimeRoot) || "クラウド同期";
+  const reason = details?.reason || "unknown";
+  const exitCode = typeof details?.exitCode === "number" ? details.exitCode : "unknown";
+
+  appLogger.logWarning("Launch-failed guidance shown", {
+    runtimeRoot,
+    provider,
+    reason,
+    exitCode,
+  });
+
+  dialog.showMessageBox({
+    type: "error",
+    buttons: ["OK"],
+    defaultId: 0,
+    noLink: true,
+    title: "Cotaska 起動エラー",
+    message: "画面の起動に失敗しました。",
+    detail:
+      `検出: reason=${reason}, exitCode=${exitCode}\n` +
+      `実行フォルダ: ${runtimeRoot}\n\n` +
+      `${provider} 配下での実行が原因の可能性があります。\n\n` +
+      "対応方法:\n" +
+      "1. Cotaska-0.1.0-dist をローカル固定パスへコピーして起動\n" +
+      "2. もしくはクラウド同期フォルダでオフライン固定を設定\n" +
+      "3. logs/app-YYYY-MM-DD.log と launcher.log を確認",
+  });
+}
 
 process.on("uncaughtException", (err) => {
   appLogger.logError("uncaughtException in main process", err);
@@ -513,6 +614,9 @@ function createWindow() {
 
   win.webContents.on("render-process-gone", (_event, details) => {
     appLogger.logError(`Renderer process gone: reason=${details.reason}, exitCode=${details.exitCode}`);
+    if (details?.reason === "launch-failed") {
+      showLaunchFailedGuidance(details);
+    }
   });
 
   // 開発時は Vite dev server、ビルド後は dist/renderer/index.html を読み込む
@@ -594,6 +698,9 @@ app.whenReady().then(async () => {
   logger.info("Ensuring data directories...");
   await ensureDataDirectories();
   appLogger.logInfo("Data directories ensured");
+
+  // 恒久対策: クラウド同期配下実行の検知と事前警告
+  await maybeShowCloudSyncWarning();
 
   // 開発時は Vite を子プロセスで起動してから BrowserWindow を開く
   if (process.env.NODE_ENV === "development") {
