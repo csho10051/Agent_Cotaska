@@ -6,6 +6,7 @@ const fs = require("fs");
 const taskService = require("./taskService");
 const listService = require("./listService");
 const watcher = require("./watcher");
+const reminderService = require("./reminderService");
 const logger     = require("./logger");
 const appLogger  = require("./appLogger");
 
@@ -499,6 +500,79 @@ ipcMain.handle("shell:openPath", async (_e, targetPath) => {
     return { ok: false, error: err.message || "既定アプリ起動に失敗しました。" };
   }
 });
+
+ipcMain.handle("shell:openTarget", async (_e, target, baseDir) => {
+  await servicesReady;
+
+  const rawTarget = String(target || "").trim();
+  const rawBaseDir = String(baseDir || "").trim();
+  if (!rawTarget) {
+    return { ok: false, error: "リンク先が未指定です。" };
+  }
+
+  // URL は既定ブラウザで開く
+  if (/^https?:\/\//i.test(rawTarget)) {
+    try {
+      const result = await shell.openExternal(rawTarget);
+      if (!result) {
+        logger.info("shell:openTarget url success", { target: rawTarget });
+        return { ok: true, targetType: "url", opened: rawTarget };
+      }
+      logger.error("shell:openTarget url failed", { target: rawTarget, detail: result });
+      return { ok: false, error: `既定ブラウザで開けませんでした: ${result}` };
+    } catch (err) {
+      logger.error("shell:openTarget url exception", err);
+      return { ok: false, error: err.message || "既定ブラウザ起動に失敗しました。" };
+    }
+  }
+
+  // file:// はローカルパスへ変換
+  let candidatePath = rawTarget;
+  if (/^file:\/\//i.test(rawTarget)) {
+    try {
+      candidatePath = decodeURIComponent(new URL(rawTarget).pathname);
+      if (/^\/[a-zA-Z]:/.test(candidatePath)) {
+        candidatePath = candidatePath.slice(1);
+      }
+    } catch {
+      return { ok: false, error: "file URL の解析に失敗しました。" };
+    }
+  } else if (/%[0-9a-fA-F]{2}/.test(candidatePath)) {
+    // MarkdownIt がローカルパスを % エンコードするため復元する
+    try {
+      candidatePath = decodeURIComponent(candidatePath);
+    } catch {
+      // decode 失敗時は元文字列のまま評価する
+    }
+  }
+
+  if (!path.isAbsolute(candidatePath)) {
+    const base = rawBaseDir && fs.existsSync(rawBaseDir) ? rawBaseDir : process.cwd();
+    candidatePath = path.resolve(base, candidatePath);
+  }
+
+  const normalizedPath = path.normalize(candidatePath);
+  if (!fs.existsSync(normalizedPath)) {
+    logger.warn("shell:openTarget target not found", { path: normalizedPath, baseDir: rawBaseDir || null });
+    return { ok: false, error: "対象のファイルまたはフォルダが見つかりません。" };
+  }
+
+  try {
+    const stat = fs.statSync(normalizedPath);
+    const targetType = stat.isDirectory() ? "folder" : "file";
+    const openResult = await shell.openPath(normalizedPath);
+    if (openResult) {
+      logger.error("shell:openTarget path failed", { path: normalizedPath, detail: openResult });
+      return { ok: false, error: `既定アプリで開けませんでした: ${openResult}` };
+    }
+
+    logger.info("shell:openTarget path success", { path: normalizedPath, targetType });
+    return { ok: true, targetType, opened: normalizedPath };
+  } catch (err) {
+    logger.error("shell:openTarget path exception", err);
+    return { ok: false, error: err.message || "リンク先の起動に失敗しました。" };
+  }
+});
 // ──────────────────────────────────────────────────────────────
 // Windows フォアグラウンドロック回避：setAlwaysOnTop を一時的に使って
 // 別プロセスから起動された場合でも確実にウィンドウを前面に持ってくる
@@ -726,6 +800,9 @@ app.whenReady().then(async () => {
     duration: svcDuration,
   });
 
+  // T-0065: due_date に時刻がある未完了タスクを5分前に通知
+  reminderService.start(() => taskService.getAllTasks());
+
   mainWindow = createWindow();
   logger.info("Main window created");
 
@@ -753,6 +830,8 @@ app.on("window-all-closed", () => {
   watcher.stopWatcher().catch(err => {
     logger.error("Failed to stop watcher:", err);
   });
+
+  reminderService.stop();
   
   // Vite 子プロセスを終了してから app を終了する
   if (viteProcess) {

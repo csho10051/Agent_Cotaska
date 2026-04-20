@@ -98,7 +98,7 @@ function sortByPriority(arr) {
   );
 }
 
-const FIXED_VIEWS = new Set(["すべて", "今日", "明日", "次の7日間", "完了", "ゴミ箱", "受信トレイ", "リストなし"]);
+const FIXED_VIEWS = new Set(["すべて", "今日", "明日", "次の7日間", "仕掛", "完了", "ゴミ箱", "受信トレイ", "リストなし"]);
 
 /**
  * 今日 / 次の7日間ビューでセクション配列を返す。它以外は null。
@@ -551,6 +551,8 @@ function App() {
     visibleTasks = [];
   } else if (activeNav === "すべて") {
     visibleTasks = tasks.filter((t) => t.status !== "done");
+  } else if (activeNav === "仕掛") {
+    visibleTasks = tasks.filter((t) => t.progressStatus === "仕掛" && t.status !== "done");
   } else if (activeNav === "明日") {
     const tomorrow = addDays(localDateString(), 1);
     visibleTasks = tasks.filter((t) => dueDatePart(t.due_date) === tomorrow && t.status !== "done");
@@ -581,6 +583,8 @@ function App() {
     const today = localDateString();
     if (activeNav === "すべて") {
       completedSectionTasks = tasks.filter((t) => t.status === "done");
+    } else if (activeNav === "仕掛") {
+      completedSectionTasks = [];
     } else if (activeNav === "今日") {
       // BUG-20260330-01: 「今日」完了セクションは今日期限の完了タスクのみ表示する
       completedSectionTasks = tasks.filter((t) => t.status === "done" && dueDatePart(t.due_date) === today);

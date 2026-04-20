@@ -6,6 +6,14 @@ const PRIORITY_LABEL = { normal: "低", medium: "中", high: "高" };
 const PRIORITY_COLOR = { normal: "#aaa", medium: "#f39c12", high: "#e74c3c" };
 const markdown = new MarkdownIt({ html: false, linkify: true, breaks: true });
 
+function getTaskBaseDir(taskFilePath) {
+  const raw = String(taskFilePath || "").trim();
+  if (!raw) return "";
+  const normalized = raw.replace(/\\/g, "/");
+  const idx = normalized.lastIndexOf("/");
+  return idx >= 0 ? normalized.slice(0, idx) : "";
+}
+
 function formatDatetime(value) {
   if (!value) return "";
 
@@ -208,6 +216,28 @@ function DetailPaneBody({
     }
   };
 
+  const handlePreviewLinkClick = async (event) => {
+    const anchor = event.target?.closest?.("a");
+    if (!anchor) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    const href = String(anchor.getAttribute("href") || "").trim();
+    if (!href) return;
+
+    setOpenExternalError("");
+    try {
+      const baseDir = getTaskBaseDir(task.task_file_path);
+      const result = await window.cotaskaAPI?.shell?.openTarget?.(href, baseDir);
+      if (!result?.ok) {
+        setOpenExternalError(result?.error || "リンク先を開けませんでした。");
+      }
+    } catch (error) {
+      setOpenExternalError(error?.message || "リンク先の起動に失敗しました。");
+    }
+  };
+
   return (
     <div className="detail-pane">
       {/* === detail-header: チェック + タイトル + 右上アクション === */}
@@ -367,6 +397,7 @@ function DetailPaneBody({
         {previewMode ? (
           <div
             className={`detail-preview${contentText ? "" : " detail-preview--empty"}`}
+            onClick={handlePreviewLinkClick}
             dangerouslySetInnerHTML={{
               __html: contentText ? markdown.render(contentText) : "<p>プレビューはありません。</p>",
             }}

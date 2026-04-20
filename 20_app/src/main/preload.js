@@ -46,6 +46,7 @@ contextBridge.exposeInMainWorld("cotaskaAPI", {
   // OS 既定アプリでファイルを開く
   shell: {
     openPath: (targetPath) => ipcRenderer.invoke("shell:openPath", targetPath),
+    openTarget: (target, baseDir) => ipcRenderer.invoke("shell:openTarget", target, baseDir),
   },
 
   // イベントリスナー（ファイルウォッチャーから通知）
