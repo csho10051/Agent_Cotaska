@@ -10,7 +10,6 @@ import React from "react";
 function Sidebar({ activeIcon, onIconClick }) {
   const icons = [
     { title: "リスト",     emoji: "📋" },
-    { title: "カレンダー", emoji: "📅" },
     { title: "検索",       emoji: "🔍" },
   ];
 

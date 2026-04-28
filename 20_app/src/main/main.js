@@ -759,7 +759,11 @@ app.whenReady().then(async () => {
   }
 
   app.setName("Cotaska");
-  app.setAppUserModelId("com.cotaska.app");
+  const baseAppUserModelId = "com.cotaska.app";
+  const isDevRuntime = !app.isPackaged || process.env.NODE_ENV === "development";
+  const appUserModelId = isDevRuntime ? `${baseAppUserModelId}.dev` : baseAppUserModelId;
+  app.setAppUserModelId(appUserModelId);
+  logger.info("AppUserModelID configured", { appUserModelId, isDevRuntime });
 
   const pkg = require("../../package.json");
   appLogger.logStartup({
