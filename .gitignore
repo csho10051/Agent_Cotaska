@@ -21,6 +21,7 @@ Thumbs.db
 
 # Project-specific ignored folders
 00_mgmt/90_作業ログ/
+00_mgmt/10_task/*-dist/
 30_data/archive/
 30_data/tasks/
 /00_mgmt/10_task/backup
