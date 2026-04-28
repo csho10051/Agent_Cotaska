@@ -4,6 +4,7 @@
 # ステップ 3: organize-release.ps1 (配布フォルダの再構成)
 # ステップ 4: ランチャー EXE を配布ルートへコピー
 # ステップ 5: 出荷前検証
+# 追加: CotaskaCore.exe にアイコンを後書き
 #
 # 使い方:  cd 20_app  ;  .\release-all.ps1
 #          .\release-all.ps1 -Version "0.2.0"
@@ -18,6 +19,8 @@ $scriptDir   = Split-Path -Parent $MyInvocation.MyCommand.Path
 $nodeDir     = Resolve-Path (Join-Path $scriptDir "..\..\v22.14.0")
 $launcherDir = Join-Path $scriptDir "setup\launcher"
 $distRoot    = Join-Path $scriptDir "release\Cotaska-$Version-dist"
+$distCoreExe = Join-Path $distRoot "_app\CotaskaCore.exe"
+$launcherIcon = Join-Path $launcherDir "icon.ico"
 
 $env:PATH = "$nodeDir;$env:PATH"
 
@@ -84,6 +87,17 @@ if (Test-Path $launcherExe) {
     Write-Host "  OK: Launcher copied -> $distLauncher ($sizeKB KB)" -ForegroundColor Green
 } else {
     Write-Host "  [WARN] $launcherExe not found. Using existing launcher." -ForegroundColor Yellow
+}
+
+if ((Test-Path $distCoreExe) -and (Test-Path $launcherIcon)) {
+    Write-Host "  Updating CotaskaCore.exe icon ..." -ForegroundColor Cyan
+    $setIconPs1 = Join-Path $launcherDir "Set-ExeIcon.ps1"
+    & powershell -ExecutionPolicy Bypass -File $setIconPs1 -ExePath $distCoreExe -IconPath $launcherIcon
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "[FAILED] CotaskaCore.exe icon update failed" -ForegroundColor Red
+        exit 1
+    }
+    Write-Host "  OK: CotaskaCore.exe icon updated" -ForegroundColor Green
 }
 
 # -------------------------------------------------------

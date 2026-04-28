@@ -31,8 +31,15 @@
       "src/main/**/*",
       "package.json"
     ],
+    "extraResources": [
+      {
+        "from": "setup/launcher/icon.ico",
+        "to": "icon.ico"
+      }
+    ],
     "asar": true,
     "win": {
+      "icon": "setup/launcher/icon.ico",
       "signAndEditExecutable": false,
       "target": [
         {

@@ -658,6 +658,10 @@ function createWindow() {
 
   Menu.setApplicationMenu(null);
 
+  const windowIconPath = app.isPackaged
+    ? path.join(process.resourcesPath, "icon.ico")
+    : path.join(__dirname, "../../setup/launcher/icon.ico");
+
   const win = new BrowserWindow({
     show: true,
     width: 1280,
@@ -665,6 +669,7 @@ function createWindow() {
     minWidth: 900,
     minHeight: 600,
     backgroundColor: "#1c1c1c",
+    icon: windowIconPath,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       nodeIntegration: false,

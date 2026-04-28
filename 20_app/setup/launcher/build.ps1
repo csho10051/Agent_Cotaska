@@ -19,15 +19,17 @@ Write-Host "Installing goversioninfo..." -ForegroundColor Cyan
 
 $gopath = & $goExe env GOPATH
 $goversioninfo = Join-Path $gopath "bin\goversioninfo.exe"
+$rsrcExe = Join-Path $gopath "bin\rsrc.exe"
 $resourceSysoPath = Join-Path $scriptDir "resource.syso"
 $tmpJsonPath = Join-Path $scriptDir "versioninfo_tmp.json"
+$iconPath = Join-Path $scriptDir "icon.ico"
 
 Remove-Item $resourceSysoPath -ErrorAction SilentlyContinue
 Remove-Item $tmpJsonPath -ErrorAction SilentlyContinue
 
 # icon.ico がない場合は IconPath を空にした一時JSONでリソース生成
 if (Test-Path $goversioninfo) {
-    if (-not (Test-Path "$scriptDir\icon.ico")) {
+    if (-not (Test-Path $iconPath)) {
         Write-Host "WARN: icon.ico not found. Building without icon." -ForegroundColor Yellow
         $json = Get-Content "$scriptDir\versioninfo.json" -Raw | ConvertFrom-Json
         $json.IconPath = ""
@@ -44,17 +46,33 @@ if (Test-Path $goversioninfo) {
     Write-Host "WARN: goversioninfo not found. Building without resource.syso." -ForegroundColor Yellow
 }
 
+function Build-Launcher {
+    & $goExe build -ldflags "-H windowsgui -s -w" -o Cotaska.exe .
+    return $LASTEXITCODE
+}
+
 # ビルド（コンソールウィンドウなし）
 Write-Host "Building Cotaska.exe..." -ForegroundColor Cyan
-& $goExe build -ldflags "-H windowsgui -s -w" -o Cotaska.exe .
-$buildExit = $LASTEXITCODE
+$buildExit = Build-Launcher
 
-# resource.syso が原因で失敗する場合は、syso を除去して再ビルド
+# resource.syso が原因で失敗する場合は rsrc で再生成して再ビルド
+if (($buildExit -ne 0) -and (Test-Path $resourceSysoPath) -and (Test-Path $iconPath)) {
+    Write-Host "WARN: build failed with resource.syso. Retrying with rsrc-generated syso..." -ForegroundColor Yellow
+    & $goExe install github.com/akavel/rsrc@latest
+    if (Test-Path $rsrcExe) {
+        Remove-Item $resourceSysoPath -ErrorAction SilentlyContinue
+        & $rsrcExe -arch amd64 -ico $iconPath -o $resourceSysoPath
+        if ($LASTEXITCODE -eq 0 -and (Test-Path $resourceSysoPath)) {
+            $buildExit = Build-Launcher
+        }
+    }
+}
+
+# それでも失敗する場合は、最後の手段としてアイコンなしでビルド
 if (($buildExit -ne 0) -and (Test-Path $resourceSysoPath)) {
-    Write-Host "WARN: build failed with resource.syso. Retrying without resource.syso..." -ForegroundColor Yellow
+    Write-Host "WARN: build still failed with syso. Retrying without resource.syso..." -ForegroundColor Yellow
     Remove-Item $resourceSysoPath -ErrorAction SilentlyContinue
-    & $goExe build -ldflags "-H windowsgui -s -w" -o Cotaska.exe .
-    $buildExit = $LASTEXITCODE
+    $buildExit = Build-Launcher
 }
 
 if (($buildExit -eq 0) -and (Test-Path "$scriptDir\Cotaska.exe")) {
