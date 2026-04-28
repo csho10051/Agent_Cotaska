@@ -75,6 +75,14 @@ Not allowed:
 
 ---
 
+## Git / Commit Rules
+
+- コミットメッセージは必ず日本語で記載する。
+- Commit messages must always be written in Japanese.
+- Do not use English commit messages unless the user explicitly requests it.
+
+---
+
 ## Task Update Rules
 
 When a task is completed:

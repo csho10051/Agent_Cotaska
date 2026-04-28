@@ -139,7 +139,7 @@ function focusMainWindow() {
 // app.name を変更すると named pipe 名と userData パスが自動で分離される。
 const appDir = path.resolve(__dirname, "../..");
 const instanceHash = crypto.createHash("md5").update(appDir).digest("hex").slice(0, 8);
-app.name = `Cotaska-${instanceHash}`;
+app.setName(`Cotaska-${instanceHash}`);
 app.disableHardwareAcceleration();
 
 const gotSingleInstanceLock = app.requestSingleInstanceLock();
@@ -761,9 +761,10 @@ app.whenReady().then(async () => {
   app.setName("Cotaska");
   const baseAppUserModelId = "com.cotaska.app";
   const isDevRuntime = !app.isPackaged || process.env.NODE_ENV === "development";
-  const appUserModelId = isDevRuntime ? `${baseAppUserModelId}.dev` : baseAppUserModelId;
+  const runtimeSuffix = isDevRuntime ? "dev" : "release";
+  const appUserModelId = `${baseAppUserModelId}.${runtimeSuffix}.${instanceHash}`;
   app.setAppUserModelId(appUserModelId);
-  logger.info("AppUserModelID configured", { appUserModelId, isDevRuntime });
+  logger.info("AppUserModelID configured", { appUserModelId, isDevRuntime, instanceHash });
 
   const pkg = require("../../package.json");
   appLogger.logStartup({

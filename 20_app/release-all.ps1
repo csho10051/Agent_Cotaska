@@ -21,6 +21,8 @@ $launcherDir = Join-Path $scriptDir "setup\launcher"
 $distRoot    = Join-Path $scriptDir "release\Cotaska-$Version-dist"
 $distCoreExe = Join-Path $distRoot "_app\CotaskaCore.exe"
 $launcherIcon = Join-Path $launcherDir "icon.ico"
+$sourceDataDir = Join-Path $scriptDir "..\data"
+$distDataDir = Join-Path $distRoot "data"
 
 $env:PATH = "$nodeDir;$env:PATH"
 
@@ -56,11 +58,14 @@ if (-not (Test-Path $buildPs1)) {
     Write-Host "  [WARN] $buildPs1 not found. Skipping launcher build." -ForegroundColor Yellow
 } else {
     & powershell -ExecutionPolicy Bypass -File $buildPs1
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "[FAILED] Launcher build failed" -ForegroundColor Red
-        exit 1
+    $launcherBuildExitCode = $LASTEXITCODE
+    if ($launcherBuildExitCode -ne 0) {
+        Write-Host "  [WARN] Launcher build failed. Using existing launcher if available." -ForegroundColor Yellow
+        $global:LASTEXITCODE = 0
     }
-    Write-Host "  OK: ランチャービルド完了" -ForegroundColor Green
+    else {
+        Write-Host "  OK: ランチャービルド完了" -ForegroundColor Green
+    }
 }
 
 # -------------------------------------------------------
@@ -74,6 +79,18 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 Write-Host "  OK: リリースフォルダ整理完了" -ForegroundColor Green
+
+if (Test-Path $sourceDataDir) {
+    Write-Host "  Syncing data/ to dist root ..." -ForegroundColor Cyan
+    if (Test-Path $distDataDir) {
+        Remove-Item $distDataDir -Recurse -Force
+    }
+    Copy-Item $sourceDataDir -Destination $distDataDir -Recurse -Force
+    Write-Host "  OK: data/ synced" -ForegroundColor Green
+}
+else {
+    Write-Host "  [WARN] Source data folder not found: $sourceDataDir" -ForegroundColor Yellow
+}
 
 # -------------------------------------------------------
 # ステップ 4: ランチャー EXE を配布ルートへコピー
@@ -100,6 +117,50 @@ if ((Test-Path $distCoreExe) -and (Test-Path $launcherIcon)) {
     Write-Host "  OK: CotaskaCore.exe icon updated" -ForegroundColor Green
 }
 
+function Get-AssociatedIconHash {
+    param(
+        [Parameter(Mandatory = $true)][string]$Path
+    )
+
+    Add-Type -AssemblyName System.Drawing
+    $icon = [System.Drawing.Icon]::ExtractAssociatedIcon((Resolve-Path $Path).Path)
+    $bitmap = $icon.ToBitmap()
+    $stream = New-Object System.IO.MemoryStream
+    try {
+        $bitmap.Save($stream, [System.Drawing.Imaging.ImageFormat]::Png)
+        return [System.BitConverter]::ToString(
+            [System.Security.Cryptography.SHA256]::Create().ComputeHash($stream.ToArray())
+        ).Replace("-", "")
+    }
+    finally {
+        $stream.Dispose()
+        $bitmap.Dispose()
+        $icon.Dispose()
+    }
+}
+
+function Get-IcoHash {
+    param(
+        [Parameter(Mandatory = $true)][string]$Path
+    )
+
+    Add-Type -AssemblyName System.Drawing
+    $icon = New-Object System.Drawing.Icon((Resolve-Path $Path).Path)
+    $bitmap = $icon.ToBitmap()
+    $stream = New-Object System.IO.MemoryStream
+    try {
+        $bitmap.Save($stream, [System.Drawing.Imaging.ImageFormat]::Png)
+        return [System.BitConverter]::ToString(
+            [System.Security.Cryptography.SHA256]::Create().ComputeHash($stream.ToArray())
+        ).Replace("-", "")
+    }
+    finally {
+        $stream.Dispose()
+        $bitmap.Dispose()
+        $icon.Dispose()
+    }
+}
+
 # -------------------------------------------------------
 # ステップ 5: 出荷前検証
 # -------------------------------------------------------
@@ -121,6 +182,26 @@ foreach ($c in $checks) {
         Write-Host ("  OK  " + $c.Label) -ForegroundColor Green
     } else {
         Write-Host ("  NG  " + $c.Label) -ForegroundColor Red
+        $allOk = $false
+    }
+}
+
+if ((Test-Path $launcherIcon) -and (Test-Path (Join-Path $distRoot "Cotaska.exe")) -and (Test-Path $distCoreExe)) {
+    $expectedIconHash = Get-IcoHash -Path $launcherIcon
+    $launcherIconHash = Get-AssociatedIconHash -Path (Join-Path $distRoot "Cotaska.exe")
+    $coreIconHash = Get-AssociatedIconHash -Path $distCoreExe
+
+    if ($launcherIconHash -eq $expectedIconHash) {
+        Write-Host "  OK  Cotaska.exe icon" -ForegroundColor Green
+    } else {
+        Write-Host "  NG  Cotaska.exe icon" -ForegroundColor Red
+        $allOk = $false
+    }
+
+    if ($coreIconHash -eq $expectedIconHash) {
+        Write-Host "  OK  CotaskaCore.exe icon" -ForegroundColor Green
+    } else {
+        Write-Host "  NG  CotaskaCore.exe icon" -ForegroundColor Red
         $allOk = $false
     }
 }

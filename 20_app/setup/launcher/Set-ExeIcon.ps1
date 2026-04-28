@@ -19,7 +19,17 @@ if (-not (Test-Path $IconPath)) {
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $appDir = Resolve-Path (Join-Path $scriptDir "..\..")
 $nodeDir = Resolve-Path (Join-Path $appDir "..\..\v22.14.0")
+$nodeExe = Join-Path $nodeDir "node.exe"
+$npmCmd = Join-Path $nodeDir "npm.cmd"
 $env:PATH = "$nodeDir;$env:PATH"
+
+if (-not (Test-Path $nodeExe)) {
+	throw "node.exe not found: $nodeExe"
+}
+
+if (-not (Test-Path $npmCmd)) {
+	throw "npm.cmd not found: $npmCmd"
+}
 
 $tempDir = Join-Path $env:TEMP "cotaska-rcedit"
 New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
@@ -31,7 +41,7 @@ if (-not (Test-Path $pkgJson)) {
 
 Push-Location $tempDir
 try {
-	& "C:\WorkDevelop\Agent_Cotaska\v22.14.0\npm.cmd" install rcedit --no-save --silent | Out-Null
+	& $npmCmd install rcedit --no-save --silent | Out-Null
 	if ($LASTEXITCODE -ne 0) {
 		throw "Failed to install rcedit"
 	}
@@ -54,7 +64,7 @@ await rcedit('$($ExePath.Replace('\', '/'))', {
 	$tmpScript = Join-Path $tempDir "run-rcedit.mjs"
 	[System.IO.File]::WriteAllText($tmpScript, $nodeScript, (New-Object System.Text.UTF8Encoding($false)))
 
-	& "C:\WorkDevelop\Agent_Cotaska\v22.14.0\node.exe" $tmpScript
+	& $nodeExe $tmpScript
 	if ($LASTEXITCODE -ne 0) {
 		throw "rcedit failed with exit code $LASTEXITCODE"
 	}
