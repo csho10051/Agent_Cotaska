@@ -1,0 +1,15 @@
+lists:
+  - name: 仕様変更
+    color: '#4772fa'
+    icon: icon-doc
+    created_at: '2026-03-26T00:24:35.068Z'
+    updated_at: '2026-03-26T00:24:35.068Z'
+  - name: 不具合修正
+    color: '#e74c3c'
+    icon: icon-doc
+    created_at: '2026-03-26T00:24:48.633Z'
+    updated_at: '2026-03-26T00:24:48.633Z'
+tags:
+  - 開発管理
+  - 仕様変更
+last_updated: '2026-03-26T00:24:48.633Z'

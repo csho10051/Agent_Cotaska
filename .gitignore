@@ -21,10 +21,11 @@ Thumbs.db
 
 # Project-specific ignored folders
 00_mgmt/90_作業ログ/
-00_mgmt/10_task/*-dist/
 30_data/archive/
 30_data/tasks/
 /00_mgmt/10_task/backup
 /00_mgmt/10_task/Cotaska-0.1.0-dist/backup
 /00_mgmt/10_task/Cotaska-0.1.0-dist/logs
 /temp/
+/00_mgmt/10_task/Cotaska-0.1.0-dist/_app
+/00_mgmt/10_task/Cotaska-0.1.0-dist/Cotaska.exe
