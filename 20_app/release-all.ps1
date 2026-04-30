@@ -23,6 +23,8 @@ $distCoreExe = Join-Path $distRoot "_app\CotaskaCore.exe"
 $launcherIcon = Join-Path $launcherDir "icon.ico"
 $sourceDataDir = Join-Path $scriptDir "..\data"
 $distDataDir = Join-Path $distRoot "data"
+$sourceToolsDir = Join-Path $scriptDir "scripts"
+$distToolsDir = Join-Path $distRoot "tools"
 
 $env:PATH = "$nodeDir;$env:PATH"
 
@@ -90,6 +92,20 @@ if (Test-Path $sourceDataDir) {
 }
 else {
     Write-Host "  [WARN] Source data folder not found: $sourceDataDir" -ForegroundColor Yellow
+}
+
+Write-Host "  Syncing tools/ to dist root ..." -ForegroundColor Cyan
+if (Test-Path $distToolsDir) {
+    Remove-Item $distToolsDir -Recurse -Force
+}
+New-Item -ItemType Directory -Path $distToolsDir | Out-Null
+$validateTasksScript = Join-Path $sourceToolsDir "validate-tasks.ps1"
+if (Test-Path $validateTasksScript) {
+    Copy-Item $validateTasksScript -Destination (Join-Path $distToolsDir "validate-tasks.ps1") -Force
+    Write-Host "  OK: tools/ synced" -ForegroundColor Green
+}
+else {
+    Write-Host "  [WARN] validate-tasks.ps1 not found: $validateTasksScript" -ForegroundColor Yellow
 }
 
 # -------------------------------------------------------
@@ -173,6 +189,7 @@ $checks = @(
     @{ Path = (Join-Path $distRoot "_app\resources\app.asar"); Label = "_app/resources/app.asar" },
     @{ Path = (Join-Path $distRoot "data");                    Label = "data/" },
     @{ Path = (Join-Path $distRoot "data\tasks");              Label = "data/tasks/" },
+    @{ Path = (Join-Path $distRoot "tools\validate-tasks.ps1"); Label = "tools/validate-tasks.ps1" },
     @{ Path = (Join-Path $distRoot "logs");                    Label = "logs/" }
 )
 

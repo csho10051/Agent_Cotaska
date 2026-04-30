@@ -49,6 +49,11 @@ function mapFileTask(taskData) {
     due_date:  taskData.due_date || null,
     due:       formatDue(taskData.due_date),
     overdue:   taskData.due_date ? dueDatePart(taskData.due_date) < today && taskData.status !== "done" : false,
+    is_invalid: Boolean(taskData.is_invalid),
+    validation_error: taskData.validation_error || "",
+    validation_error_name: taskData.validation_error_name || "",
+    validation_error_line: taskData.validation_error_line ?? null,
+    validation_error_column: taskData.validation_error_column ?? null,
   };
 }
 

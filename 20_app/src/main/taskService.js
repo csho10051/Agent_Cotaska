@@ -36,6 +36,66 @@ function toIndexAbsolutePath(absPath) {
   return path.resolve(absPath).replace(/\\/g, '/');
 }
 
+function toInvalidTaskId(filePath) {
+  const relativePath = normalizeRelativePath(path.relative(TASKS_DIR, filePath));
+  return `__INVALID__${relativePath || path.basename(filePath)}`;
+}
+
+function extractValidationLocation(error) {
+  const mark = error?.mark;
+  if (!mark) return {};
+
+  const line = typeof mark.line === 'number' ? mark.line + 1 : null;
+  const column = typeof mark.column === 'number' ? mark.column + 1 : null;
+  return {
+    validation_error_line: line,
+    validation_error_column: column,
+  };
+}
+
+function createInvalidTask(filePath, error, reason = null) {
+  const absolutePath = normalizeTaskFilePath(toIndexAbsolutePath(filePath));
+  const message = reason || error?.message || 'タスクファイルを読み込めませんでした。';
+  const fileName = path.basename(filePath);
+
+  return {
+    id: toInvalidTaskId(filePath),
+    title: `読み込みエラー: ${fileName}`,
+    status: 'todo',
+    priority: 'high',
+    progress_status: '要確認',
+    due_date: null,
+    list: null,
+    parent: null,
+    tags: ['破損タスク'],
+    sort_order: 999999,
+    delete_flag: 0,
+    task_file_path: absolutePath,
+    created_at: null,
+    updated_at: null,
+    completed_at: null,
+    deleted_at: null,
+    progress: 0,
+    content: [
+      'このタスクファイルは読み込みに失敗しました。',
+      '',
+      `対象ファイル: ${absolutePath}`,
+      `エラー: ${message}`,
+    ].join('\n'),
+    is_invalid: true,
+    validation_error: message,
+    validation_error_name: error?.name || 'TaskValidationError',
+    ...extractValidationLocation(error),
+    _filePath: filePath
+  };
+}
+
+function assertMutableTask(task) {
+  if (task?.is_invalid) {
+    throw new Error('破損タスクはCotaska上では編集できません。対象ファイルを直接修正してください。');
+  }
+}
+
 function normalizeRootPath(rootPath) {
   const normalized = normalizeTaskFilePath(rootPath);
   if (!normalized) return '.';
@@ -127,17 +187,27 @@ function collectTaskFilesFromRoots(roots) {
 }
 
 function loadTaskFromFile(filePath) {
-  const content = fs.readFileSync(filePath, 'utf-8');
-  const parsed = matter(content);
-  const task = {
-    ...parsed.data,
-    content: parsed.content,
-    task_file_path: normalizeTaskFilePath(parsed.data.task_file_path || toIndexAbsolutePath(filePath)),
-    _filePath: filePath
-  };
-  // 廃止済みフィールドを読み込み時に除去
-  delete task.is_manual_progress;
-  return task;
+  try {
+    const content = fs.readFileSync(filePath, 'utf-8');
+    const parsed = matter(content);
+    const task = {
+      ...parsed.data,
+      content: parsed.content,
+      task_file_path: normalizeTaskFilePath(parsed.data.task_file_path || toIndexAbsolutePath(filePath)),
+      _filePath: filePath
+    };
+    // 廃止済みフィールドを読み込み時に除去
+    delete task.is_manual_progress;
+
+    if (!String(task.id || '').trim()) {
+      return createInvalidTask(filePath, null, 'frontmatter に id がありません。');
+    }
+
+    return task;
+  } catch (error) {
+    console.warn(`[TaskService] Failed to load task file: ${filePath}`, error.message);
+    return createInvalidTask(filePath, error);
+  }
 }
 
 function deriveTaskFileRootsFromCache(cache) {
@@ -177,7 +247,19 @@ function loadAllTasksAndMigratePath() {
     const task = loadTaskFromFile(filePath);
     if (!task.id) return;
 
+    if (taskCache[task.id]) {
+      const duplicate = createInvalidTask(
+        filePath,
+        null,
+        `タスクIDが重複しています: ${task.id}`
+      );
+      taskCache[duplicate.id] = duplicate;
+      return;
+    }
+
     taskCache[task.id] = task;
+
+    if (task.is_invalid) return;
 
     // 移行: task_file_path が未設定/不一致なら補完して書き戻し
     const expectedPath = normalizeTaskFilePath(toIndexAbsolutePath(filePath));
@@ -360,6 +442,7 @@ function updateTask(id, updates) {
   }
 
   const task = taskCache[id];
+  assertMutableTask(task);
   const oldFilePath = task._filePath || resolveTaskFilePath(task.task_file_path, id);
   const prevStatus = task.status;
   const prevProgressStatus = task.progress_status;
@@ -454,6 +537,7 @@ function updateTaskContent(id, content) {
   }
 
   const task = taskCache[id];
+  assertMutableTask(task);
   const now = new Date().toISOString();
 
   task.content = content;
@@ -481,6 +565,7 @@ function updateTaskTags(id, tags) {
 
   const now = new Date().toISOString();
   const task = taskCache[id];
+  assertMutableTask(task);
 
   task.tags = normalizedTags;
   task.updated_at = now;
@@ -503,6 +588,7 @@ function completeTask(id) {
 
   const now = new Date().toISOString();
   const task = taskCache[id];
+  assertMutableTask(task);
 
   task.status = 'done';
   task.completed_at = now;
@@ -527,6 +613,7 @@ function reopenTask(id) {
 
   const now = new Date().toISOString();
   const task = taskCache[id];
+  assertMutableTask(task);
 
   task.status = 'todo';
   task.completed_at = null;
@@ -550,6 +637,7 @@ function trashTask(id) {
 
   const now = new Date().toISOString();
   const task = taskCache[id];
+  assertMutableTask(task);
 
   task.delete_flag = 1;
   task.deleted_at = now;
@@ -573,6 +661,7 @@ function restoreTask(id) {
 
   const now = new Date().toISOString();
   const task = taskCache[id];
+  assertMutableTask(task);
 
   task.delete_flag = 0;
   task.deleted_at = null;
@@ -595,6 +684,7 @@ function deleteTask(id) {
   }
 
   const task = taskCache[id];
+  assertMutableTask(task);
   const filePath = task._filePath || resolveTaskFilePath(task.task_file_path, id);
   const archivePath = path.join(ARCHIVE_DIR, `${id}-archived.md`);
 
@@ -624,6 +714,7 @@ function duplicateTask(id) {
   }
 
   const original = taskCache[id];
+  assertMutableTask(original);
 
   const duplicated = addTask({
     title: original.title + '（コピー）',
@@ -656,7 +747,7 @@ function reorderTasks(payload = {}) {
 
   const now = new Date().toISOString();
   const activeTasks = Object.values(taskCache)
-    .filter((t) => t.delete_flag === 0)
+    .filter((t) => t.delete_flag === 0 && !t.is_invalid)
     .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
   const activeIds = activeTasks.map((t) => t.id);
 
@@ -670,6 +761,7 @@ function reorderTasks(payload = {}) {
   Object.entries(fieldUpdates).forEach(([taskId, patch]) => {
     const task = taskCache[taskId];
     if (!task || task.delete_flag === 1) return;
+    assertMutableTask(task);
 
     const nextPatch = { ...patch };
 
@@ -702,6 +794,7 @@ function reorderTasks(payload = {}) {
   finalIds.forEach((taskId, idx) => {
     const task = taskCache[taskId];
     if (!task || task.delete_flag === 1) return;
+    if (task.is_invalid) return;
     const nextOrder = idx + 1;
     if (task.sort_order !== nextOrder) {
       task.sort_order = nextOrder;

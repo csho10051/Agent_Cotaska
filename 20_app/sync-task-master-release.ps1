@@ -173,9 +173,11 @@ $taskMasterRoot = Join-Path $repoRoot "00_mgmt\10_task\Cotaska-0.1.0-dist"
 
 $srcExe = Join-Path $releaseRoot "Cotaska.exe"
 $srcApp = Join-Path $releaseRoot "_app"
+$srcTools = Join-Path $releaseRoot "tools"
 
 $dstExe = Join-Path $taskMasterRoot "Cotaska.exe"
 $dstApp = Join-Path $taskMasterRoot "_app"
+$dstTools = Join-Path $taskMasterRoot "tools"
 
 $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
 $backupDir = Join-Path (Split-Path $taskMasterRoot) "backup"
@@ -194,6 +196,7 @@ Assert-PathExists -Path $releaseRoot -Label "Release root"
 Assert-PathExists -Path $taskMasterRoot -Label "Task-master root"
 Assert-PathExists -Path $srcExe -Label "Release Cotaska.exe"
 Assert-PathExists -Path $srcApp -Label "Release _app folder"
+Assert-PathExists -Path (Join-Path $srcTools "validate-tasks.ps1") -Label "Release validate-tasks.ps1"
 
 Write-Host "[3/5] Creating backup: $backupRoot"
 Copy-Item -LiteralPath $taskMasterRoot -Destination $backupRoot -Recurse -Force
@@ -206,6 +209,12 @@ if (Test-Path -LiteralPath $dstApp) {
     Remove-PathWithLockHint -Path $dstApp
 }
 Copy-Item -LiteralPath $srcApp -Destination $dstApp -Recurse -Force
+
+Write-Host "      Syncing tools folder"
+if (Test-Path -LiteralPath $dstTools) {
+    Remove-Item -LiteralPath $dstTools -Recurse -Force
+}
+Copy-Item -LiteralPath $srcTools -Destination $dstTools -Recurse -Force
 
 Write-Host ""
 Write-Host "Done"

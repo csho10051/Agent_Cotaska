@@ -85,6 +85,7 @@ function DetailPaneBody({
   onSetTaskTags,
   onAddTag,
 }) {
+  const isInvalid = Boolean(task.is_invalid);
   const [priority, setPriority] = useState(task.priority ?? "normal");
   const [status, setStatus] = useState(task.status);
   const [completed, setCompleted] = useState(task.status === "done");
@@ -103,6 +104,7 @@ function DetailPaneBody({
   const [openExternalError, setOpenExternalError] = useState("");
 
   const persist = async (patch) => {
+    if (isInvalid) return;
     await window.cotaskaAPI?.tasks?.update({
       id: task.id,
       title: titleText,
@@ -124,12 +126,14 @@ function DetailPaneBody({
   }, 500);
 
   const handlePriorityChange = async (e) => {
+    if (isInvalid) return;
     const nextPriority = e.target.value;
     setPriority(nextPriority);
     await persist({ priority: nextPriority });
   };
 
   const handleComplete = async (e) => {
+    if (isInvalid) return;
     const done = e.target.checked;
     const nextStatus = done ? "done" : "todo";
     const nextCompletedAt = done ? (completedAt || new Date().toISOString()) : null;
@@ -148,6 +152,7 @@ function DetailPaneBody({
   };
 
   const handleProgressStatusChange = async (e) => {
+    if (isInvalid) return;
     const next = e.target.value;
     setProgressStatus(next);
     const nextStatus = next === "完了" ? "done" : "todo";
@@ -160,8 +165,13 @@ function DetailPaneBody({
 
   const isDone = status === "done" || progressStatus === "完了";
   const completedAtText = isDone ? formatCompletedAt(completedAt || task.completed_at) : "";
+  const validationLocation = [
+    task.validation_error_line ? `行 ${task.validation_error_line}` : "",
+    task.validation_error_column ? `列 ${task.validation_error_column}` : "",
+  ].filter(Boolean).join(" / ");
 
   const handleDueDateChange = async (nextDue) => {
+    if (isInvalid) return;
     if (onSetTaskDue) {
       await onSetTaskDue(task, nextDue);
     } else {
@@ -171,12 +181,14 @@ function DetailPaneBody({
   };
 
   const handleListChange = async (e) => {
+    if (isInvalid) return;
     const newListName = e.target.value;
     setListName(newListName);
     await persist({ list: newListName || null });
   };
 
   const handleAddTagToTask = async (name) => {
+    if (isInvalid) return;
     const tag = String(name || "").trim();
     if (!tag || taskTags.includes(tag)) return;
 
@@ -191,6 +203,7 @@ function DetailPaneBody({
   };
 
   const handleRemoveTagFromTask = async (tag) => {
+    if (isInvalid) return;
     const next = taskTags.filter((t) => t !== tag);
     setTaskTags(next);
     await onSetTaskTags?.(task, next);
@@ -217,6 +230,7 @@ function DetailPaneBody({
   };
 
   const handlePreviewLinkClick = async (event) => {
+    if (isInvalid) return;
     const anchor = event.target?.closest?.("a");
     if (!anchor) return;
 
@@ -242,13 +256,15 @@ function DetailPaneBody({
     <div className="detail-pane">
       {/* === detail-header: チェック + タイトル + 右上アクション === */}
       <div className="detail-header">
-        <input type="checkbox" className="d-check" checked={completed} onChange={handleComplete} />
+        <input type="checkbox" className="d-check" checked={completed} onChange={handleComplete} disabled={isInvalid} />
 
         <input
-          className={`header-title${completed ? " completed" : ""}`}
+          className={`header-title${completed ? " completed" : ""}${isInvalid ? " invalid" : ""}`}
           value={titleText}
           placeholder="タスク名"
+          readOnly={isInvalid}
           onChange={(e) => {
+            if (isInvalid) return;
             const nextTitle = e.target.value;
             setTitleText(nextTitle);
             debouncedSave(nextTitle, contentText);
@@ -277,6 +293,20 @@ function DetailPaneBody({
         </div>
       </div>
       {openExternalError && <div className="detail-open-error">{openExternalError}</div>}
+      {isInvalid && (
+        <div className="detail-validation-error">
+          <div className="detail-validation-title">
+            <span className="detail-validation-mark">!</span>
+            タスクファイルの読み込みに失敗しました
+          </div>
+          <div className="detail-validation-body">
+            <div>対象ファイル: {task.task_file_path || "不明"}</div>
+            {task.validation_error_name && <div>種類: {task.validation_error_name}</div>}
+            {validationLocation && <div>位置: {validationLocation}</div>}
+            {task.validation_error && <div>内容: {task.validation_error}</div>}
+          </div>
+        </div>
+      )}
 
       {/* === detail-meta: メタ情報集約セクション === */}
       <div className="detail-meta">
@@ -290,7 +320,8 @@ function DetailPaneBody({
             <div className="meta-row">
               <div className="meta-item">
                 <span className="meta-item-label">進捗:</span>
-                <select className="meta-select" value={progressStatus} onChange={handleProgressStatusChange}>
+                <select className="meta-select" value={progressStatus} onChange={handleProgressStatusChange} disabled={isInvalid}>
+                  {isInvalid && <option value="要確認">要確認</option>}
                   <option value="未着">未着</option>
                   <option value="仕掛">仕掛</option>
                   <option value="完了">完了</option>
@@ -300,7 +331,9 @@ function DetailPaneBody({
                 <span className="meta-item-label">期限:</span>
                 <span
                   className={`meta-due${task.overdue ? " overdue" : ""}`}
-                  onClick={() => setDueEditorOpen(true)}
+                  onClick={() => {
+                    if (!isInvalid) setDueEditorOpen(true);
+                  }}
                 >
                   {task.due || "未設定"}
                 </span>
@@ -322,6 +355,7 @@ function DetailPaneBody({
                   onChange={handlePriorityChange}
                   style={{ color: PRIORITY_COLOR[priority] }}
                   title="優先度を変更"
+                  disabled={isInvalid}
                 >
                   <option value="normal">{PRIORITY_LABEL.normal}</option>
                   <option value="medium">{PRIORITY_LABEL.medium}</option>
@@ -332,7 +366,7 @@ function DetailPaneBody({
 
             {/* Row 2: リスト + タグ選択 + タグ入力 */}
             <div className="meta-row">
-              <select className="meta-select" value={listName} onChange={handleListChange} title="リストを設定" style={{ minWidth: 90 }}>
+              <select className="meta-select" value={listName} onChange={handleListChange} title="リストを設定" style={{ minWidth: 90 }} disabled={isInvalid}>
                 <option value="">リストなし</option>
                 {lists.map((l) => (
                   <option key={l.name} value={l.name}>
@@ -344,6 +378,7 @@ function DetailPaneBody({
               <select
                 className="meta-tag-select"
                 value=""
+                disabled={isInvalid}
                 onChange={(e) => {
                   if (e.target.value) handleAddTagToTask(e.target.value);
                 }}
@@ -363,13 +398,14 @@ function DetailPaneBody({
                 type="text"
                 placeholder="新タグ"
                 value={newTagName}
+                disabled={isInvalid}
                 onChange={(e) => setNewTagName(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") handleAddTagToTask(newTagName);
                 }}
               />
 
-              <button className="meta-tag-add-btn" onClick={() => handleAddTagToTask(newTagName)}>
+              <button className="meta-tag-add-btn" onClick={() => handleAddTagToTask(newTagName)} disabled={isInvalid}>
                 追加
               </button>
             </div>
@@ -379,7 +415,7 @@ function DetailPaneBody({
               {taskTags.map((tag) => (
                 <span key={tag} className="tag">
                   #{tag}
-                  <button className="tag-remove-btn" onClick={() => handleRemoveTagFromTask(tag)} title="タグを削除">
+                  <button className="tag-remove-btn" onClick={() => handleRemoveTagFromTask(tag)} title="タグを削除" disabled={isInvalid}>
                     x
                   </button>
                 </span>
@@ -407,7 +443,9 @@ function DetailPaneBody({
             className="detail-content"
             value={contentText}
             placeholder="メモを入力..."
+            readOnly={isInvalid}
             onChange={(e) => {
+              if (isInvalid) return;
               const nextContent = e.target.value;
               setContentText(nextContent);
               debouncedSave(titleText, nextContent);

@@ -788,7 +788,98 @@ tasks:
     due_date: null
     task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0075.md
     updated_at: '2026-04-30T07:08:09.541Z'
+  - id: "T-0080"
+    title: "CHG-044-00: 破損タスク検知仕様の詳細化"
+    list: "仕様変更"
+    status: "done"
+    priority: "high"
+    progress: 0
+    sort_order: 80
+    tags:
+      - "開発管理"
+      - "仕様変更"
+    due_date: null
+    task_file_path: "D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0080.md"
+    updated_at: "2026-04-28T13:38:11.000Z"
+  - id: "T-0081"
+    title: "CHG-044-01: taskServiceでYAMLパースエラーを破損タスク化"
+    list: "仕様変更"
+    status: "done"
+    priority: "high"
+    progress: 0
+    sort_order: 81
+    tags:
+      - "開発管理"
+      - "仕様変更"
+    due_date: null
+    task_file_path: "D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0081.md"
+    updated_at: "2026-04-28T13:45:58.000Z"
+  - id: "T-0082"
+    title: "CHG-044-02: 破損タスクがあっても全体読み込みを継続"
+    list: "仕様変更"
+    status: "done"
+    priority: "high"
+    progress: 0
+    sort_order: 82
+    tags:
+      - "開発管理"
+      - "仕様変更"
+    due_date: null
+    task_file_path: "D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0082.md"
+    updated_at: "2026-04-28T13:45:58.000Z"
+  - id: "T-0083"
+    title: "CHG-044-03: メインペインに破損タスクの警告表示を追加"
+    list: "仕様変更"
+    status: "done"
+    priority: "normal"
+    progress: 0
+    sort_order: 83
+    tags:
+      - "開発管理"
+      - "仕様変更"
+    due_date: null
+    task_file_path: "D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0083.md"
+    updated_at: "2026-04-28T13:45:58.000Z"
+  - id: "T-0084"
+    title: "CHG-044-04: 詳細ペインに検証エラー表示とファイル起動導線を追加"
+    list: "仕様変更"
+    status: "done"
+    priority: "normal"
+    progress: 0
+    sort_order: 84
+    tags:
+      - "開発管理"
+      - "仕様変更"
+    due_date: null
+    task_file_path: "D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0084.md"
+    updated_at: "2026-04-28T13:45:58.000Z"
+  - id: "T-0085"
+    title: "CHG-044-05: AI作業後のタスク検証スクリプト追加検討"
+    list: "仕様変更"
+    status: "done"
+    priority: "normal"
+    progress: 0
+    sort_order: 85
+    tags:
+      - "開発管理"
+      - "仕様変更"
+    due_date: null
+    task_file_path: "D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0085.md"
+    updated_at: "2026-04-28T14:05:00.000Z"
+  - id: "T-0086"
+    title: "CHG-044-06: 破損タスク検知と警告表示の手動確認"
+    list: "仕様変更"
+    status: "done"
+    priority: "normal"
+    progress: 0
+    sort_order: 86
+    tags:
+      - "開発管理"
+      - "仕様変更"
+    due_date: null
+    task_file_path: "D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0086.md"
+    updated_at: "2026-04-28T14:15:00.000Z"
 task_file_roots:
   - .
-next_task_id: 76
-last_updated: '2026-04-30T07:08:23.064Z'
+next_task_id: 87
+last_updated: '2026-04-30T15:30:00.000Z'

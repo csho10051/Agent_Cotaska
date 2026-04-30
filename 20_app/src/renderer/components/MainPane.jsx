@@ -163,26 +163,38 @@ function MainPane({
   };
 
   // タスク行を描画する関数
-  const renderTaskRow = (task, showSep, isSubtask = false, childCount = 0, sectionMeta = null) => (
+  const renderTaskRow = (task, showSep, isSubtask = false, childCount = 0, sectionMeta = null) => {
+    const isInvalid = Boolean(task.is_invalid);
+    const rowClassName = [
+      "task-row",
+      selectedTaskId === task.id ? "selected" : "",
+      task.status === "done" ? "task-row--done" : "",
+      isSubtask ? "task-row--subtask" : "",
+      draggingTaskId === task.id ? "task-row--dragging" : "",
+      isInvalid ? "task-row--invalid" : "",
+    ].filter(Boolean).join(" ");
+    const canDragTask = dragEnabled && !isSubtask && task.status !== "done" && !isInvalid;
+
+    return (
     <React.Fragment key={task.id}>
       <div
-        className={`task-row${selectedTaskId === task.id ? " selected" : ""}${task.status === "done" ? " task-row--done" : ""}${isSubtask ? " task-row--subtask" : ""}${draggingTaskId === task.id ? " task-row--dragging" : ""}`}
+        className={rowClassName}
         onClick={() => onTaskClick?.(task)}
-        draggable={dragEnabled && !isSubtask && task.status !== "done"}
+        draggable={canDragTask}
         onDragStart={(e) => {
-          if (!(dragEnabled && !isSubtask && task.status !== "done")) return;
+          if (!canDragTask) return;
           e.dataTransfer.effectAllowed = "move";
           e.dataTransfer.setData("text/plain", String(task.id));
           setDraggingTaskId(task.id);
         }}
         onDragEnd={() => setDraggingTaskId(null)}
         onDragOver={(e) => {
-          if (!dragEnabled || !draggingTaskId || draggingTaskId === task.id) return;
+          if (isInvalid || !dragEnabled || !draggingTaskId || draggingTaskId === task.id) return;
           e.preventDefault();
           e.dataTransfer.dropEffect = "move";
         }}
         onDrop={(e) => {
-          if (!dragEnabled) return;
+          if (isInvalid || !dragEnabled) return;
           e.preventDefault();
           e.stopPropagation();
           const draggedTaskId = e.dataTransfer.getData("text/plain") || draggingTaskId;
@@ -201,7 +213,7 @@ function MainPane({
           setHoveredSectionKey(null);
         }}
         onContextMenu={(e) => {
-          if (!isTrashed && !isCompleted && !isSearchMode) {
+          if (!isInvalid && !isTrashed && !isCompleted && !isSearchMode) {
             e.preventDefault();
             setContextMenu({ x: e.clientX, y: e.clientY, task });
           }
@@ -225,15 +237,17 @@ function MainPane({
           <input
             type="checkbox"
             checked={task.status === "done"}
+            disabled={isInvalid}
             onChange={(e) => { e.stopPropagation(); onToggleComplete?.(task); }}
             onClick={(e) => e.stopPropagation()}
           />
         )}
         {!isTrashed && (
-          <span className={`progress-status-badge ${task.progressStatus === "完了" ? "done" : task.progressStatus === "仕掛" ? "in-progress" : "not-started"}`}>
+          <span className={`progress-status-badge ${isInvalid ? "invalid" : task.progressStatus === "完了" ? "done" : task.progressStatus === "仕掛" ? "in-progress" : "not-started"}`}>
             {task.progressStatus || "未着"}
           </span>
         )}
+        {isInvalid && <span className="task-warning-mark" title="タスクファイルの読み込みエラー">!</span>}
         <span className="task-title">{task.title}</span>
         {!isTrashed && PRIORITY[task.priority] && (
           <span className={`priority-icon ${PRIORITY[task.priority].cls}`}>
@@ -245,7 +259,7 @@ function MainPane({
             className="task-due-anchor"
             onClick={(e) => {
               e.stopPropagation();
-              if (onSetTaskDue) setDueEditorTaskId(task.id);
+              if (!isInvalid && onSetTaskDue) setDueEditorTaskId(task.id);
             }}
           >
             <span className={`task-due${task.overdue ? " overdue" : ""}${task.due ? "" : " task-due--empty"}`}>
@@ -287,7 +301,8 @@ function MainPane({
       </div>
       {showSep && <div className="task-separator" />}
     </React.Fragment>
-  );
+    );
+  };
 
   const renderTaskTree = (list, sectionMeta = null) => {
     const { roots, byParent } = buildTaskTree(list);
