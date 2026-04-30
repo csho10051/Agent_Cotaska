@@ -40,7 +40,6 @@
     "asar": true,
     "win": {
       "icon": "setup/launcher/icon.ico",
-      "signAndEditExecutable": false,
       "target": [
         {
           "target": "portable",

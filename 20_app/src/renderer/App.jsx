@@ -98,6 +98,21 @@ function sortByPriority(arr) {
   );
 }
 
+function taskMatchesSearch(task, keyword) {
+  const searchable = [
+    task.id,
+    task.title,
+    task.content,
+    task.list,
+    task.priority,
+    task.progressStatus,
+    ...(task.tags || []),
+  ];
+  return searchable.some((value) =>
+    String(value || "").toLowerCase().includes(keyword)
+  );
+}
+
 const FIXED_VIEWS = new Set(["すべて", "今日", "明日", "次の7日間", "仕掛", "完了", "ゴミ箱", "受信トレイ", "リストなし"]);
 
 /**
@@ -538,10 +553,7 @@ function App() {
       visibleTasks = [];
     } else {
       const kw = searchKeyword.toLowerCase();
-      visibleTasks = tasks.filter((t) =>
-        t.title.toLowerCase().includes(kw) ||
-        (t.content && t.content.toLowerCase().includes(kw))
-      );
+      visibleTasks = tasks.filter((t) => taskMatchesSearch(t, kw));
     }
   } else if (activeNav === "ゴミ箱") {
     visibleTasks = trashedTasks;
