@@ -6,6 +6,7 @@ import MainPane   from "./components/MainPane";
 import DetailPane from "./components/DetailPane";
 
 const TAG_NAV_PREFIX = "tag:";
+const MAX_TASK_TREE_DEPTH = 5;
 
 // ── Markdownファイル → UI オブジェクトの変換 ────────────────────────────────────
 function formatDue(due_date) {
@@ -27,10 +28,17 @@ function dueDatePart(due_date) {
   return match ? match[1] : null;
 }
 
+function normalizeProgressStatusValue(progressStatus, status = "todo") {
+  const value = String(progressStatus || "").trim();
+  if (value === "未着手") return "未着";
+  if (value === "未着" || value === "仕掛" || value === "完了") return value;
+  return status === "done" ? "完了" : (value || "未着");
+}
+
 // T-031: frontmatterフィールドに対応（file-first architecture）
 function mapFileTask(taskData) {
   const today = localDateString();
-  const progressStatus = taskData.progress_status || (taskData.status === "done" ? "完了" : "未着");
+  const progressStatus = normalizeProgressStatusValue(taskData.progress_status, taskData.status);
   return {
     id:        taskData.id,
     title:     taskData.title,
@@ -58,7 +66,7 @@ function mapFileTask(taskData) {
 }
 
 function calcParentProgress(subtasks) {
-  const statuses = subtasks.map((t) => t.progressStatus || (t.status === "done" ? "完了" : "未着"));
+  const statuses = subtasks.map((t) => normalizeProgressStatusValue(t.progressStatus, t.status));
   if (statuses.length > 0 && statuses.every((status) => status === "完了")) return "完了";
   if (statuses.some((status) => status === "仕掛" || status === "完了")) return "仕掛";
   return "未着";
@@ -80,6 +88,93 @@ function toFileTaskPayload(task, patch = {}) {
     due_date: task.due_date || null,
     ...patch,
   };
+}
+
+function enrichTaskHierarchy(taskList) {
+  const byId = new Map(taskList.map((task) => [task.id, task]));
+  const memo = new Map();
+
+  const resolve = (task, trail = new Set()) => {
+    if (!task?.id) return { depth: 1, overLimit: false, parentMissing: false, cycle: false };
+    if (memo.has(task.id)) return memo.get(task.id);
+
+    const parentId = task.parent;
+    if (parentId === null || parentId === undefined || parentId === "") {
+      const rootMeta = { depth: 1, overLimit: false, parentMissing: false, cycle: false };
+      memo.set(task.id, rootMeta);
+      return rootMeta;
+    }
+
+    const parent = byId.get(parentId);
+    if (!parent) {
+      const missingMeta = { depth: 1, overLimit: false, parentMissing: true, cycle: false };
+      memo.set(task.id, missingMeta);
+      return missingMeta;
+    }
+
+    if (trail.has(task.id)) {
+      const cycleMeta = { depth: 1, overLimit: true, parentMissing: false, cycle: true };
+      memo.set(task.id, cycleMeta);
+      return cycleMeta;
+    }
+
+    trail.add(task.id);
+    const parentMeta = resolve(parent, trail);
+    trail.delete(task.id);
+
+    const depth = parentMeta.depth + 1;
+    const meta = {
+      depth,
+      overLimit: parentMeta.overLimit || depth > MAX_TASK_TREE_DEPTH,
+      parentMissing: parentMeta.parentMissing,
+      cycle: parentMeta.cycle,
+    };
+    memo.set(task.id, meta);
+    return meta;
+  };
+
+  return taskList.map((task) => {
+    const meta = resolve(task);
+    const warning = meta.cycle
+      ? "階層の循環参照があります"
+      : meta.overLimit
+        ? `階層上限を超えています（${meta.depth}階層目）`
+        : meta.parentMissing
+          ? "親タスクが見つかりません"
+          : "";
+
+    return {
+      ...task,
+      hierarchyDepth: meta.depth,
+      hierarchyOverLimit: meta.overLimit,
+      hierarchyParentMissing: meta.parentMissing,
+      hierarchyCycle: meta.cycle,
+      hierarchyWarning: warning,
+    };
+  });
+}
+
+function collectDescendantTasks(taskList, parentId, maxDepth = MAX_TASK_TREE_DEPTH) {
+  const byParent = {};
+  taskList.forEach((task) => {
+    if (!task.parent) return;
+    if (!byParent[task.parent]) byParent[task.parent] = [];
+    byParent[task.parent].push(task);
+  });
+
+  const descendants = [];
+  const walk = (currentParentId, depth, seen = new Set()) => {
+    if (depth > maxDepth || seen.has(currentParentId)) return;
+    seen.add(currentParentId);
+    (byParent[currentParentId] || []).forEach((child) => {
+      if (child.hierarchyOverLimit || child.hierarchyCycle) return;
+      descendants.push(child);
+      walk(child.id, depth + 1, new Set(seen));
+    });
+  };
+
+  walk(parentId, 1);
+  return descendants;
 }
 // ─────────────────────────────────────────────────────────────────
 
@@ -221,7 +316,7 @@ function App() {
     setLoading(true);
     try {
       let rows   = await window.cotaskaAPI?.tasks?.getAll() ?? [];
-      let mapped = rows.map(mapFileTask);
+      let mapped = enrichTaskHierarchy(rows.map(mapFileTask));
 
       // T-015-03: 親タスクの進捗ステータスを最悪値ストラテジで自動推定
       // 子タスクを持つ親は常に子タスク連動で進捗を再計算する。
@@ -252,7 +347,7 @@ function App() {
 
       if (parentStatusUpdated) {
         rows = await window.cotaskaAPI?.tasks?.getAll() ?? [];
-        mapped = rows.map(mapFileTask);
+        mapped = enrichTaskHierarchy(rows.map(mapFileTask));
       }
 
       setTasks(mapped);
@@ -327,6 +422,7 @@ function App() {
   // T-014-02: サブタスク追加
   const handleAddSubtask = useCallback(async (parentTask, title) => {
     if (!title.trim()) return;
+    if (parentTask.hierarchyOverLimit || (parentTask.hierarchyDepth || 1) >= MAX_TASK_TREE_DEPTH) return;
     await window.cotaskaAPI?.tasks?.add({
       title:     title.trim(),
       status:    "todo",
@@ -352,9 +448,10 @@ function App() {
     );
 
     // CHG-009: 親タスク完了時はサブタスクも自動完了（カスケード）
-    if (newStatus === "done" && task.parent == null) {
-      const children = tasks.filter(t => t.parent === task.id && t.status !== "done");
-      for (const child of children) {
+    if (newStatus === "done") {
+      const descendants = collectDescendantTasks(tasks, task.id)
+        .filter((child) => child.status !== "done");
+      for (const child of descendants) {
         await window.cotaskaAPI?.tasks?.update(
           toFileTaskPayload(child, {
             status: "done",
@@ -502,7 +599,7 @@ function App() {
     if (activeNav !== "ゴミ箱") return;
     (async () => {
       const rows = await window.cotaskaAPI?.tasks?.getTrashed() ?? [];
-      setTrashedTasks(rows.map(mapFileTask));
+      setTrashedTasks(enrichTaskHierarchy(rows.map(mapFileTask)));
     })();
   }, [activeNav, tasks]); // tasks 変化時も再取得
 
@@ -511,7 +608,7 @@ function App() {
     if (activeNav !== "完了") return;
     (async () => {
       const rows = await window.cotaskaAPI?.tasks?.getCompleted() ?? [];
-      setCompletedTasks(rows.map(mapFileTask));
+      setCompletedTasks(enrichTaskHierarchy(rows.map(mapFileTask)));
     })();
   }, [activeNav, tasks]); // tasks 変化時も再取得
 
@@ -624,8 +721,14 @@ function App() {
   const useProgressSections = !isSearchMode && activeNav !== "ゴミ箱";
 
   if (useProgressSections) {
-    const merged = visibleTasks.filter((t) => t.progressStatus === "未着" || t.progressStatus === "仕掛");
-    const completedProg = visibleTasks.filter((t) => t.progressStatus === "完了");
+    const merged = visibleTasks.filter((t) => {
+      const progressStatus = normalizeProgressStatusValue(t.progressStatus, t.status);
+      return t.status !== "done" && progressStatus !== "完了";
+    });
+    const completedProg = visibleTasks.filter((t) => {
+      const progressStatus = normalizeProgressStatusValue(t.progressStatus, t.status);
+      return progressStatus === "完了";
+    });
     progressSections = [];
     if (merged.length > 0) progressSections.push({ label: "未着・仕掛", tasks: merged });
     if (completedProg.length > 0) progressSections.push({ label: "完了", tasks: completedProg });

@@ -306,8 +306,19 @@ html, body, #root {
   background: #ffecec;
 }
 
+.task-row--hierarchy-warning {
+  background: #fff8e8;
+  border-left: 4px solid #d99a2b;
+  padding-left: 16px;
+}
+
+.task-row--hierarchy-warning:hover,
+.task-row--hierarchy-warning.selected {
+  background: #fff1d2;
+}
+
 .task-row--subtask {
-  padding-left: 40px;
+  padding-left: calc(20px + (var(--task-depth, 2) - 1) * 24px);
 }
 
 .expand-btn {
@@ -333,7 +344,7 @@ html, body, #root {
 .inline-add-row {
   display: flex;
   align-items: center;
-  padding: 6px 20px 8px 40px;
+  padding: 6px 20px 8px calc(20px + (var(--task-depth, 2) - 1) * 24px);
 }
 
 .inline-add-input {
@@ -387,6 +398,10 @@ html, body, #root {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+}
+
+.task-warning-mark.hierarchy {
+  background: #f4a62a;
 }
 
 .task-due {
@@ -613,6 +628,16 @@ html, body, #root {
   color: #803131;
   font-size: 12px;
   line-height: 1.5;
+}
+
+.detail-validation-error--warning {
+  background: #fff8e8;
+  border-color: #efc06f;
+  color: #6f4500;
+}
+
+.detail-validation-error--warning .detail-validation-mark {
+  background: #f4a62a;
 }
 
 .detail-validation-title {

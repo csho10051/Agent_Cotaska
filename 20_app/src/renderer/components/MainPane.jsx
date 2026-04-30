@@ -6,6 +6,7 @@ const PRIORITY = {
   high:   { label: "!!", cls: "priority-high"   },
   medium: { label: "!",  cls: "priority-medium" },
 };
+const MAX_TASK_TREE_DEPTH = 5;
 
 /**
  * MainPane — ヘッダー・クイック追加バー・タスクリスト表示（flex: 1）
@@ -119,21 +120,22 @@ function MainPane({
       list.forEach((task) => {
         const pid = task.parent;
         if (pid === null || pid === undefined || !idSet.has(pid)) return;
+        if (task.hierarchyOverLimit || task.hierarchyCycle) return;
         if (!byParent[pid]) byParent[pid] = [];
         byParent[pid].push(task);
       });
       const roots = list.filter((t) => {
         const pid = t.parent;
-        return pid === null || pid === undefined || !idSet.has(pid);
+        return pid === null || pid === undefined || !idSet.has(pid) || t.hierarchyOverLimit || t.hierarchyCycle;
       });
       return { roots, byParent };
     };
   }, []);
 
-  const renderInlineInput = (parentTask) => {
+  const renderInlineInput = (parentTask, depth = 1) => {
     if (!inlineInput || inlineInput.parentId !== parentTask.id) return null;
     return (
-      <div className="inline-add-row">
+      <div className="inline-add-row" style={{ "--task-depth": depth }}>
         <span className="subtask-indent" />
         <input
           ref={inlineInputRef}
@@ -163,8 +165,10 @@ function MainPane({
   };
 
   // タスク行を描画する関数
-  const renderTaskRow = (task, showSep, isSubtask = false, childCount = 0, sectionMeta = null) => {
+  const renderTaskRow = (task, showSep, depth = 1, childCount = 0, sectionMeta = null) => {
     const isInvalid = Boolean(task.is_invalid);
+    const isSubtask = depth > 1;
+    const isHierarchyWarning = Boolean(task.hierarchyWarning);
     const rowClassName = [
       "task-row",
       selectedTaskId === task.id ? "selected" : "",
@@ -172,13 +176,15 @@ function MainPane({
       isSubtask ? "task-row--subtask" : "",
       draggingTaskId === task.id ? "task-row--dragging" : "",
       isInvalid ? "task-row--invalid" : "",
+      isHierarchyWarning ? "task-row--hierarchy-warning" : "",
     ].filter(Boolean).join(" ");
-    const canDragTask = dragEnabled && !isSubtask && task.status !== "done" && !isInvalid;
+    const canDragTask = dragEnabled && !isSubtask && !task.hierarchyOverLimit && task.status !== "done" && !isInvalid;
 
     return (
     <React.Fragment key={task.id}>
       <div
         className={rowClassName}
+        style={{ "--task-depth": depth }}
         onClick={() => onTaskClick?.(task)}
         draggable={canDragTask}
         onDragStart={(e) => {
@@ -219,7 +225,7 @@ function MainPane({
           }
         }}
       >
-        {!isSubtask && (
+        {depth <= MAX_TASK_TREE_DEPTH && (
           <button
             className={`expand-btn${childCount === 0 && !(inlineInput && inlineInput.parentId === task.id) ? " expand-btn--hidden" : ""}`}
             onClick={(e) => {
@@ -248,6 +254,7 @@ function MainPane({
           </span>
         )}
         {isInvalid && <span className="task-warning-mark" title="タスクファイルの読み込みエラー">!</span>}
+        {!isInvalid && isHierarchyWarning && <span className="task-warning-mark hierarchy" title={task.hierarchyWarning}>!</span>}
         <span className="task-title">{task.title}</span>
         {!isTrashed && PRIORITY[task.priority] && (
           <span className={`priority-icon ${PRIORITY[task.priority].cls}`}>
@@ -308,16 +315,20 @@ function MainPane({
     const { roots, byParent } = buildTaskTree(list);
     const items = [];
 
-    roots.forEach((parent, idx) => {
-      const children = byParent[parent.id] || [];
-      const parentExpanded = expanded[parent.id] || inlineInput?.parentId === parent.id;
-      items.push(renderTaskRow(parent, idx < roots.length - 1, false, children.length, sectionMeta));
+    const pushNode = (task, depth, showSep) => {
+      const children = depth < MAX_TASK_TREE_DEPTH ? (byParent[task.id] || []) : [];
+      const parentExpanded = expanded[task.id] || inlineInput?.parentId === task.id;
+      items.push(renderTaskRow(task, showSep, depth, children.length, sectionMeta));
       if (parentExpanded) {
         children.forEach((child) => {
-          items.push(renderTaskRow(child, false, true, 0, sectionMeta));
+          pushNode(child, depth + 1, false);
         });
-        items.push(renderInlineInput(parent));
+        items.push(renderInlineInput(task, depth + 1));
       }
+    };
+
+    roots.forEach((parent, idx) => {
+      pushNode(parent, 1, idx < roots.length - 1);
     });
 
     return items;
@@ -516,9 +527,9 @@ function MainPane({
         >
           {/* サブタスクの追加 */}
           <button
-            className={`ctx-item${contextMenu.task.parent != null ? " ctx-item--disabled" : ""}`}
+            className={`ctx-item${contextMenu.task.hierarchyOverLimit || (contextMenu.task.hierarchyDepth || 1) >= MAX_TASK_TREE_DEPTH ? " ctx-item--disabled" : ""}`}
             onClick={() => {
-              if (contextMenu.task.parent != null) return;
+              if (contextMenu.task.hierarchyOverLimit || (contextMenu.task.hierarchyDepth || 1) >= MAX_TASK_TREE_DEPTH) return;
               setExpanded((prev) => ({ ...prev, [contextMenu.task.id]: true }));
               setInlineInput({ parentId: contextMenu.task.id, value: "", mode: "subtask" });
               setContextMenu(null);

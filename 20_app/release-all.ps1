@@ -16,6 +16,7 @@ param(
 $ErrorActionPreference = "Stop"
 
 $scriptDir   = Split-Path -Parent $MyInvocation.MyCommand.Path
+$repoRoot    = (Resolve-Path (Join-Path $scriptDir "..")).Path
 $nodeDir     = Resolve-Path (Join-Path $scriptDir "..\..\v22.14.0")
 $launcherDir = Join-Path $scriptDir "setup\launcher"
 $distRoot    = Join-Path $scriptDir "release\Cotaska-$Version-dist"
@@ -25,6 +26,17 @@ $sourceDataDir = Join-Path $scriptDir "..\data"
 $distDataDir = Join-Path $distRoot "data"
 $sourceToolsDir = Join-Path $scriptDir "scripts"
 $distToolsDir = Join-Path $distRoot "tools"
+$sourceAiAgentRuleItem = Get-ChildItem -LiteralPath $repoRoot -Filter "Cotaska_AI*.md" -Recurse -File |
+    Select-Object -First 1
+if ($null -ne $sourceAiAgentRuleItem) {
+    $aiAgentRuleFileName = $sourceAiAgentRuleItem.Name
+    $sourceAiAgentRule = $sourceAiAgentRuleItem.FullName
+}
+else {
+    $aiAgentRuleFileName = "Cotaska_AI*.md"
+    $sourceAiAgentRule = $null
+}
+$distAiAgentRule = Join-Path $distRoot $aiAgentRuleFileName
 
 $env:PATH = "$nodeDir;$env:PATH"
 
@@ -122,6 +134,14 @@ if (Test-Path $launcherExe) {
     Write-Host "  [WARN] $launcherExe not found. Using existing launcher." -ForegroundColor Yellow
 }
 
+if ($sourceAiAgentRule -and (Test-Path $sourceAiAgentRule)) {
+    Copy-Item $sourceAiAgentRule -Destination $distAiAgentRule -Force
+    Write-Host "  OK: AI agent rule copied -> $distAiAgentRule" -ForegroundColor Green
+}
+else {
+    Write-Host "  [WARN] AI agent rule not found: $sourceAiAgentRule" -ForegroundColor Yellow
+}
+
 if ((Test-Path $distCoreExe) -and (Test-Path $launcherIcon)) {
     Write-Host "  Updating CotaskaCore.exe icon ..." -ForegroundColor Cyan
     $setIconPs1 = Join-Path $launcherDir "Set-ExeIcon.ps1"
@@ -190,6 +210,7 @@ $checks = @(
     @{ Path = (Join-Path $distRoot "data");                    Label = "data/" },
     @{ Path = (Join-Path $distRoot "data\tasks");              Label = "data/tasks/" },
     @{ Path = (Join-Path $distRoot "tools\validate-tasks.ps1"); Label = "tools/validate-tasks.ps1" },
+    @{ Path = (Join-Path $distRoot $aiAgentRuleFileName);       Label = $aiAgentRuleFileName },
     @{ Path = (Join-Path $distRoot "logs");                    Label = "logs/" }
 )
 

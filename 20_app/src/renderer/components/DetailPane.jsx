@@ -86,6 +86,7 @@ function DetailPaneBody({
   onAddTag,
 }) {
   const isInvalid = Boolean(task.is_invalid);
+  const hierarchyWarning = !isInvalid ? String(task.hierarchyWarning || "") : "";
   const [priority, setPriority] = useState(task.priority ?? "normal");
   const [status, setStatus] = useState(task.status);
   const [completed, setCompleted] = useState(task.status === "done");
@@ -293,6 +294,18 @@ function DetailPaneBody({
         </div>
       </div>
       {openExternalError && <div className="detail-open-error">{openExternalError}</div>}
+      {hierarchyWarning && (
+        <div className="detail-validation-error detail-validation-error--warning">
+          <div className="detail-validation-title">
+            <span className="detail-validation-mark">!</span>
+            階層の確認が必要です
+          </div>
+          <div className="detail-validation-body">
+            <div>{hierarchyWarning}</div>
+            <div>このタスクは一覧上では1階層目相当として表示されます。</div>
+          </div>
+        </div>
+      )}
       {isInvalid && (
         <div className="detail-validation-error">
           <div className="detail-validation-title">

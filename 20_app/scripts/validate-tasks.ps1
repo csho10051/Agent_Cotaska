@@ -47,6 +47,18 @@ function New-ValidationError {
     }
 }
 
+function New-ValidationWarning {
+    param(
+        [Parameter(Mandatory = $true)][string]$File,
+        [Parameter(Mandatory = $true)][string]$Message
+    )
+
+    [pscustomobject]@{
+        File = $File
+        Message = $Message
+    }
+}
+
 function Test-UnquotedColonValue {
     param(
         [string]$Value
@@ -98,6 +110,7 @@ function Test-TaskFile {
     }
 
     $id = $null
+    $parent = $null
     $knownKeys = @{
         id = $true
         title = $true
@@ -175,6 +188,12 @@ function Test-TaskFile {
         if ($key -eq "id") {
             $id = $value.Trim().Trim("'`"")
         }
+        if ($key -eq "parent") {
+            $parentValue = $value.Trim().Trim("'`"")
+            if ($parentValue -ne "" -and $parentValue -ne "null") {
+                $parent = $parentValue
+            }
+        }
 
         if ($value.Trim() -match "^[>|][+-]?$") {
             $blockScalarKey = $key
@@ -193,7 +212,7 @@ function Test-TaskFile {
         $errors.Add((New-ValidationError -File $fileName -Line 1 -Message "Required frontmatter key 'id' is missing or empty."))
     }
 
-    return @{ Errors = $errors; Id = $id }
+    return @{ Errors = $errors; Id = $id; Parent = $parent; File = $fileName }
 }
 
 if ([string]::IsNullOrWhiteSpace($TasksDir)) {
@@ -209,7 +228,10 @@ if (-not (Test-Path -LiteralPath $TasksDir)) {
 
 $files = Get-ChildItem -LiteralPath $TasksDir -Filter "T-*.md" -File | Sort-Object Name
 $allErrors = New-Object System.Collections.Generic.List[object]
+$allWarnings = New-Object System.Collections.Generic.List[object]
 $ids = @{}
+$parents = @{}
+$filesById = @{}
 
 foreach ($file in $files) {
     $result = Test-TaskFile -Path $file.FullName
@@ -224,7 +246,56 @@ foreach ($file in $files) {
         }
         else {
             $ids[$id] = $file.Name
+            $filesById[$id] = $file.Name
+            if (-not [string]::IsNullOrWhiteSpace([string]$result.Parent)) {
+                $parents[$id] = [string]$result.Parent
+            }
         }
+    }
+}
+
+function Get-TaskDepth {
+    param(
+        [Parameter(Mandatory = $true)][string]$Id,
+        [hashtable]$Seen = @{}
+    )
+
+    if ($Seen.ContainsKey($Id)) {
+        return @{ Depth = 1; Cycle = $true; MissingParent = $false }
+    }
+
+    if (-not $parents.ContainsKey($Id)) {
+        return @{ Depth = 1; Cycle = $false; MissingParent = $false }
+    }
+
+    $parentId = [string]$parents[$Id]
+    if (-not $ids.ContainsKey($parentId)) {
+        return @{ Depth = 1; Cycle = $false; MissingParent = $true }
+    }
+
+    $nextSeen = @{}
+    foreach ($key in $Seen.Keys) { $nextSeen[$key] = $true }
+    $nextSeen[$Id] = $true
+
+    $parentResult = Get-TaskDepth -Id $parentId -Seen $nextSeen
+    return @{
+        Depth = ([int]$parentResult.Depth + 1)
+        Cycle = [bool]$parentResult.Cycle
+        MissingParent = [bool]$parentResult.MissingParent
+    }
+}
+
+foreach ($id in $ids.Keys) {
+    $depthResult = Get-TaskDepth -Id $id
+    $fileName = [string]$filesById[$id]
+    if ($depthResult.Cycle) {
+        $allWarnings.Add((New-ValidationWarning -File $fileName -Message "Parent chain has a cycle. The task will be shown as a root-level warning item."))
+    }
+    elseif ($depthResult.MissingParent) {
+        $allWarnings.Add((New-ValidationWarning -File $fileName -Message "Parent task was not found. The task will be shown at root level."))
+    }
+    elseif ([int]$depthResult.Depth -gt 5) {
+        $allWarnings.Add((New-ValidationWarning -File $fileName -Message "Task depth is $($depthResult.Depth). Depth 6 or deeper will be shown at root level with a warning."))
     }
 }
 
@@ -241,6 +312,12 @@ if ($allErrors.Count -gt 0) {
         $allErrors | Sort-Object File, Line | Format-Table -AutoSize
     }
     exit 1
+}
+
+if ($allWarnings.Count -gt 0 -and -not $Quiet) {
+    Write-Host ""
+    Write-Host "WARN: $($allWarnings.Count) hierarchy warning(s)." -ForegroundColor Yellow
+    $allWarnings | Sort-Object File | Format-Table -AutoSize
 }
 
 if (-not $Quiet) {

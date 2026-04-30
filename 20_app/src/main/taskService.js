@@ -13,6 +13,7 @@ const TASKS_DIR = path.join(process.cwd(), '../data/tasks');
 const INDEX_PATH = path.join(TASKS_DIR, '_index.yaml');
 const ARCHIVE_DIR = path.join(process.cwd(), '../data/archive');
 const DEFAULT_TASK_FILE_ROOTS = ['.'];
+const MAX_TASK_TREE_DEPTH = 5;
 
 let taskCache = {};  // メモリキャッシュ
 let nextTaskId = 1;
@@ -278,6 +279,29 @@ function normalizeProgressStatus(task) {
   return task.progress_status || (task.status === 'done' ? '完了' : '未着');
 }
 
+function getTaskDepth(taskId, seen = new Set()) {
+  const task = taskCache[taskId];
+  if (!task || !task.parent) return 1;
+  if (seen.has(taskId)) return MAX_TASK_TREE_DEPTH + 1;
+  seen.add(taskId);
+  return getTaskDepth(task.parent, seen) + 1;
+}
+
+function collectDescendantTasks(parentId, maxDepth = MAX_TASK_TREE_DEPTH) {
+  const descendants = [];
+  const walk = (currentParentId, depth, seen = new Set()) => {
+    if (depth >= maxDepth || seen.has(currentParentId)) return;
+    seen.add(currentParentId);
+    Object.values(taskCache).forEach((child) => {
+      if (child.parent !== currentParentId || child.delete_flag === 1 || child.is_invalid) return;
+      descendants.push(child);
+      walk(child.id, depth + 1, new Set(seen));
+    });
+  };
+  walk(parentId, 1);
+  return descendants;
+}
+
 function estimateParentState(children) {
   const statuses = children.map((child) => normalizeProgressStatus(child));
   if (statuses.length > 0 && statuses.every((status) => status === '完了')) {
@@ -304,6 +328,9 @@ function recomputeParentFromChildren(parentId, now) {
   parent.updated_at = now;
   taskCache[parent.id] = parent;
   writeTaskFile(parent);
+  if (parent.parent) {
+    recomputeParentFromChildren(parent.parent, now);
+  }
 }
 
 /**
@@ -394,6 +421,10 @@ function getTasksByParent(parentId) {
  * 新規タスク作成
  */
 function addTask(taskData) {
+  if (taskData.parent && getTaskDepth(taskData.parent) >= MAX_TASK_TREE_DEPTH) {
+    throw new Error('タスク階層は最大5階層までです。');
+  }
+
   // ID 自動採番
   const newId = `T-${String(nextTaskId).padStart(4, '0')}`;
   nextTaskId++;
@@ -486,10 +517,10 @@ function updateTask(id, updates) {
   }
 
   // 親タスクが todo/doing/blocked -> done に遷移した場合、直下サブタスクを自動完了
-  const isParentTask = task.parent === null || task.parent === undefined;
+  const descendants = collectDescendantTasks(id);
+  const isParentTask = descendants.length > 0;
   if (isParentTask && prevStatus !== 'done' && task.status === 'done') {
-    Object.values(taskCache).forEach((child) => {
-      if (child.parent !== id) return;
+    descendants.forEach((child) => {
       if (child.status === 'done' && child.progress_status === '完了') return;
 
       child.status = 'done';
@@ -503,9 +534,7 @@ function updateTask(id, updates) {
 
   // CHG-010: 親タスクの進捗ステータスが 完了 -> 非完了 に戻った場合、直下サブタスクも同方向へ戻す
   if (isParentTask && prevProgressStatus === '完了' && task.progress_status !== '完了') {
-    Object.values(taskCache).forEach((child) => {
-      if (child.parent !== id) return;
-
+    descendants.forEach((child) => {
       child.progress_status = task.progress_status;
       child.status = 'todo';
       child.completed_at = null;
@@ -599,6 +628,16 @@ function completeTask(id) {
 
   taskCache[id] = task;
   writeTaskFile(task);
+  collectDescendantTasks(id).forEach((child) => {
+    if (child.status === 'done' && child.progress_status === '完了') return;
+    child.status = 'done';
+    child.completed_at = child.completed_at || now;
+    child.progress_status = '完了';
+    child.updated_at = now;
+    taskCache[child.id] = child;
+    writeTaskFile(child);
+  });
+  if (task.parent) recomputeParentFromChildren(task.parent, now);
 
   return { success: true, completed_at: now };
 }
