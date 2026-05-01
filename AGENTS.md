@@ -80,6 +80,10 @@ Not allowed:
 - コミットメッセージは必ず日本語で記載する。
 - Commit messages must always be written in Japanese.
 - Do not use English commit messages unless the user explicitly requests it.
+- 仕様変更のコミットメッセージは、先頭に仕様変更IDを含め、続けて仕様変更の概要を日本語で記載する。
+  - 例: `CHG-046 ドラッグハンドル並び替えを実装`
+- 不具合対応のコミットメッセージは、先頭にバグレポートIDを含め、続けて不具合対応の概要を日本語で記載する。
+  - 例: `BUG-20260326-01 起動時に画面が表示されない問題を修正`
 
 ---
 
