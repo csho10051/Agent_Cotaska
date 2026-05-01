@@ -8,554 +8,578 @@ tasks:
     tags: []
     due_date: null
     task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0001.md
-    updated_at: '2026-03-30T04:49:34.768Z'
-  - id: T-0002
-    title: リリース主要導線の目視確認（タスク一覧・左ナビ・詳細編集・保存）
-    list: null
-    status: done
-    priority: normal
-    progress: 0
-    sort_order: 2
-    tags: []
-    due_date: null
-    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0002.md
-    updated_at: '2026-03-26T01:22:12.196Z'
-  - id: T-0003
-    title: T-054-04 GitHub push 初回実施（PAT準備後）
-    list: null
-    status: done
-    priority: low
-    progress: 0
-    sort_order: 3
-    tags: []
-    due_date: null
-    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0003.md
-    updated_at: '2026-03-26T00:04:27.939Z'
-  - id: T-0004
-    title: BUG-20260326-01 リリース版 Cotaska.exe 起動時に画面が表示されない 発生・調査
-    list: 不具合修正
-    status: done
-    priority: high
-    progress: 0
-    sort_order: 4
-    tags:
-      - 開発管理
-      - 不具合対応
-    due_date: null
-    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0004.md
-    updated_at: '2026-03-31T07:23:00.416Z'
-  - id: T-0005
-    title: 仕様変更：期限未設定
-    list: 仕様変更
-    status: done
-    priority: normal
-    progress: 0
-    sort_order: 5
-    tags:
-      - 開発管理
-      - 仕様変更
-    due_date: null
-    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0005.md
-    updated_at: '2026-03-31T07:23:23.145Z'
-  - id: T-0006
-    title: 運用ルールの見直し
-    list: null
-    status: done
-    priority: normal
-    progress: 0
-    sort_order: 6
-    tags:
-      - 開発管理
-    due_date: null
-    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0006.md
-    updated_at: '2026-03-26T05:04:34.643Z'
-  - id: T-0007
-    title: 3/26時点でコミット
-    list: null
-    status: done
-    priority: normal
-    progress: 0
-    sort_order: 7
-    tags:
-      - 開発管理
-    due_date: null
-    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0007.md
-    updated_at: '2026-03-26T03:04:59.817Z'
-  - id: T-0008
-    title: release-all.ps1 作成・リリース実施
-    list: null
-    status: done
-    priority: normal
-    sort_order: 8
-    tags:
-      - 開発管理
-    due_date: null
-    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0008.md
-    updated_at: '2026-03-26T00:51:59.630Z'
-  - id: T-0009
-    title: 仕様変更：タスクIDを表示
-    list: 仕様変更
-    status: done
-    priority: high
-    progress: 0
-    sort_order: 9
-    tags: []
-    due_date: null
-    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0009.md
-    updated_at: '2026-03-26T09:55:50.920Z'
-  - id: T-0010
-    title: 仕様変更：並び替え機能
-    list: 仕様変更
-    status: todo
-    priority: normal
-    sort_order: 10
-    tags: []
-    due_date: null
-    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0010.md
-    updated_at: '2026-03-26T02:15:32.238Z'
-  - id: T-0011
-    title: CHG-030-01 DetailPane 設計変更
-    list: 仕様変更
-    status: done
-    priority: normal
-    sort_order: 11
-    tags:
-      - 開発管理
-      - 仕様変更
-    due_date: null
-    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0011.md
-    updated_at: '2026-03-31T07:23:15.318Z'
-  - id: T-0012
-    title: CHG-030-02 MainPane 設計変更
-    list: 仕様変更
-    status: done
-    priority: normal
-    sort_order: 12
-    tags:
-      - 開発管理
-      - 仕様変更
-    due_date: null
-    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0012.md
-    updated_at: '2026-03-31T07:23:17.887Z'
-  - id: T-0013
-    title: CHG-030-03 ビルド・配布物生成・起動確認
-    list: 仕様変更
-    status: done
-    priority: normal
-    sort_order: 13
-    tags:
-      - 開発管理
-      - 仕様変更
-    due_date: null
-    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0013.md
-    updated_at: '2026-03-31T07:23:20.725Z'
-  - id: T-0014
-    title: CHG-030-04 画面表示のユーザ確認
-    list: 仕様変更
-    status: done
-    priority: normal
-    progress: 0
-    sort_order: 14
-    tags:
-      - 開発管理
-      - 仕様変更
-    due_date: null
-    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0014.md
-    updated_at: '2026-03-31T07:23:23.145Z'
-  - id: T-0015
-    title: テスト！
-    list: null
-    status: done
-    priority: normal
-    progress: 0
-    sort_order: 15
-    tags: []
-    due_date: null
-    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0015.md
-    updated_at: '2026-03-26T01:19:04.319Z'
-  - id: T-0016
-    title: サブタスク（１）
-    list: null
-    status: done
-    priority: normal
-    progress: 0
-    sort_order: 16
-    tags: []
-    due_date: null
-    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0016.md
-    updated_at: '2026-03-26T01:19:04.334Z'
-  - id: T-0017
-    title: 不具合：子タスク連動で親が完了にならない
-    list: 不具合修正
-    status: done
-    priority: normal
-    progress: 0
-    sort_order: 17
-    tags: []
-    due_date: null
-    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0017.md
-    updated_at: '2026-03-26T03:00:33.536Z'
-  - id: T-0018
-    title: 仕様変更：ファイルリンク機能
-    list: 仕様変更
-    status: done
-    priority: normal
-    progress: 0
-    sort_order: 18
-    tags: []
-    due_date: null
-    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0018.md
-    updated_at: '2026-04-28T07:19:00.872Z'
-  - id: T-0020
-    title: 仕様変更：未着/仕掛のフィルター機能
-    list: 仕様変更
-    status: done
-    priority: normal
-    progress: 0
-    sort_order: 20
-    tags: []
-    due_date: null
-    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0020.md
-    updated_at: '2026-04-28T07:19:21.329Z'
+    updated_at: '2026-05-01T14:10:36.785Z'
   - id: T-0021
     title: 仕様変更：設定画面の実装
     list: 仕様変更
     status: todo
     priority: normal
-    sort_order: 21
+    sort_order: 2
     tags: []
     due_date: null
     task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0021.md
-    updated_at: '2026-04-09T04:00:28.243Z'
-  - id: T-0022
-    title: is_manual_progress フィールド削除（App.jsx / DetailPane.jsx）
-    list: 不具合修正
-    status: done
-    priority: normal
-    progress: 0
-    sort_order: 22
-    tags:
-      - is_manual_progress削除
-      - リファクタ
-    due_date: null
-    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0022.md
-    updated_at: '2026-03-26T02:59:23.533Z'
-  - id: T-0023
-    title: is_manual_progress フィールド削除（DB スキーマ・frontmatter）
-    list: 不具合修正
-    status: done
-    priority: normal
-    progress: 0
-    sort_order: 23
-    tags:
-      - is_manual_progress削除
-      - スキーマ変更
-    due_date: null
-    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0023.md
-    updated_at: '2026-03-26T03:00:09.323Z'
-  - id: T-0024
-    title: 設計ドキュメント更新（is_manual_progress レガシー処理）
-    list: 不具合修正
-    status: done
-    priority: normal
-    progress: 0
-    sort_order: 24
-    tags:
-      - is_manual_progress削除
-      - ドキュメント
-    due_date: null
-    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0024.md
-    updated_at: '2026-03-26T03:00:09.323Z'
-  - id: T-0025
-    title: AIエージェント運用ルール更新（is_manual_progress 参照削除）
-    list: 不具合修正
-    status: done
-    priority: normal
-    progress: 0
-    sort_order: 25
-    tags:
-      - is_manual_progress削除
-      - 運用ルール
-    due_date: null
-    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0025.md
-    updated_at: '2026-03-26T03:00:09.323Z'
+    updated_at: '2026-05-01T14:10:36.785Z'
   - id: T-0026
     title: 仕様変更：親子紐づけを手動でメンテ
     list: 仕様変更
     status: todo
     priority: normal
-    sort_order: 26
+    sort_order: 3
     tags: []
     due_date: null
     task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0026.md
-    updated_at: '2026-03-30T04:49:44.609Z'
-  - id: T-0027
-    title: 仕様変更：セクションの折り畳み機能
+    updated_at: '2026-05-01T14:10:36.785Z'
+  - id: T-0010
+    title: 仕様変更：並び替え機能
     list: 仕様変更
-    status: done
+    status: todo
     priority: normal
-    sort_order: 27
-    tags:
-      - CHG-034
+    sort_order: 4
+    tags: []
     due_date: null
-    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0027.md
-    updated_at: '2026-03-31T07:23:36.111Z'
+    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0010.md
+    updated_at: '2026-05-01T14:10:36.785Z'
   - id: T-0028
     title: 仕様変更：バックアップ機能の実装
     list: 仕様変更
     status: todo
     priority: normal
-    sort_order: 28
+    sort_order: 5
     tags: []
     due_date: null
     task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0028.md
-    updated_at: '2026-03-28T06:41:28.337Z'
-  - id: T-0029
-    title: 'T-0006-01: AI運用ルール正本の修正・一本化'
-    list: null
-    status: done
-    priority: normal
-    sort_order: 29
-    tags:
-      - 開発管理
-      - 運用ルール
-    due_date: null
-    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0029.md
-    updated_at: '2026-03-26T00:00:00.000Z'
-  - id: T-0030
-    title: 'T-0006-02: 個別運用ルールへの同期原則追記'
-    list: null
-    status: done
-    priority: normal
-    sort_order: 30
-    tags:
-      - 開発管理
-      - 運用ルール
-    due_date: null
-    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0030.md
-    updated_at: '2026-03-26T00:00:00.000Z'
-  - id: T-0031
-    title: 'T-0006-03: CURRENT_SPRINT.md の位置づけ整理'
-    list: null
-    status: done
-    priority: normal
-    sort_order: 31
-    tags:
-      - 開発管理
-      - 運用ルール
-    due_date: null
-    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0031.md
-    updated_at: '2026-03-26T12:00:00.000Z'
-  - id: T-0032
-    title: 仕様変更：画面幅を変更可能とする
-    list: 仕様変更
-    status: done
-    priority: medium
-    sort_order: 32
-    tags: []
-    due_date: null
-    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0032.md
-    updated_at: '2026-03-31T07:23:29.685Z'
-  - id: T-0033
-    title: 仕様変更：タスクの検索機能
-    list: 仕様変更
-    status: done
-    priority: medium
-    progress: 0
-    sort_order: 33
-    tags: []
-    due_date: null
-    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0033.md
-    updated_at: '2026-04-28T07:19:08.955Z'
-  - id: T-0034
-    title: CHG-031 :仕様変更：タスクIDを表示
-    list: 仕様変更
-    status: done
-    priority: normal
-    sort_order: 34
-    tags:
-      - CHG-031
-      - UI
-      - 画面モック
-    due_date: null
-    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0034.md
-    updated_at: '2026-03-26T09:55:50.920Z'
-  - id: T-0035
-    title: 仕様変更：画面レイアウトの見直し
-    list: 仕様変更
-    status: done
-    priority: normal
-    progress: 0
-    sort_order: 35
-    tags: []
-    due_date: null
-    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0035.md
-    updated_at: '2026-03-31T07:23:51.976Z'
-  - id: T-0036
-    title: 'CHG-032-01: ペイン幅ドラッグリサイズ実装'
-    list: 仕様変更
-    status: done
-    priority: normal
-    sort_order: 36
-    tags:
-      - CHG-032
-      - UI
-    due_date: '2026-03-26'
-    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0036.md
-    updated_at: '2026-03-26T08:00:00.000Z'
-  - id: T-0037
-    title: 'CHG-032-02: ペイン幅リサイズ動作確認（ユーザ確認）'
-    list: 仕様変更
-    status: done
-    priority: normal
-    sort_order: 37
-    tags:
-      - CHG-032
-      - UI
-    due_date: '2026-03-26'
-    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0037.md
-    updated_at: '2026-03-26T08:00:00.000Z'
-  - id: T-0038
-    title: CHG-033 詳細ペインレイアウト整理：実装
-    list: null
-    status: done
-    priority: normal
-    sort_order: 38
-    tags:
-      - CHG-033
-    due_date: null
-    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0038.md
-    updated_at: '2026-03-26T14:30:00.000Z'
-  - id: T-0039
-    title: CHG-033 詳細ペインレイアウト整理：ユーザ確認
-    list: null
-    status: done
-    priority: normal
-    sort_order: 39
-    tags:
-      - CHG-033
-    due_date: null
-    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0039.md
-    updated_at: '2026-03-26T14:30:00.000Z'
-  - id: T-0040
-    title: CHG-034 メインペインセクション折りたたみ：実装
-    list: 仕様変更
-    status: done
-    priority: normal
-    sort_order: 40
-    tags:
-      - CHG-034
-    due_date: null
-    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0040.md
-    updated_at: '2026-03-31T07:23:33.390Z'
-  - id: T-0041
-    title: CHG-034 メインペインセクション折りたたみ：ユーザ確認
-    list: 仕様変更
-    status: done
-    priority: normal
-    sort_order: 41
-    tags:
-      - CHG-034
-    due_date: null
-    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0041.md
-    updated_at: '2026-03-31T07:23:36.111Z'
-  - id: T-0042
-    title: CHG-035-01 シングルインスタンスロックのパス別スコープ化・userData分離
-    list: 仕様変更
-    status: done
-    priority: normal
-    progress: 0
-    sort_order: 42
-    tags:
-      - 開発管理
-      - 仕様変更
-    due_date: null
-    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0042.md
-    updated_at: '2026-03-31T07:23:39.496Z'
-  - id: T-0043
-    title: CHG-035-02 ユーザ確認（多重起動動作確認）
-    list: 仕様変更
-    status: done
-    priority: normal
-    progress: 0
-    sort_order: 43
-    tags:
-      - 開発管理
-      - 仕様変更
-    due_date: null
-    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0043.md
-    updated_at: '2026-03-31T07:23:42.489Z'
-  - id: T-0044
-    title: 仕様変更：起動ﾌｧｲﾙの名前を変更
-    list: 仕様変更
-    status: done
-    priority: high
-    progress: 0
-    sort_order: 44
-    tags: []
-    due_date: '2026-03-30'
-    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0044.md
-    updated_at: '2026-03-31T07:23:48.495Z'
+    updated_at: '2026-05-01T13:00:40.017Z'
   - id: T-0045
     title: 仕様変更：サブタスク管理画面の追加
     list: 仕様変更
     status: todo
     priority: normal
-    sort_order: 45
+    sort_order: 6
     tags: []
     due_date: null
     task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0045.md
-    updated_at: '2026-03-28T06:34:06.900Z'
-  - id: T-0046
-    title: 仕様変更：画面レイアウトの変更
-    list: 仕様変更
+    updated_at: '2026-05-01T13:00:40.017Z'
+  - id: T-0093
+    title: 仕様変更：ドラッグ＆並び替え
+    list: null
     status: done
-    priority: high
+    priority: normal
     progress: 100
-    sort_order: 46
+    sort_order: 7
     tags: []
-    due_date: '2026-03-30'
-    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0046.md
-    updated_at: '2026-04-30T06:51:16.912Z'
-  - id: T-0048
-    title: 仕様変更：期限に時分を追加
-    list: Cotaska
-    status: done
-    priority: high
-    progress: 100
-    sort_order: 48
-    tags:
-      - 仕様変更
-      - Agent_Hisyo移管
-    due_date: 2026-03-31T10:30
-    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0048.md
-    updated_at: '2026-03-31T06:50:26.505Z'
-  - id: T-0049
-    title: 仕様変更：リストなしを追加
-    list: Cotaska
-    status: done
-    priority: high
-    progress: 0
-    sort_order: 49
-    tags:
-      - 仕様変更
-      - Agent_Hisyo移管
-    due_date: '2026-03-30'
-    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0049.md
-    updated_at: '2026-03-30T07:59:01.759Z'
+    due_date: null
+    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0093.md
+    updated_at: '2026-05-01T14:10:41.336Z'
   - id: T-0050
     title: 仕様変更：タスク入力時の入力補正
     list: Cotaska
     status: todo
     priority: normal
     progress: 0
-    sort_order: 50
+    sort_order: 8
     tags:
       - 仕様変更
       - Agent_Hisyo移管
     due_date: null
     task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0050.md
-    updated_at: '2026-03-30T00:00:00.000Z'
+    updated_at: '2026-05-01T13:45:04.316Z'
+  - id: T-0096
+    title: CHG-046-02 並び替え操作のビルド確認とユーザ確認
+    list: 仕様変更
+    status: done
+    priority: normal
+    progress: 100
+    sort_order: 9
+    tags:
+      - 開発管理
+      - 仕様変更
+    due_date: null
+    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0096.md
+    updated_at: '2026-05-01T14:10:41.336Z'
+  - id: T-0002
+    title: リリース主要導線の目視確認（タスク一覧・左ナビ・詳細編集・保存）
+    list: null
+    status: done
+    priority: normal
+    progress: 0
+    sort_order: 10
+    tags: []
+    due_date: null
+    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0002.md
+    updated_at: '2026-05-01T13:45:04.316Z'
+  - id: T-0003
+    title: T-054-04 GitHub push 初回実施（PAT準備後）
+    list: null
+    status: done
+    priority: low
+    progress: 0
+    sort_order: 11
+    tags: []
+    due_date: null
+    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0003.md
+    updated_at: '2026-05-01T13:45:04.316Z'
+  - id: T-0004
+    title: BUG-20260326-01 リリース版 Cotaska.exe 起動時に画面が表示されない 発生・調査
+    list: 不具合修正
+    status: done
+    priority: high
+    progress: 0
+    sort_order: 12
+    tags:
+      - 開発管理
+      - 不具合対応
+    due_date: null
+    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0004.md
+    updated_at: '2026-05-01T13:45:04.316Z'
+  - id: T-0005
+    title: 仕様変更：期限未設定
+    list: 仕様変更
+    status: done
+    priority: normal
+    progress: 0
+    sort_order: 13
+    tags:
+      - 開発管理
+      - 仕様変更
+    due_date: null
+    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0005.md
+    updated_at: '2026-05-01T13:45:04.316Z'
+  - id: T-0006
+    title: 運用ルールの見直し
+    list: null
+    status: done
+    priority: normal
+    progress: 0
+    sort_order: 14
+    tags:
+      - 開発管理
+    due_date: null
+    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0006.md
+    updated_at: '2026-05-01T13:45:04.316Z'
+  - id: T-0007
+    title: 3/26時点でコミット
+    list: null
+    status: done
+    priority: normal
+    progress: 0
+    sort_order: 15
+    tags:
+      - 開発管理
+    due_date: null
+    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0007.md
+    updated_at: '2026-05-01T13:45:04.316Z'
+  - id: T-0008
+    title: release-all.ps1 作成・リリース実施
+    list: null
+    status: done
+    priority: normal
+    sort_order: 16
+    tags:
+      - 開発管理
+    due_date: null
+    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0008.md
+    updated_at: '2026-05-01T13:45:04.316Z'
+  - id: T-0009
+    title: 仕様変更：タスクIDを表示
+    list: 仕様変更
+    status: done
+    priority: high
+    progress: 0
+    sort_order: 17
+    tags: []
+    due_date: null
+    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0009.md
+    updated_at: '2026-05-01T13:45:04.316Z'
+  - id: T-0011
+    title: CHG-030-01 DetailPane 設計変更
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 18
+    tags:
+      - 開発管理
+      - 仕様変更
+    due_date: null
+    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0011.md
+    updated_at: '2026-05-01T13:45:04.316Z'
+  - id: T-0012
+    title: CHG-030-02 MainPane 設計変更
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 19
+    tags:
+      - 開発管理
+      - 仕様変更
+    due_date: null
+    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0012.md
+    updated_at: '2026-05-01T13:45:04.316Z'
+  - id: T-0013
+    title: CHG-030-03 ビルド・配布物生成・起動確認
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 20
+    tags:
+      - 開発管理
+      - 仕様変更
+    due_date: null
+    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0013.md
+    updated_at: '2026-05-01T13:45:04.316Z'
+  - id: T-0014
+    title: CHG-030-04 画面表示のユーザ確認
+    list: 仕様変更
+    status: done
+    priority: normal
+    progress: 0
+    sort_order: 21
+    tags:
+      - 開発管理
+      - 仕様変更
+    due_date: null
+    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0014.md
+    updated_at: '2026-05-01T13:45:04.316Z'
+  - id: T-0015
+    title: テスト！
+    list: null
+    status: done
+    priority: normal
+    progress: 0
+    sort_order: 22
+    tags: []
+    due_date: null
+    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0015.md
+    updated_at: '2026-05-01T13:45:04.316Z'
+  - id: T-0016
+    title: サブタスク（１）
+    list: null
+    status: done
+    priority: normal
+    progress: 0
+    sort_order: 23
+    tags: []
+    due_date: null
+    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0016.md
+    updated_at: '2026-05-01T13:45:04.316Z'
+  - id: T-0017
+    title: 不具合：子タスク連動で親が完了にならない
+    list: 不具合修正
+    status: done
+    priority: normal
+    progress: 0
+    sort_order: 24
+    tags: []
+    due_date: null
+    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0017.md
+    updated_at: '2026-05-01T13:45:04.316Z'
+  - id: T-0018
+    title: 仕様変更：ファイルリンク機能
+    list: 仕様変更
+    status: done
+    priority: normal
+    progress: 0
+    sort_order: 25
+    tags: []
+    due_date: null
+    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0018.md
+    updated_at: '2026-05-01T13:45:04.316Z'
+  - id: T-0020
+    title: 仕様変更：未着/仕掛のフィルター機能
+    list: 仕様変更
+    status: done
+    priority: normal
+    progress: 0
+    sort_order: 26
+    tags: []
+    due_date: null
+    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0020.md
+    updated_at: '2026-05-01T13:45:04.316Z'
+  - id: T-0022
+    title: is_manual_progress フィールド削除（App.jsx / DetailPane.jsx）
+    list: 不具合修正
+    status: done
+    priority: normal
+    progress: 0
+    sort_order: 27
+    tags:
+      - is_manual_progress削除
+      - リファクタ
+    due_date: null
+    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0022.md
+    updated_at: '2026-05-01T13:45:04.316Z'
+  - id: T-0023
+    title: is_manual_progress フィールド削除（DB スキーマ・frontmatter）
+    list: 不具合修正
+    status: done
+    priority: normal
+    progress: 0
+    sort_order: 28
+    tags:
+      - is_manual_progress削除
+      - スキーマ変更
+    due_date: null
+    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0023.md
+    updated_at: '2026-05-01T13:45:04.316Z'
+  - id: T-0024
+    title: 設計ドキュメント更新（is_manual_progress レガシー処理）
+    list: 不具合修正
+    status: done
+    priority: normal
+    progress: 0
+    sort_order: 29
+    tags:
+      - is_manual_progress削除
+      - ドキュメント
+    due_date: null
+    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0024.md
+    updated_at: '2026-05-01T13:45:04.316Z'
+  - id: T-0025
+    title: AIエージェント運用ルール更新（is_manual_progress 参照削除）
+    list: 不具合修正
+    status: done
+    priority: normal
+    progress: 0
+    sort_order: 30
+    tags:
+      - is_manual_progress削除
+      - 運用ルール
+    due_date: null
+    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0025.md
+    updated_at: '2026-05-01T13:45:04.316Z'
+  - id: T-0027
+    title: 仕様変更：セクションの折り畳み機能
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 31
+    tags:
+      - CHG-034
+    due_date: null
+    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0027.md
+    updated_at: '2026-05-01T13:45:04.316Z'
+  - id: T-0029
+    title: 'T-0006-01: AI運用ルール正本の修正・一本化'
+    list: null
+    status: done
+    priority: normal
+    sort_order: 32
+    tags:
+      - 開発管理
+      - 運用ルール
+    due_date: null
+    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0029.md
+    updated_at: '2026-05-01T13:45:04.316Z'
+  - id: T-0030
+    title: 'T-0006-02: 個別運用ルールへの同期原則追記'
+    list: null
+    status: done
+    priority: normal
+    sort_order: 33
+    tags:
+      - 開発管理
+      - 運用ルール
+    due_date: null
+    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0030.md
+    updated_at: '2026-05-01T13:45:04.316Z'
+  - id: T-0031
+    title: 'T-0006-03: CURRENT_SPRINT.md の位置づけ整理'
+    list: null
+    status: done
+    priority: normal
+    sort_order: 34
+    tags:
+      - 開発管理
+      - 運用ルール
+    due_date: null
+    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0031.md
+    updated_at: '2026-05-01T13:45:04.316Z'
+  - id: T-0032
+    title: 仕様変更：画面幅を変更可能とする
+    list: 仕様変更
+    status: done
+    priority: medium
+    sort_order: 35
+    tags: []
+    due_date: null
+    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0032.md
+    updated_at: '2026-05-01T13:45:04.316Z'
+  - id: T-0033
+    title: 仕様変更：タスクの検索機能
+    list: 仕様変更
+    status: done
+    priority: medium
+    progress: 0
+    sort_order: 36
+    tags: []
+    due_date: null
+    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0033.md
+    updated_at: '2026-05-01T13:45:04.316Z'
+  - id: T-0034
+    title: CHG-031 :仕様変更：タスクIDを表示
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 37
+    tags:
+      - CHG-031
+      - UI
+      - 画面モック
+    due_date: null
+    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0034.md
+    updated_at: '2026-05-01T13:45:04.316Z'
+  - id: T-0035
+    title: 仕様変更：画面レイアウトの見直し
+    list: 仕様変更
+    status: done
+    priority: normal
+    progress: 0
+    sort_order: 38
+    tags: []
+    due_date: null
+    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0035.md
+    updated_at: '2026-05-01T13:45:04.316Z'
+  - id: T-0036
+    title: 'CHG-032-01: ペイン幅ドラッグリサイズ実装'
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 39
+    tags:
+      - CHG-032
+      - UI
+    due_date: '2026-03-26'
+    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0036.md
+    updated_at: '2026-05-01T13:45:04.316Z'
+  - id: T-0037
+    title: 'CHG-032-02: ペイン幅リサイズ動作確認（ユーザ確認）'
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 40
+    tags:
+      - CHG-032
+      - UI
+    due_date: '2026-03-26'
+    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0037.md
+    updated_at: '2026-05-01T13:45:04.316Z'
+  - id: T-0038
+    title: CHG-033 詳細ペインレイアウト整理：実装
+    list: null
+    status: done
+    priority: normal
+    sort_order: 41
+    tags:
+      - CHG-033
+    due_date: null
+    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0038.md
+    updated_at: '2026-05-01T13:45:04.316Z'
+  - id: T-0039
+    title: CHG-033 詳細ペインレイアウト整理：ユーザ確認
+    list: null
+    status: done
+    priority: normal
+    sort_order: 42
+    tags:
+      - CHG-033
+    due_date: null
+    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0039.md
+    updated_at: '2026-05-01T13:45:04.316Z'
+  - id: T-0040
+    title: CHG-034 メインペインセクション折りたたみ：実装
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 43
+    tags:
+      - CHG-034
+    due_date: null
+    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0040.md
+    updated_at: '2026-05-01T13:45:04.316Z'
+  - id: T-0041
+    title: CHG-034 メインペインセクション折りたたみ：ユーザ確認
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 44
+    tags:
+      - CHG-034
+    due_date: null
+    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0041.md
+    updated_at: '2026-05-01T13:45:04.316Z'
+  - id: T-0042
+    title: CHG-035-01 シングルインスタンスロックのパス別スコープ化・userData分離
+    list: 仕様変更
+    status: done
+    priority: normal
+    progress: 0
+    sort_order: 45
+    tags:
+      - 開発管理
+      - 仕様変更
+    due_date: null
+    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0042.md
+    updated_at: '2026-05-01T13:45:04.316Z'
+  - id: T-0043
+    title: CHG-035-02 ユーザ確認（多重起動動作確認）
+    list: 仕様変更
+    status: done
+    priority: normal
+    progress: 0
+    sort_order: 46
+    tags:
+      - 開発管理
+      - 仕様変更
+    due_date: null
+    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0043.md
+    updated_at: '2026-05-01T13:45:04.316Z'
+  - id: T-0044
+    title: 仕様変更：起動ﾌｧｲﾙの名前を変更
+    list: 仕様変更
+    status: done
+    priority: high
+    progress: 0
+    sort_order: 47
+    tags: []
+    due_date: '2026-03-30'
+    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0044.md
+    updated_at: '2026-05-01T13:45:04.316Z'
+  - id: T-0046
+    title: 仕様変更：画面レイアウトの変更
+    list: 仕様変更
+    status: done
+    priority: high
+    progress: 100
+    sort_order: 48
+    tags: []
+    due_date: '2026-03-30'
+    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0046.md
+    updated_at: '2026-05-01T13:45:04.316Z'
+  - id: T-0048
+    title: 仕様変更：期限に時分を追加
+    list: Cotaska
+    status: done
+    priority: high
+    progress: 100
+    sort_order: 49
+    tags:
+      - 仕様変更
+      - Agent_Hisyo移管
+    due_date: 2026-03-31T10:30
+    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0048.md
+    updated_at: '2026-05-01T13:45:04.316Z'
+  - id: T-0049
+    title: 仕様変更：リストなしを追加
+    list: Cotaska
+    status: done
+    priority: high
+    progress: 0
+    sort_order: 50
+    tags:
+      - 仕様変更
+      - Agent_Hisyo移管
+    due_date: '2026-03-30'
+    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0049.md
+    updated_at: '2026-05-01T13:45:04.316Z'
   - id: T-0051
     title: CHG-036-01 Electron本体EXE名変更・ランチャー参照先変更・再ビルド
     list: 仕様変更
@@ -568,7 +592,7 @@ tasks:
       - CHG-036
     due_date: '2026-03-30'
     task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0051.md
-    updated_at: '2026-03-31T07:23:45.568Z'
+    updated_at: '2026-05-01T13:45:04.316Z'
   - id: T-0052
     title: CHG-036-02 ユーザ確認（ランチャー経由の正常起動確認）
     list: 仕様変更
@@ -581,17 +605,17 @@ tasks:
       - CHG-036
     due_date: '2026-03-30'
     task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0052.md
-    updated_at: '2026-03-31T07:23:48.495Z'
+    updated_at: '2026-05-01T13:45:04.316Z'
   - id: T-0053
     title: 不具合：今日の完了タスクが表示されない
     list: 不具合修正
     status: done
     priority: normal
-    sort_order: 52
+    sort_order: 53
     tags: []
     due_date: '2026-03-30'
     task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0053.md
-    updated_at: '2026-03-30T05:30:00.000Z'
+    updated_at: '2026-05-01T13:45:04.316Z'
   - id: T-0054
     title: CHG-037-00 設計反映要否の確認（必要なら設計書更新）
     list: 仕様変更
@@ -604,7 +628,7 @@ tasks:
       - CHG-037
     due_date: '2026-03-30'
     task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0054.md
-    updated_at: '2026-03-30T00:00:00.000Z'
+    updated_at: '2026-05-01T13:45:04.316Z'
   - id: T-0055
     title: CHG-037-01 「リストなし」表示と未設定タスク表示の実装
     list: 仕様変更
@@ -617,7 +641,7 @@ tasks:
       - CHG-037
     due_date: '2026-03-30'
     task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0055.md
-    updated_at: '2026-03-30T09:30:00.000Z'
+    updated_at: '2026-05-01T13:45:04.316Z'
   - id: T-0056
     title: CHG-037-02 ユーザ確認（リストなし表示と絞り込み確認）
     list: 仕様変更
@@ -630,7 +654,7 @@ tasks:
       - CHG-037
     due_date: '2026-03-30'
     task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0056.md
-    updated_at: '2026-03-30T16:56:00.000Z'
+    updated_at: '2026-05-01T13:45:04.316Z'
   - id: T-0057
     title: CHG-038-00 設計反映要否の確認（必要なら設計書更新）
     list: 仕様変更
@@ -643,7 +667,7 @@ tasks:
       - CHG-038
     due_date: '2026-03-30'
     task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0057.md
-    updated_at: '2026-04-30T06:51:16.738Z'
+    updated_at: '2026-05-01T13:45:04.316Z'
   - id: T-0058
     title: CHG-038-01 詳細ペインフッターに登録日時・完了日時を追加
     list: 仕様変更
@@ -656,7 +680,7 @@ tasks:
       - CHG-038
     due_date: '2026-03-30'
     task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0058.md
-    updated_at: '2026-04-30T06:51:16.762Z'
+    updated_at: '2026-05-01T13:45:04.316Z'
   - id: T-0059
     title: CHG-038-02 ユーザ確認（フッター表示と完了日時確認）
     list: 仕様変更
@@ -669,7 +693,7 @@ tasks:
       - CHG-038
     due_date: '2026-03-30'
     task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0059.md
-    updated_at: '2026-04-30T06:51:16.799Z'
+    updated_at: '2026-05-01T13:45:04.316Z'
   - id: T-0060
     title: CHG-039-00 設計反映要否の確認（必要なら設計書更新）
     list: 仕様変更
@@ -682,7 +706,7 @@ tasks:
       - CHG-039
     due_date: '2026-03-31'
     task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0060.md
-    updated_at: '2026-03-31T06:50:26.505Z'
+    updated_at: '2026-05-01T13:45:04.316Z'
   - id: T-0061
     title: CHG-039-01 期限入力サブ画面と期限時分表示・進捗ステータス位置変更の実装
     list: 仕様変更
@@ -695,7 +719,7 @@ tasks:
       - CHG-039
     due_date: '2026-03-31'
     task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0061.md
-    updated_at: '2026-03-31T06:50:26.505Z'
+    updated_at: '2026-05-01T13:45:04.316Z'
   - id: T-0062
     title: CHG-039-02 ユーザ確認（表示形式とレイアウト確認）
     list: 仕様変更
@@ -708,7 +732,7 @@ tasks:
       - CHG-039
     due_date: '2026-03-31'
     task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0062.md
-    updated_at: '2026-03-31T06:50:26.505Z'
+    updated_at: '2026-05-01T13:45:04.316Z'
   - id: T-0063
     title: BUG-20260331-01 メイン画面の期限ホバーで画面が真っ暗になる 調査
     list: 不具合修正
@@ -721,7 +745,7 @@ tasks:
       - 不具合対応
     due_date: '2026-03-31'
     task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0063.md
-    updated_at: '2026-04-09T05:13:22.806Z'
+    updated_at: '2026-05-01T13:45:04.316Z'
   - id: T-0064
     title: 不具合：タスクを下のほうで右クリックで見切れる
     list: Cotaska
@@ -732,7 +756,7 @@ tasks:
     tags: []
     due_date: null
     task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0064.md
-    updated_at: '2026-04-28T07:18:52.093Z'
+    updated_at: '2026-05-01T13:45:04.316Z'
   - id: T-0065
     title: 仕様変更：通知機能の実装
     list: Cotaska
@@ -743,7 +767,7 @@ tasks:
     tags: []
     due_date: null
     task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0065.md
-    updated_at: '2026-04-28T07:18:50.251Z'
+    updated_at: '2026-05-01T13:45:04.316Z'
   - id: T-0072
     title: 不具合：タスクバーのアイコンがElectionのものになっている。
     list: 不具合修正
@@ -754,7 +778,7 @@ tasks:
     tags: []
     due_date: null
     task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0072.md
-    updated_at: '2026-04-30T06:29:11.534Z'
+    updated_at: '2026-05-01T13:45:04.316Z'
   - id: T-0073
     title: 不具合：タスクIDで検索できない
     list: Cotaska
@@ -765,18 +789,18 @@ tasks:
     tags: []
     due_date: null
     task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0073.md
-    updated_at: '2026-04-30T07:01:00.686Z'
+    updated_at: '2026-05-01T13:45:04.316Z'
   - id: T-0074
     title: 不具合：孫タスクが表示されない
     list: Cotaska
-    status: todo
+    status: done
     priority: normal
     progress: 0
     sort_order: 68
     tags: []
     due_date: null
     task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0074.md
-    updated_at: '2026-04-30T06:53:50.733Z'
+    updated_at: '2026-05-01T13:45:04.316Z'
   - id: T-0075
     title: 不具合：タスクマネージャ上の表示名がElectron
     list: Cotaska
@@ -787,183 +811,209 @@ tasks:
     tags: []
     due_date: null
     task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0075.md
-    updated_at: '2026-04-30T07:08:09.541Z'
+    updated_at: '2026-05-01T13:45:04.316Z'
   - id: T-0080
     title: 'CHG-044-00: 破損タスク検知仕様の詳細化'
     list: 仕様変更
     status: done
     priority: high
     progress: 0
-    sort_order: 80
+    sort_order: 70
     tags:
       - 開発管理
       - 仕様変更
     due_date: null
     task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0080.md
-    updated_at: '2026-04-28T13:38:11.000Z'
+    updated_at: '2026-05-01T13:45:04.316Z'
   - id: T-0081
     title: 'CHG-044-01: taskServiceでYAMLパースエラーを破損タスク化'
     list: 仕様変更
     status: done
     priority: high
     progress: 0
-    sort_order: 81
+    sort_order: 71
     tags:
       - 開発管理
       - 仕様変更
     due_date: null
     task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0081.md
-    updated_at: '2026-04-28T13:45:58.000Z'
+    updated_at: '2026-05-01T13:45:04.316Z'
   - id: T-0082
     title: 'CHG-044-02: 破損タスクがあっても全体読み込みを継続'
     list: 仕様変更
     status: done
     priority: high
     progress: 0
-    sort_order: 82
+    sort_order: 72
     tags:
       - 開発管理
       - 仕様変更
     due_date: null
     task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0082.md
-    updated_at: '2026-04-28T13:45:58.000Z'
+    updated_at: '2026-05-01T13:45:04.316Z'
   - id: T-0083
     title: 'CHG-044-03: メインペインに破損タスクの警告表示を追加'
     list: 仕様変更
     status: done
     priority: normal
     progress: 0
-    sort_order: 83
+    sort_order: 73
     tags:
       - 開発管理
       - 仕様変更
     due_date: null
     task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0083.md
-    updated_at: '2026-04-28T13:45:58.000Z'
+    updated_at: '2026-05-01T13:45:04.316Z'
   - id: T-0084
     title: 'CHG-044-04: 詳細ペインに検証エラー表示とファイル起動導線を追加'
     list: 仕様変更
     status: done
     priority: normal
     progress: 0
-    sort_order: 84
+    sort_order: 74
     tags:
       - 開発管理
       - 仕様変更
     due_date: null
     task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0084.md
-    updated_at: '2026-04-28T13:45:58.000Z'
+    updated_at: '2026-05-01T13:45:04.316Z'
   - id: T-0085
     title: 'CHG-044-05: AI作業後のタスク検証スクリプト追加検討'
     list: 仕様変更
     status: done
     priority: normal
     progress: 0
-    sort_order: 85
+    sort_order: 75
     tags:
       - 開発管理
       - 仕様変更
     due_date: null
     task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0085.md
-    updated_at: '2026-04-28T14:05:00.000Z'
+    updated_at: '2026-05-01T13:45:04.316Z'
   - id: T-0086
     title: 'CHG-044-06: 破損タスク検知と警告表示の手動確認'
     list: 仕様変更
     status: done
     priority: normal
     progress: 0
-    sort_order: 86
+    sort_order: 76
     tags:
       - 開発管理
       - 仕様変更
     due_date: null
     task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0086.md
-    updated_at: '2026-04-28T14:15:00.000Z'
+    updated_at: '2026-05-01T13:45:04.316Z'
   - id: T-0087
     title: 'CHG-045-00: 最大5階層タスク仕様を設計書へ反映'
     list: 仕様変更
     status: done
     priority: high
     progress: 0
-    sort_order: 87
+    sort_order: 77
     tags:
       - 開発管理
       - 仕様変更
       - CHG-045
     due_date: null
     task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0087.md
-    updated_at: '2026-04-30T09:20:00.000Z'
+    updated_at: '2026-05-01T13:45:04.316Z'
   - id: T-0088
     title: 'CHG-045-01: メインペインを最大5階層まで再帰表示'
     list: 仕様変更
     status: done
     priority: high
     progress: 0
-    sort_order: 88
+    sort_order: 78
     tags:
       - 開発管理
       - 仕様変更
       - CHG-045
     due_date: null
     task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0088.md
-    updated_at: '2026-04-30T09:20:00.000Z'
+    updated_at: '2026-05-01T13:45:04.316Z'
   - id: T-0089
     title: 'CHG-045-02: 6階層目以上を警告付きルート相当表示'
     list: 仕様変更
     status: done
     priority: high
     progress: 0
-    sort_order: 89
+    sort_order: 79
     tags:
       - 開発管理
       - 仕様変更
       - CHG-045
     due_date: null
     task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0089.md
-    updated_at: '2026-04-30T09:20:00.000Z'
+    updated_at: '2026-05-01T13:45:04.316Z'
   - id: T-0090
     title: 'CHG-045-03: 追加・完了・進捗連動を5階層対応'
     list: 仕様変更
     status: done
     priority: normal
     progress: 0
-    sort_order: 90
+    sort_order: 80
     tags:
       - 開発管理
       - 仕様変更
       - CHG-045
     due_date: null
     task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0090.md
-    updated_at: '2026-04-30T09:20:00.000Z'
+    updated_at: '2026-05-01T13:45:04.316Z'
   - id: T-0091
     title: 'CHG-045-04: 検索・ドラッグ・検証を階層上限対応'
     list: 仕様変更
     status: done
     priority: normal
     progress: 0
-    sort_order: 91
+    sort_order: 81
     tags:
       - 開発管理
       - 仕様変更
       - CHG-045
     due_date: null
     task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0091.md
-    updated_at: '2026-04-30T09:20:00.000Z'
+    updated_at: '2026-05-01T13:45:04.316Z'
   - id: T-0092
     title: 'CHG-045-05: 5階層表示と6階層目警告のユーザ確認'
     list: 仕様変更
     status: done
     priority: normal
     progress: 100
-    sort_order: 92
+    sort_order: 82
     tags:
       - 開発管理
       - 仕様変更
       - CHG-045
     due_date: null
     task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0092.md
-    updated_at: '2026-04-30T13:25:00.000Z'
+    updated_at: '2026-05-01T13:45:04.316Z'
+  - id: T-0094
+    title: CHG-046-00 タスク管理設計へドラッグハンドル並び替え仕様を反映
+    list: 仕様変更
+    status: done
+    priority: normal
+    progress: 100
+    sort_order: 83
+    tags:
+      - 開発管理
+      - 仕様変更
+    due_date: null
+    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0094.md
+    updated_at: '2026-05-01T13:45:04.316Z'
+  - id: T-0095
+    title: CHG-046-01 メインペインのドラッグ開始をハンドルに限定
+    list: 仕様変更
+    status: done
+    priority: normal
+    progress: 100
+    sort_order: 84
+    tags:
+      - 開発管理
+      - 仕様変更
+    due_date: null
+    task_file_path: D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0095.md
+    updated_at: '2026-05-01T13:45:04.316Z'
 task_file_roots:
   - .
-next_task_id: 93
-last_updated: '2026-04-30T13:28:27.993Z'
+next_task_id: 97
+last_updated: '2026-05-01T14:10:41.336Z'

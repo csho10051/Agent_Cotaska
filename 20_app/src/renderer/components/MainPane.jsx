@@ -43,6 +43,7 @@ function MainPane({
   const inlineInputRef = useRef(null);
   const contextMenuRef = useRef(null);
   const searchTimer = useRef(null);
+  const dragHandleTaskIdRef = useRef(null);
   const [localSearch, setLocalSearch] = useState("");
   const [contextMenu, setContextMenu] = useState(null);
   const [contextMenuPos, setContextMenuPos] = useState(null);
@@ -52,6 +53,7 @@ function MainPane({
   const [sectionCollapsed, setSectionCollapsed] = useState({});
   const [dueEditorTaskId, setDueEditorTaskId] = useState(null);
   const [draggingTaskId, setDraggingTaskId] = useState(null);
+  const [dropTargetTaskId, setDropTargetTaskId] = useState(null);
   const [hoveredSectionKey, setHoveredSectionKey] = useState(null);
   const dragEnabled = Boolean(onReorderTask) && !isTrashed && !isCompleted && !isSearchMode;
 
@@ -175,6 +177,7 @@ function MainPane({
       task.status === "done" ? "task-row--done" : "",
       isSubtask ? "task-row--subtask" : "",
       draggingTaskId === task.id ? "task-row--dragging" : "",
+      dropTargetTaskId === task.id && draggingTaskId !== task.id ? "task-row--drop-before" : "",
       isInvalid ? "task-row--invalid" : "",
       isHierarchyWarning ? "task-row--hierarchy-warning" : "",
     ].filter(Boolean).join(" ");
@@ -188,16 +191,29 @@ function MainPane({
         onClick={() => onTaskClick?.(task)}
         draggable={canDragTask}
         onDragStart={(e) => {
-          if (!canDragTask) return;
+          if (!canDragTask || dragHandleTaskIdRef.current !== task.id) {
+            e.preventDefault();
+            return;
+          }
           e.dataTransfer.effectAllowed = "move";
           e.dataTransfer.setData("text/plain", String(task.id));
           setDraggingTaskId(task.id);
         }}
-        onDragEnd={() => setDraggingTaskId(null)}
+        onDragEnd={() => {
+          setDraggingTaskId(null);
+          setDropTargetTaskId(null);
+          dragHandleTaskIdRef.current = null;
+        }}
         onDragOver={(e) => {
           if (isInvalid || !dragEnabled || !draggingTaskId || draggingTaskId === task.id) return;
           e.preventDefault();
+          e.stopPropagation();
           e.dataTransfer.dropEffect = "move";
+          setDropTargetTaskId(task.id);
+        }}
+        onDragLeave={(e) => {
+          if (e.currentTarget.contains(e.relatedTarget)) return;
+          if (dropTargetTaskId === task.id) setDropTargetTaskId(null);
         }}
         onDrop={(e) => {
           if (isInvalid || !dragEnabled) return;
@@ -206,6 +222,8 @@ function MainPane({
           const draggedTaskId = e.dataTransfer.getData("text/plain") || draggingTaskId;
           if (!draggedTaskId || draggedTaskId === task.id) {
             setDraggingTaskId(null);
+            setDropTargetTaskId(null);
+            dragHandleTaskIdRef.current = null;
             setHoveredSectionKey(null);
             return;
           }
@@ -216,6 +234,8 @@ function MainPane({
             toSectionLabel: sectionMeta?.label || null,
           });
           setDraggingTaskId(null);
+          setDropTargetTaskId(null);
+          dragHandleTaskIdRef.current = null;
           setHoveredSectionKey(null);
         }}
         onContextMenu={(e) => {
@@ -238,7 +258,18 @@ function MainPane({
           </button>
         )}
         {isSubtask && <span className="subtask-indent" />}
-        <span className="drag-handle">⠇</span>
+        <span
+          className={`drag-handle${canDragTask ? "" : " drag-handle--disabled"}`}
+          onMouseDown={(e) => {
+            e.stopPropagation();
+            if (canDragTask) dragHandleTaskIdRef.current = task.id;
+          }}
+          onClick={(e) => e.stopPropagation()}
+          title="ドラッグして並び替え"
+          aria-label="ドラッグして並び替え"
+        >
+          ⠇
+        </span>
         {!isTrashed && (
           <input
             type="checkbox"
@@ -372,6 +403,7 @@ function MainPane({
               e.preventDefault();
               e.dataTransfer.dropEffect = "move";
               setHoveredSectionKey(`progress:${section.label}`);
+              setDropTargetTaskId(null);
             }}
             onDragLeave={() => {
               if (hoveredSectionKey === `progress:${section.label}`) setHoveredSectionKey(null);
@@ -388,6 +420,7 @@ function MainPane({
                 toSectionLabel: section.label,
               });
               setDraggingTaskId(null);
+              setDropTargetTaskId(null);
               setHoveredSectionKey(null);
             }}
           >
@@ -421,6 +454,7 @@ function MainPane({
               e.preventDefault();
               e.dataTransfer.dropEffect = "move";
               setHoveredSectionKey(`date:${section.label}`);
+              setDropTargetTaskId(null);
             }}
             onDragLeave={() => {
               if (hoveredSectionKey === `date:${section.label}`) setHoveredSectionKey(null);
@@ -437,6 +471,7 @@ function MainPane({
                 toSectionLabel: section.label,
               });
               setDraggingTaskId(null);
+              setDropTargetTaskId(null);
               setHoveredSectionKey(null);
             }}
           >

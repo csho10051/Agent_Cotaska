@@ -198,6 +198,12 @@ function sortByPriority(arr) {
   );
 }
 
+function sortByTaskOrder(arr) {
+  return [...arr].sort((a, b) =>
+    (a.sort_order || 0) - (b.sort_order || 0) || String(a.id).localeCompare(String(b.id))
+  );
+}
+
 function taskMatchesSearch(task, keyword) {
   const searchable = [
     task.id,
@@ -226,8 +232,8 @@ function buildSections(allTasks, view) {
       (t) => dueDatePart(t.due_date) && dueDatePart(t.due_date) <= today && t.status !== "done"
     );
     const sections = [];
-    const overdue    = sortByPriority(filtered.filter((t) => dueDatePart(t.due_date) < today));
-    const todayTasks = sortByPriority(filtered.filter((t) => dueDatePart(t.due_date) === today));
+    const overdue    = sortByTaskOrder(filtered.filter((t) => dueDatePart(t.due_date) < today));
+    const todayTasks = sortByTaskOrder(filtered.filter((t) => dueDatePart(t.due_date) === today));
     if (overdue.length)    sections.push({ label: "⚠️ 遅延", tasks: overdue });
     if (todayTasks.length) sections.push({ label: "☀️ 今日",   tasks: todayTasks });
     return sections;
@@ -241,10 +247,10 @@ function buildSections(allTasks, view) {
     );
     
     const sections  = [];
-    const overdue    = sortByPriority(filtered.filter((t) => dueDatePart(t.due_date) <  today));
-    const todayTasks = sortByPriority(filtered.filter((t) => dueDatePart(t.due_date) === today));
-    const tomorrows  = sortByPriority(filtered.filter((t) => dueDatePart(t.due_date) === day1));
-    const later      = sortByPriority(filtered.filter((t) => dueDatePart(t.due_date) >= day2 && dueDatePart(t.due_date) <= today7));
+    const overdue    = sortByTaskOrder(filtered.filter((t) => dueDatePart(t.due_date) <  today));
+    const todayTasks = sortByTaskOrder(filtered.filter((t) => dueDatePart(t.due_date) === today));
+    const tomorrows  = sortByTaskOrder(filtered.filter((t) => dueDatePart(t.due_date) === day1));
+    const later      = sortByTaskOrder(filtered.filter((t) => dueDatePart(t.due_date) >= day2 && dueDatePart(t.due_date) <= today7));
     if (overdue.length)    sections.push({ label: "⚠️ 遅延",   tasks: overdue });
     if (todayTasks.length) sections.push({ label: "☀️ 今日",   tasks: todayTasks });
     if (tomorrows.length)  sections.push({ label: "📅 明日",   tasks: tomorrows });
@@ -350,7 +356,7 @@ function App() {
         mapped = enrichTaskHierarchy(rows.map(mapFileTask));
       }
 
-      setTasks(mapped);
+      setTasks(sortByTaskOrder(mapped));
 
       // 固定ビューのバッジ件数
       const today = localDateString();
@@ -655,7 +661,7 @@ function App() {
       visibleTasks = [];
     } else {
       const kw = searchKeyword.toLowerCase();
-      visibleTasks = tasks.filter((t) => taskMatchesSearch(t, kw));
+      visibleTasks = sortByTaskOrder(tasks.filter((t) => taskMatchesSearch(t, kw)));
     }
   } else if (activeNav === "ゴミ箱") {
     visibleTasks = trashedTasks;
@@ -664,30 +670,30 @@ function App() {
   } else if (loading) {
     visibleTasks = [];
   } else if (activeNav === "すべて") {
-    visibleTasks = tasks.filter((t) => t.status !== "done");
+    visibleTasks = sortByTaskOrder(tasks.filter((t) => t.status !== "done"));
   } else if (activeNav === "仕掛") {
-    visibleTasks = tasks.filter((t) => t.progressStatus === "仕掛" && t.status !== "done");
+    visibleTasks = sortByTaskOrder(tasks.filter((t) => t.progressStatus === "仕掛" && t.status !== "done"));
   } else if (activeNav === "明日") {
     const tomorrow = addDays(localDateString(), 1);
-    visibleTasks = tasks.filter((t) => dueDatePart(t.due_date) === tomorrow && t.status !== "done");
+    visibleTasks = sortByTaskOrder(tasks.filter((t) => dueDatePart(t.due_date) === tomorrow && t.status !== "done"));
   } else if (activeNav === "今日" || activeNav === "次の7日間") {
     visibleSections = buildSections(tasks, activeNav);
     visibleTasks    = visibleSections.flatMap((s) => s.tasks);
   } else if (activeNav === "受信トレイ" || activeNav === "リストなし") {
     // T-007-05: 完了済みタスクは完了ビューへ
     // T-031: list_id を list に変更
-    visibleTasks = tasks.filter((t) =>
+    visibleTasks = sortByTaskOrder(tasks.filter((t) =>
       (t.list === null || t.list === undefined) && t.status !== "done"
-    );
+    ));
   } else {
     if (activeNav.startsWith(TAG_NAV_PREFIX)) {
       const activeTag = activeNav.slice(TAG_NAV_PREFIX.length);
       // CHG-011: 完了タスクは完了セクションへ移動するため status フィルタを追加
-      visibleTasks = tasks.filter((t) => (t.tags || []).includes(activeTag) && t.status !== "done");
+      visibleTasks = sortByTaskOrder(tasks.filter((t) => (t.tags || []).includes(activeTag) && t.status !== "done"));
     } else {
       // T-031: list_id ではなく list（文字列）でフィルタ
       // CHG-011: 完了タスクは完了セクションへ移動するため status フィルタを追加
-      visibleTasks = tasks.filter((t) => t.list === activeNav && t.status !== "done");
+      visibleTasks = sortByTaskOrder(tasks.filter((t) => t.list === activeNav && t.status !== "done"));
     }
   }
 
