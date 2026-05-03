@@ -7,6 +7,9 @@ import DetailPane from "./components/DetailPane";
 
 const TAG_NAV_PREFIX = "tag:";
 const MAX_TASK_TREE_DEPTH = 5;
+const DETAIL_PANE_MIN_WIDTH = 320;
+const DETAIL_PANE_MAX_WIDTH = 720;
+const DETAIL_PANE_DEFAULT_WIDTH = 380;
 
 // ── Markdownファイル → UI オブジェクトの変換 ────────────────────────────────────
 function formatDue(due_date) {
@@ -280,7 +283,11 @@ function App() {
 
   // CHG-032: ペイン幅リサイズ
   const [navWidth,    setNavWidth]    = useState(240);
-  const [detailWidth, setDetailWidth] = useState(380);
+  const [detailWidth, setDetailWidth] = useState(() => {
+    const saved = Number(window.localStorage?.getItem("cotaska.detailPaneWidth"));
+    if (!Number.isFinite(saved)) return DETAIL_PANE_DEFAULT_WIDTH;
+    return Math.max(DETAIL_PANE_MIN_WIDTH, Math.min(DETAIL_PANE_MAX_WIDTH, saved));
+  });
   const resizeDragRef = useRef(null);
 
   // T-005-02: DB からタスク一覧を読み込む
@@ -306,7 +313,7 @@ function App() {
       if (drag.type === "nav") {
         setNavWidth(Math.max(160, Math.min(480, drag.startWidth + delta)));
       } else {
-        setDetailWidth(Math.max(280, Math.min(640, drag.startWidth - delta)));
+        setDetailWidth(Math.max(DETAIL_PANE_MIN_WIDTH, Math.min(DETAIL_PANE_MAX_WIDTH, drag.startWidth - delta)));
       }
     };
     const onUp = () => { resizeDragRef.current = null; };
@@ -317,6 +324,10 @@ function App() {
       window.removeEventListener("mouseup", onUp);
     };
   }, []);
+
+  useEffect(() => {
+    window.localStorage?.setItem("cotaska.detailPaneWidth", String(detailWidth));
+  }, [detailWidth]);
 
   const loadTasks = useCallback(async () => {
     setLoading(true);
@@ -806,13 +817,14 @@ function App() {
         onSearchChange={setSearchKeyword}
       />
       <div
-        className="resize-handle"
+        className="resize-handle resize-handle--detail"
+        title="詳細ペインの幅を変更"
         onMouseDown={(e) => {
           e.preventDefault();
           resizeDragRef.current = { type: "detail", startX: e.clientX, startWidth: detailWidth };
         }}
       />
-      <div style={{ width: detailWidth, flexShrink: 0, overflow: "visible", display: "flex", alignSelf: "stretch", position: "relative", zIndex: 20 }}>
+      <div className="detail-pane-shell" style={{ width: detailWidth }}>
         <DetailPane
           key={selectedTask?.id ?? "none"}
           task={selectedTask}

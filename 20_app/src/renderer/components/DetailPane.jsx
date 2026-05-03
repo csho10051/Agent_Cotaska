@@ -5,6 +5,12 @@ import DueDatePopover from "./DueDatePopover";
 const PRIORITY_LABEL = { normal: "低", medium: "中", high: "高" };
 const PRIORITY_COLOR = { normal: "#aaa", medium: "#f39c12", high: "#e74c3c" };
 const markdown = new MarkdownIt({ html: false, linkify: true, breaks: true });
+const SUBTASK_PANEL_MIN_HEIGHT = 120;
+const SUBTASK_PANEL_MAX_HEIGHT = 520;
+const SUBTASK_PANEL_DEFAULT_HEIGHT = 260;
+const SUBTASK_PANEL_STORAGE_KEY = "cotaska.detailSubtasksHeight";
+
+const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 
 function getTaskBaseDir(taskFilePath) {
   const raw = String(taskFilePath || "").trim();
@@ -109,7 +115,14 @@ function DetailPaneBody({
   const [completedAt, setCompletedAt] = useState(task.completed_at || null);
   const [metaOpen, setMetaOpen] = useState(true);
   const [subtasksOpen, setSubtasksOpen] = useState(true);
+  const [subtaskPanelHeight, setSubtaskPanelHeight] = useState(() => {
+    if (typeof window === "undefined") return SUBTASK_PANEL_DEFAULT_HEIGHT;
+    const saved = Number(window.localStorage?.getItem(SUBTASK_PANEL_STORAGE_KEY));
+    if (!Number.isFinite(saved)) return SUBTASK_PANEL_DEFAULT_HEIGHT;
+    return clamp(saved, SUBTASK_PANEL_MIN_HEIGHT, SUBTASK_PANEL_MAX_HEIGHT);
+  });
   const [subtaskNodeExpanded, setSubtaskNodeExpanded] = useState({});
+  const subtaskResizeRef = useRef(null);
   const [openExternalError, setOpenExternalError] = useState("");
 
   const parentTask = tasks.find((candidate) =>
@@ -136,6 +149,46 @@ function DetailPaneBody({
   };
 
   const relatedSubtasks = collectRelatedSubtasks(task.id);
+
+  useEffect(() => {
+    window.localStorage?.setItem(SUBTASK_PANEL_STORAGE_KEY, String(subtaskPanelHeight));
+  }, [subtaskPanelHeight]);
+
+  useEffect(() => {
+    const handleResizeMove = (event) => {
+      const drag = subtaskResizeRef.current;
+      if (!drag) return;
+      const deltaY = event.clientY - drag.startY;
+      const viewportMax = Math.max(
+        SUBTASK_PANEL_MIN_HEIGHT,
+        Math.min(SUBTASK_PANEL_MAX_HEIGHT, window.innerHeight - 260)
+      );
+      setSubtaskPanelHeight(clamp(drag.startHeight - deltaY, SUBTASK_PANEL_MIN_HEIGHT, viewportMax));
+    };
+
+    const handleResizeEnd = () => {
+      subtaskResizeRef.current = null;
+      document.body.classList.remove("is-resizing-detail-sections");
+    };
+
+    window.addEventListener("mousemove", handleResizeMove);
+    window.addEventListener("mouseup", handleResizeEnd);
+
+    return () => {
+      window.removeEventListener("mousemove", handleResizeMove);
+      window.removeEventListener("mouseup", handleResizeEnd);
+      document.body.classList.remove("is-resizing-detail-sections");
+    };
+  }, []);
+
+  const handleSubtaskPanelResizeStart = (event) => {
+    event.preventDefault();
+    subtaskResizeRef.current = {
+      startY: event.clientY,
+      startHeight: subtaskPanelHeight,
+    };
+    document.body.classList.add("is-resizing-detail-sections");
+  };
 
   const progressBadgeClass = (targetTask) => {
     if (targetTask.is_invalid) return "invalid";
@@ -584,8 +637,21 @@ function DetailPaneBody({
         )}
       </div>
 
+      {relatedSubtasks.length > 0 && subtasksOpen && (
+        <div
+          className="detail-section-resize-handle"
+          onMouseDown={handleSubtaskPanelResizeStart}
+          title="Resize task detail and related subtasks"
+          role="separator"
+          aria-orientation="horizontal"
+        />
+      )}
+
       {relatedSubtasks.length > 0 && (
-        <div className="detail-subtasks">
+        <div
+          className={`detail-subtasks${subtasksOpen ? " detail-subtasks--open" : " detail-subtasks--collapsed"}`}
+          style={subtasksOpen ? { height: subtaskPanelHeight } : undefined}
+        >
           <button
             type="button"
             className="detail-subtasks-header"

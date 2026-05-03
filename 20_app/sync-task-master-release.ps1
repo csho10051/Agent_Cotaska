@@ -1,4 +1,7 @@
-# sync-task-master-release.ps1
+﻿# sync-task-master-release.ps1
+# release\Cotaska-0.1.0-dist に作成された最新リリース成果物を、
+# 00_mgmt 配下のタスクマスター用配布フォルダへ反映する同期スクリプト。
+# 既存の配布フォルダはタイムスタンプ付きでバックアップしてから置き換える。
 # 目的:
 # 1) タスクマスター配布フォルダをタイムスタンプ付きでバックアップ
 # 2) 最新リリース出力から Cotaska.exe を差し替え
@@ -14,6 +17,8 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+# app.asar のロック元プロセスを調べるため、Windows Restart Manager API を
+# PowerShell から呼び出せる .NET 型として一度だけ登録する。
 function Ensure-RestartManagerTypes {
     if ("Cotaska.RestartManager" -as [type]) {
         return
@@ -81,6 +86,8 @@ function Get-LockingProcesses {
 
     Ensure-RestartManagerTypes
 
+    # Restart Manager の一時セッションに対象ファイルを登録し、
+    # そのファイルを開いているプロセス一覧を取得する。
     $sessionKey = [Guid]::NewGuid().ToString()
     $handle = 0
     $startResult = [Cotaska.RestartManager]::RmStartSession([ref]$handle, 0, $sessionKey)
@@ -127,6 +134,8 @@ function Remove-PathWithLockHint {
         [Parameter(Mandatory = $true)][string]$Path
     )
 
+    # _app フォルダ削除時に app.asar が掴まれていることがあるため、
+    # 短いリトライ後も失敗する場合はロック元プロセスを表示して終了する。
     for ($try = 1; $try -le 3; $try++) {
         try {
             Remove-Item -LiteralPath $Path -Recurse -Force
@@ -165,12 +174,14 @@ function Assert-PathExists {
     }
 }
 
+# スクリプト配置場所を基準に、リリース元とタスクマスター反映先を決定する。
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $repoRoot = (Resolve-Path (Join-Path $scriptDir "..")).Path
 
 $releaseRoot = Join-Path $scriptDir "release\Cotaska-0.1.0-dist"
 $taskMasterRoot = Join-Path $repoRoot "00_mgmt\10_task\Cotaska-0.1.0-dist"
 
+# リリース成果物側の Cotaska.exe、_app、tools、AIエージェント運用ルールを同期対象にする。
 $srcExe = Join-Path $releaseRoot "Cotaska.exe"
 $srcApp = Join-Path $releaseRoot "_app"
 $srcTools = Join-Path $releaseRoot "tools"
@@ -187,12 +198,14 @@ $dstApp = Join-Path $taskMasterRoot "_app"
 $dstTools = Join-Path $taskMasterRoot "tools"
 $dstAiAgentRule = Join-Path $taskMasterRoot $aiAgentRuleFileName
 
+# 置き換え前の配布フォルダ全体を backup 配下へ退避するための保存先を作る。
 $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
 $backupDir = Join-Path (Split-Path $taskMasterRoot) "backup"
 if (-not (Test-Path -LiteralPath $backupDir)) { New-Item -ItemType Directory -Path $backupDir | Out-Null }
 $backupRoot = Join-Path $backupDir "Cotaska-0.1.0-dist_$timestamp"
 
 if ($StopRunningCotaska) {
+    # 実行中の Cotaska 関連プロセスがあると _app\resources\app.asar を置換できないため停止する。
     Write-Host "[1/5] Stopping related processes..."
     Get-Process -Name "Cotaska", "CotaskaCore", "electron", "crashpad_handler" -ErrorAction SilentlyContinue |
         Stop-Process -Force -ErrorAction SilentlyContinue
@@ -200,6 +213,7 @@ if ($StopRunningCotaska) {
 }
 
 Write-Host "[2/5] Validating source/target paths..."
+# コピー元とコピー先に必要なファイル・フォルダが揃っていることを先に検証する。
 Assert-PathExists -Path $releaseRoot -Label "Release root"
 Assert-PathExists -Path $taskMasterRoot -Label "Task-master root"
 Assert-PathExists -Path $srcExe -Label "Release Cotaska.exe"
@@ -208,19 +222,23 @@ Assert-PathExists -Path (Join-Path $srcTools "validate-tasks.ps1") -Label "Relea
 Assert-PathExists -Path $srcAiAgentRule -Label "Release AI agent rule"
 
 Write-Host "[3/5] Creating backup: $backupRoot"
+# 失敗時に戻せるよう、現在のタスクマスター配布フォルダを丸ごとバックアップする。
 Copy-Item -LiteralPath $taskMasterRoot -Destination $backupRoot -Recurse -Force
 
 Write-Host "[4/5] Replacing Cotaska.exe"
+# 実行ファイルとAIエージェント運用ルールを最新リリースから上書きする。
 Copy-Item -LiteralPath $srcExe -Destination $dstExe -Force
 Copy-Item -LiteralPath $srcAiAgentRule -Destination $dstAiAgentRule -Force
 
 Write-Host "[5/5] Replacing _app folder"
+# Electron アプリ本体はフォルダ単位で差し替える。
 if (Test-Path -LiteralPath $dstApp) {
     Remove-PathWithLockHint -Path $dstApp
 }
 Copy-Item -LiteralPath $srcApp -Destination $dstApp -Recurse -Force
 
 Write-Host "      Syncing tools folder"
+# 検証スクリプトなどの補助ツールもリリース成果物に合わせて同期する。
 if (Test-Path -LiteralPath $dstTools) {
     Remove-Item -LiteralPath $dstTools -Recurse -Force
 }

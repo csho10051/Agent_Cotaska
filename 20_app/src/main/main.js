@@ -702,7 +702,9 @@ function createWindow() {
   if (process.env.NODE_ENV === "development") {
     const port = process.env.VITE_PORT || "5173";
     win.loadURL(`http://localhost:${port}`);
-    win.webContents.openDevTools();
+    if (process.env.COTASKA_NO_DEVTOOLS !== "1") {
+      win.webContents.openDevTools();
+    }
   } else {
     const rendererPath = path.join(__dirname, "../../dist/renderer/index.html");
     if (!require("fs").existsSync(rendererPath)) {
