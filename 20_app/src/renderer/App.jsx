@@ -69,7 +69,7 @@ function calcParentProgress(subtasks) {
   const statuses = subtasks.map((t) => normalizeProgressStatusValue(t.progressStatus, t.status));
   if (statuses.length > 0 && statuses.every((status) => status === "完了")) return "完了";
   if (statuses.some((status) => status === "仕掛" || status === "完了")) return "仕掛";
-  return "未着";
+  return null;
 }
 
 // T-031: frontmatter形式でのペイロード作成
@@ -339,6 +339,7 @@ function App() {
         const children = byParent[parent.id] || [];
         if (children.length === 0) continue;
         const estimated = calcParentProgress(children);
+        if (!estimated) continue;
         const estimatedTaskStatus = estimated === "完了" ? "done" : "todo";
         if (parent.progressStatus !== estimated || parent.status !== estimatedTaskStatus) {
           await window.cotaskaAPI?.tasks?.update(
@@ -815,7 +816,9 @@ function App() {
         <DetailPane
           key={selectedTask?.id ?? "none"}
           task={selectedTask}
+          tasks={tasks}
           onClose={() => setSelectedTask(null)}
+          onSelectTask={setSelectedTask}
           onSaved={handleSaved}
           onToggleComplete={handleToggleComplete}
           onSetTaskDue={handleSetTaskDue}

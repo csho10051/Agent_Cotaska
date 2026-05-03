@@ -310,7 +310,7 @@ function estimateParentState(children) {
   if (statuses.some((status) => status === '仕掛' || status === '完了')) {
     return { progress_status: '仕掛', status: 'todo' };
   }
-  return { progress_status: '未着', status: 'todo' };
+  return null;
 }
 
 function recomputeParentFromChildren(parentId, now) {
@@ -321,6 +321,7 @@ function recomputeParentFromChildren(parentId, now) {
   const siblings = Object.values(taskCache)
     .filter((child) => child.parent === parentId && child.delete_flag === 0);
   const estimatedParent = estimateParentState(siblings);
+  if (!estimatedParent) return;
 
   parent.progress_status = estimatedParent.progress_status;
   parent.status = estimatedParent.status;

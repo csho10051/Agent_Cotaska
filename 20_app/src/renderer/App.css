@@ -919,6 +919,174 @@ html, body, #root {
   color: #666;
 }
 
+.detail-parent-link-wrap {
+  padding: 10px 16px 0;
+  flex-shrink: 0;
+}
+
+.detail-parent-link {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid #d8e1ec;
+  border-radius: 6px;
+  background: #fff;
+  color: #31445c;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  font-family: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.detail-parent-link:hover {
+  background: #f3f8ff;
+  border-color: #bdd2ea;
+}
+
+.detail-parent-label {
+  color: #7a8da4;
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.detail-parent-title {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.detail-parent-id {
+  color: #99a7b7;
+  font-size: 11px;
+  font-family: Consolas, "Courier New", monospace;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.detail-parent-arrow {
+  color: #9aa9ba;
+  font-size: 16px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.detail-subtasks {
+  padding: 10px 16px;
+  border-top: 1px solid #eee;
+  background: #fafafa;
+  flex-shrink: 0;
+}
+
+.detail-subtasks-header {
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: #999;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0;
+  margin-bottom: 6px;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+
+.detail-subtasks-header:hover {
+  color: #666;
+}
+
+.detail-subtasks-count {
+  color: #99a7b7;
+  font-size: 11px;
+  font-weight: 400;
+}
+
+.detail-subtask-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-subtask-row {
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 4px 6px calc(4px + (var(--task-depth, 1) - 1) * 22px);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.detail-subtask-row:hover {
+  background: #f2f6fb;
+}
+
+.detail-subtask-expand {
+  width: 16px;
+  height: 16px;
+  border: none;
+  background: transparent;
+  color: #888;
+  font-size: 11px;
+  line-height: 1;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.detail-subtask-expand--hidden {
+  visibility: hidden;
+}
+
+.detail-subtask-row input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #3498db;
+  flex-shrink: 0;
+}
+
+.detail-subtask-title {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  color: #333;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.detail-subtask-row--done .detail-subtask-title {
+  color: #999;
+  text-decoration: line-through;
+}
+
+.detail-subtask-due {
+  color: #999;
+  font-size: 11px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.detail-subtask-due.overdue {
+  color: #c0392b;
+  font-weight: 600;
+}
+
+.detail-subtask-meta {
+  color: #999;
+  font-size: 11px;
+  font-family: Consolas, "Courier New", monospace;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
 .due-dialog {
   position: absolute;
   top: calc(100% + 8px);

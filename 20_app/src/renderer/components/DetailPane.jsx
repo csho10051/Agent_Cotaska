@@ -43,7 +43,9 @@ function useDebounce(fn, delay) {
 
 function DetailPane({
   task,
+  tasks = [],
   onClose,
+  onSelectTask,
   onSaved,
   onToggleComplete,
   onSetTaskDue,
@@ -63,7 +65,9 @@ function DetailPane({
   return (
     <DetailPaneBody
       task={task}
+      tasks={tasks}
       onClose={onClose}
+      onSelectTask={onSelectTask}
       onSaved={onSaved}
       onToggleComplete={onToggleComplete}
       onSetTaskDue={onSetTaskDue}
@@ -77,6 +81,8 @@ function DetailPane({
 
 function DetailPaneBody({
   task,
+  tasks = [],
+  onSelectTask,
   onSaved,
   onToggleComplete,
   onSetTaskDue,
@@ -102,7 +108,102 @@ function DetailPaneBody({
   const [dueEditorOpen, setDueEditorOpen] = useState(false);
   const [completedAt, setCompletedAt] = useState(task.completed_at || null);
   const [metaOpen, setMetaOpen] = useState(true);
+  const [subtasksOpen, setSubtasksOpen] = useState(true);
+  const [subtaskNodeExpanded, setSubtaskNodeExpanded] = useState({});
   const [openExternalError, setOpenExternalError] = useState("");
+
+  const parentTask = tasks.find((candidate) =>
+    candidate.id === task.parent && !candidate.is_invalid
+  );
+  const sortedTasks = [...tasks].sort((a, b) =>
+    (a.sort_order || 0) - (b.sort_order || 0) || String(a.id).localeCompare(String(b.id))
+  );
+  const relatedTasksByParent = sortedTasks.reduce((acc, candidate) => {
+    if (!candidate.parent || candidate.is_invalid || candidate.hierarchyOverLimit || candidate.hierarchyCycle) return acc;
+    if (!acc[candidate.parent]) acc[candidate.parent] = [];
+    acc[candidate.parent].push(candidate);
+    return acc;
+  }, {});
+
+  const collectRelatedSubtasks = (parentId, depth = 1, seen = new Set()) => {
+    if (depth > 5 || seen.has(parentId)) return [];
+    const nextSeen = new Set(seen);
+    nextSeen.add(parentId);
+    return (relatedTasksByParent[parentId] || []).flatMap((child) => [
+      { task: child, depth },
+      ...collectRelatedSubtasks(child.id, depth + 1, nextSeen),
+    ]);
+  };
+
+  const relatedSubtasks = collectRelatedSubtasks(task.id);
+
+  const progressBadgeClass = (targetTask) => {
+    if (targetTask.is_invalid) return "invalid";
+    if (targetTask.status === "done" || targetTask.progressStatus === "完了") return "done";
+    if (targetTask.progressStatus === "仕掛") return "in-progress";
+    return "not-started";
+  };
+
+  const handleSelectRelatedTask = (targetTask) => {
+    if (!targetTask || targetTask.is_invalid) return;
+    onSelectTask?.(targetTask);
+  };
+
+  const renderRelatedSubtaskRows = (parentId, depth = 1, seen = new Set()) => {
+    if (depth > 5 || seen.has(parentId)) return null;
+    const nextSeen = new Set(seen);
+    nextSeen.add(parentId);
+
+    return (relatedTasksByParent[parentId] || []).map((subtask) => {
+      const children = depth < 5 ? (relatedTasksByParent[subtask.id] || []) : [];
+      const isExpanded = subtaskNodeExpanded[subtask.id] !== false;
+      return (
+        <React.Fragment key={subtask.id}>
+          <div
+            className={`detail-subtask-row${subtask.status === "done" ? " detail-subtask-row--done" : ""}`}
+            style={{ "--task-depth": depth }}
+            onClick={() => handleSelectRelatedTask(subtask)}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                handleSelectRelatedTask(subtask);
+              }
+            }}
+          >
+            <button
+              type="button"
+              className={`detail-subtask-expand${children.length === 0 ? " detail-subtask-expand--hidden" : ""}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                setSubtaskNodeExpanded((prev) => ({ ...prev, [subtask.id]: !isExpanded }));
+              }}
+              title="展開/折りたたみ"
+            >
+              {isExpanded ? "▼" : "▶"}
+            </button>
+            <input
+              type="checkbox"
+              checked={subtask.status === "done"}
+              onChange={async (e) => {
+                e.stopPropagation();
+                await onToggleComplete?.(subtask);
+              }}
+              onClick={(e) => e.stopPropagation()}
+            />
+            <span className={`progress-status-badge ${progressBadgeClass(subtask)}`}>
+              {subtask.progressStatus || (subtask.status === "done" ? "完了" : "未着")}
+            </span>
+            <span className="detail-subtask-title">{subtask.title}</span>
+            {subtask.due && <span className={`detail-subtask-due${subtask.overdue ? " overdue" : ""}`}>{subtask.due}</span>}
+            <span className="detail-subtask-meta">{subtask.id}</span>
+          </div>
+          {isExpanded && renderRelatedSubtaskRows(subtask.id, depth + 1, nextSeen)}
+        </React.Fragment>
+      );
+    });
+  };
 
   const persist = async (patch) => {
     if (isInvalid) return;
@@ -439,6 +540,22 @@ function DetailPaneBody({
         )}
       </div>
 
+      {parentTask && (
+        <div className="detail-parent-link-wrap">
+          <button
+            type="button"
+            className="detail-parent-link"
+            onClick={() => handleSelectRelatedTask(parentTask)}
+            title={`親タスクへ移動: ${parentTask.title}`}
+          >
+            <span className="detail-parent-label">親タスク</span>
+            <span className="detail-parent-title">{parentTask.title}</span>
+            <span className="detail-parent-id">{parentTask.id}</span>
+            <span className="detail-parent-arrow">›</span>
+          </button>
+        </div>
+      )}
+
       {/* === detail-body: メモ本文 === */}
       <div className="detail-body">
         <div className="body-section-header">▼ タスク詳細</div>
@@ -466,6 +583,25 @@ function DetailPaneBody({
           />
         )}
       </div>
+
+      {relatedSubtasks.length > 0 && (
+        <div className="detail-subtasks">
+          <button
+            type="button"
+            className="detail-subtasks-header"
+            onClick={() => setSubtasksOpen((prev) => !prev)}
+            aria-expanded={subtasksOpen}
+          >
+            <span>{subtasksOpen ? "▼" : "▶"}関連サブタスク</span>
+            <span className="detail-subtasks-count">{relatedSubtasks.length}</span>
+          </button>
+          {subtasksOpen && (
+            <div className="detail-subtask-list">
+              {renderRelatedSubtaskRows(task.id)}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* === detail-footer: 登録日時・完了日時・ID === */}
       <div className="detail-footer">

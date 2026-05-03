@@ -395,8 +395,8 @@
     }
     .detail-content {
       width: 100%;
-      flex: 1;
-      min-height: 0;
+      flex: 0 0 138px;
+      min-height: 120px;
       border: none;
       background: transparent;
       outline: none;
@@ -408,6 +408,107 @@
     }
 
     /* detail-footer: IDのみ */
+    .parent-link-panel {
+      padding: 8px 16px;
+      border-bottom: 1px solid #eee;
+      background: #fff;
+      flex-shrink: 0;
+    }
+    .parent-link {
+      border: 1px solid #d9e3ee;
+      border-radius: 6px;
+      background: #f7fbff;
+      color: #2d6ea5;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 32px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .parent-link .parent-label {
+      color: #7d8da1;
+      flex-shrink: 0;
+    }
+    .parent-link .parent-title {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: #2d6ea5;
+      font-weight: 600;
+    }
+    .subtask-panel {
+      border-top: 1px solid #eee;
+      margin-top: 12px;
+      padding-top: 10px;
+      flex-shrink: 0;
+    }
+    .subtask-panel summary {
+      list-style: none;
+      cursor: pointer;
+    }
+    .subtask-panel summary::-webkit-details-marker { display: none; }
+    .subtask-panel .section-caret::before { content: "▶"; }
+    .subtask-panel[open] .section-caret::before { content: "▼"; }
+    .subtask-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      color: #888;
+      font-size: 11px;
+      letter-spacing: 0.04em;
+    }
+    .subtask-panel-title {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .subtask-add-btn {
+      border: none;
+      background: transparent;
+      color: #2d78b7;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .detail-subtask-row {
+      min-height: 34px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-radius: 6px;
+      padding: 6px 4px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .detail-subtask-row:hover { background: #f2f6fb; }
+    .detail-subtask-row input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: #3498db;
+      flex-shrink: 0;
+    }
+    .detail-subtask-title {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: #444;
+    }
+    .detail-subtask-row.done .detail-subtask-title {
+      color: #999;
+      text-decoration: line-through;
+    }
+    .detail-subtask-meta {
+      color: #999;
+      font-size: 11px;
+      white-space: nowrap;
+    }
+
     .detail-footer {
       height: 32px;
       padding: 0 16px;
@@ -569,6 +670,14 @@
       </div>
 
       <!-- detail-body: メモ本文のみ -->
+      <div class="parent-link-panel">
+        <div class="parent-link" title="parent task">
+          <span class="parent-label">親タスク</span>
+          <span class="parent-title">業務タスク / DB設計フェーズ</span>
+          <span>›</span>
+        </div>
+      </div>
+
       <div class="detail-body">
         <div class="body-section-header">▼ タスク詳細</div>
         <textarea class="detail-content">tasks, task_logs, lists の定義を作成する。
@@ -579,6 +688,31 @@
       </div>
 
       <!-- detail-footer: IDのみ -->
+      <details class="subtask-panel" style="margin:0 16px 12px;" open>
+        <summary class="subtask-panel-header">
+          <span class="subtask-panel-title"><span class="section-caret"></span>関連サブタスク</span>
+          <span class="subtask-add-btn">＋</span>
+        </summary>
+        <div class="detail-subtask-row">
+          <input type="checkbox" />
+          <span class="detail-subtask-title">テーブル定義の見直し</span>
+          <span class="progress-status-badge not-started">未着手</span>
+          <span class="detail-subtask-meta">T-0032</span>
+        </div>
+        <div class="detail-subtask-row">
+          <input type="checkbox" />
+          <span class="detail-subtask-title">制約定義の確認</span>
+          <span class="progress-status-badge in-progress">仕掛中</span>
+          <span class="detail-subtask-meta">T-0033</span>
+        </div>
+        <div class="detail-subtask-row done">
+          <input type="checkbox" checked />
+          <span class="detail-subtask-title">初期データ確認</span>
+          <span class="progress-status-badge completed">完了</span>
+          <span class="detail-subtask-meta">T-0034</span>
+        </div>
+      </details>
+
       <div class="detail-footer">
         <span class="d-task-id">ID: T-0028</span>
       </div>
