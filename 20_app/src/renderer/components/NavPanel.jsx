@@ -295,13 +295,19 @@ function NavPanel({ activeNav, onNavClick, allBadge = 0, todayBadge = 0, tomorro
         </>
       )}
 
-      {/* 仕掛 / 完了 / ゴミ箱 */}
+      {/* 仕掛 / 保留 / 完了 / ゴミ箱 */}
       <div className="divider" />
       <div
         className={`nav-item${activeNav === "仕掛" ? " active" : ""}`}
         onClick={() => onNavClick?.("仕掛")}
       >
         <span className="icon">🛠️</span> 仕掛
+      </div>
+      <div
+        className={`nav-item${activeNav === "保留" ? " active" : ""}`}
+        onClick={() => onNavClick?.("保留")}
+      >
+        <span className="icon">⏸️</span> 保留
       </div>
       <div
         className={`nav-item${activeNav === "完了" ? " active" : ""}`}

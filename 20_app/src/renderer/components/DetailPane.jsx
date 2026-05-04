@@ -194,6 +194,7 @@ function DetailPaneBody({
     if (targetTask.is_invalid) return "invalid";
     if (targetTask.status === "done" || targetTask.progressStatus === "完了") return "done";
     if (targetTask.progressStatus === "仕掛") return "in-progress";
+    if (targetTask.progressStatus === "保留") return "on-hold";
     return "not-started";
   };
 
@@ -491,6 +492,7 @@ function DetailPaneBody({
                   {isInvalid && <option value="要確認">要確認</option>}
                   <option value="未着">未着</option>
                   <option value="仕掛">仕掛</option>
+                  <option value="保留">保留</option>
                   <option value="完了">完了</option>
                 </select>
               </div>

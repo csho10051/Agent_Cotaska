@@ -280,7 +280,7 @@ function MainPane({
           />
         )}
         {!isTrashed && (
-          <span className={`progress-status-badge ${isInvalid ? "invalid" : task.progressStatus === "完了" ? "done" : task.progressStatus === "仕掛" ? "in-progress" : "not-started"}`}>
+          <span className={`progress-status-badge ${isInvalid ? "invalid" : task.progressStatus === "完了" ? "done" : task.progressStatus === "仕掛" ? "in-progress" : task.progressStatus === "保留" ? "on-hold" : "not-started"}`}>
             {task.progressStatus || "未着"}
           </span>
         )}

@@ -34,7 +34,7 @@ function dueDatePart(due_date) {
 function normalizeProgressStatusValue(progressStatus, status = "todo") {
   const value = String(progressStatus || "").trim();
   if (value === "未着手") return "未着";
-  if (value === "未着" || value === "仕掛" || value === "完了") return value;
+  if (value === "未着" || value === "仕掛" || value === "保留" || value === "完了") return value;
   return status === "done" ? "完了" : (value || "未着");
 }
 
@@ -72,6 +72,7 @@ function calcParentProgress(subtasks) {
   const statuses = subtasks.map((t) => normalizeProgressStatusValue(t.progressStatus, t.status));
   if (statuses.length > 0 && statuses.every((status) => status === "完了")) return "完了";
   if (statuses.some((status) => status === "仕掛" || status === "完了")) return "仕掛";
+  if (statuses.some((status) => status === "保留")) return "保留";
   return null;
 }
 
@@ -222,7 +223,7 @@ function taskMatchesSearch(task, keyword) {
   );
 }
 
-const FIXED_VIEWS = new Set(["すべて", "今日", "明日", "次の7日間", "仕掛", "完了", "ゴミ箱", "受信トレイ", "リストなし"]);
+const FIXED_VIEWS = new Set(["すべて", "今日", "明日", "次の7日間", "仕掛", "保留", "完了", "ゴミ箱", "受信トレイ", "リストなし"]);
 
 /**
  * 今日 / 次の7日間ビューでセクション配列を返す。它以外は null。
@@ -685,6 +686,8 @@ function App() {
     visibleTasks = sortByTaskOrder(tasks.filter((t) => t.status !== "done"));
   } else if (activeNav === "仕掛") {
     visibleTasks = sortByTaskOrder(tasks.filter((t) => t.progressStatus === "仕掛" && t.status !== "done"));
+  } else if (activeNav === "保留") {
+    visibleTasks = sortByTaskOrder(tasks.filter((t) => t.progressStatus === "保留" && t.status !== "done"));
   } else if (activeNav === "明日") {
     const tomorrow = addDays(localDateString(), 1);
     visibleTasks = sortByTaskOrder(tasks.filter((t) => dueDatePart(t.due_date) === tomorrow && t.status !== "done"));
@@ -715,7 +718,7 @@ function App() {
     const today = localDateString();
     if (activeNav === "すべて") {
       completedSectionTasks = tasks.filter((t) => t.status === "done");
-    } else if (activeNav === "仕掛") {
+    } else if (activeNav === "仕掛" || activeNav === "保留") {
       completedSectionTasks = [];
     } else if (activeNav === "今日") {
       // BUG-20260330-01: 「今日」完了セクションは今日期限の完了タスクのみ表示する
@@ -741,7 +744,11 @@ function App() {
   if (useProgressSections) {
     const merged = visibleTasks.filter((t) => {
       const progressStatus = normalizeProgressStatusValue(t.progressStatus, t.status);
-      return t.status !== "done" && progressStatus !== "完了";
+      return t.status !== "done" && progressStatus !== "保留" && progressStatus !== "完了";
+    });
+    const onHold = visibleTasks.filter((t) => {
+      const progressStatus = normalizeProgressStatusValue(t.progressStatus, t.status);
+      return t.status !== "done" && progressStatus === "保留";
     });
     const completedProg = visibleTasks.filter((t) => {
       const progressStatus = normalizeProgressStatusValue(t.progressStatus, t.status);
@@ -749,6 +756,7 @@ function App() {
     });
     progressSections = [];
     if (merged.length > 0) progressSections.push({ label: "未着・仕掛", tasks: merged });
+    if (onHold.length > 0) progressSections.push({ label: "保留", tasks: onHold });
     if (completedProg.length > 0) progressSections.push({ label: "完了", tasks: completedProg });
   }
 

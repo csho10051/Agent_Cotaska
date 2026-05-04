@@ -2,13 +2,15 @@ tasks:
   - id: T-0105
     title: 仕様変更：進捗ステータスに「保留」を追加
     list: 仕様変更
-    status: todo
+    status: doing
     priority: normal
     sort_order: 1
-    tags: []
+    tags:
+      - CHG-050
+      - 仕様変更
     due_date: null
     task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0105.md
-    updated_at: '2026-05-03T13:43:43.823Z'
+    updated_at: '2026-05-04T21:19:24+09:00'
   - id: T-0010
     title: 仕様変更：並び替え機能
     list: 仕様変更
@@ -1245,7 +1247,43 @@ tasks:
     due_date: null
     task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0114.md
     updated_at: '2026-05-04T21:10:02+09:00'
+  - id: T-0115
+    title: CHG-050-00 設計書反映：進捗ステータスに保留を追加
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 115
+    tags:
+      - CHG-050
+      - 設計書
+    due_date: null
+    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0115.md
+    updated_at: '2026-05-04T21:13:51+09:00'
+  - id: T-0116
+    title: CHG-050-01 進捗ステータス「保留」実装
+    list: 仕様変更
+    status: done
+    priority: high
+    sort_order: 116
+    tags:
+      - CHG-050
+      - 実装
+    due_date: null
+    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0116.md
+    updated_at: '2026-05-04T21:19:24+09:00'
+  - id: T-0117
+    title: CHG-050-02 ユーザー確認：進捗ステータスに保留を追加
+    list: 仕様変更
+    status: todo
+    priority: normal
+    sort_order: 117
+    tags:
+      - CHG-050
+      - ユーザー確認
+    due_date: null
+    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0117.md
+    updated_at: '2026-05-04T21:13:51+09:00'
 task_file_roots:
   - .
-next_task_id: 115
-last_updated: '2026-05-04T21:10:02+09:00'
+next_task_id: 118
+last_updated: '2026-05-04T21:19:24+09:00'
