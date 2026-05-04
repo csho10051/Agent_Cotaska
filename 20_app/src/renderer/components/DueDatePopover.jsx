@@ -55,7 +55,7 @@ function isSameDay(left, right) {
 }
 
 function formatSummary(datePart, timeEnabled, timePart) {
-  if (!datePart) return "期限なし";
+  if (!datePart) return "日付なし";
   return timeEnabled && timePart ? `${datePart} ${timePart}` : datePart;
 }
 

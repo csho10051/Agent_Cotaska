@@ -1131,6 +1131,18 @@ tasks:
     due_date: null
     task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0108.md
     updated_at: '2026-05-04T09:40:26.373Z'
+  - id: T-0112
+    title: 仕様変更：期限⇒日付に変更
+    list: 仕様変更
+    status: done
+    priority: high
+    sort_order: 102
+    tags:
+      - CHG-049
+      - 実装
+    due_date: null
+    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0112.md
+    updated_at: '2026-05-04T21:10:02+09:00'
   - id: T-0104
     title: CHG-047-03 詳細ペイン幅変更と関連サブタスク展開サイズ制限
     list: 仕様変更
@@ -1209,7 +1221,31 @@ tasks:
     due_date: null
     task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0111.md
     updated_at: '2026-05-04T18:40:07+09:00'
+  - id: T-0113
+    title: CHG-049-00 設計書反映：期限表示を日付表示へ変更
+    list: 仕様変更
+    status: done
+    priority: high
+    sort_order: 113
+    tags:
+      - CHG-049
+      - 設計書
+    due_date: null
+    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0113.md
+    updated_at: '2026-05-04T21:10:02+09:00'
+  - id: T-0114
+    title: CHG-049-02 ユーザー確認：期限表示を日付表示へ変更
+    list: 仕様変更
+    status: todo
+    priority: normal
+    sort_order: 114
+    tags:
+      - CHG-049
+      - ユーザー確認
+    due_date: null
+    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0114.md
+    updated_at: '2026-05-04T21:10:02+09:00'
 task_file_roots:
   - .
-next_task_id: 112
-last_updated: '2026-05-04T09:40:56.176Z'
+next_task_id: 115
+last_updated: '2026-05-04T21:10:02+09:00'

@@ -66,7 +66,7 @@ function runCheck() {
     notifiedKeys.add(key);
 
     const notification = new Notification({
-      title: `まもなく期限: ${task.title || "(無題タスク)"}`,
+      title: `まもなく日付: ${task.title || "(無題タスク)"}`,
       body: `${formatDueTime(dueAt)} の5分前です。`,
       silent: false,
     });

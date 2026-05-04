@@ -483,7 +483,7 @@ function DetailPaneBody({
 
         {metaOpen && (
           <>
-            {/* Row 1: 進捗 + 期限 + 優先度 */}
+            {/* Row 1: 進捗 + 日付 + 優先度 */}
             <div className="meta-row">
               <div className="meta-item">
                 <span className="meta-item-label">進捗:</span>
@@ -495,7 +495,7 @@ function DetailPaneBody({
                 </select>
               </div>
               <span className="meta-due-anchor" onClick={(e) => e.stopPropagation()}>
-                <span className="meta-item-label">期限:</span>
+                <span className="meta-item-label">日付:</span>
                 <span
                   className={`meta-due${task.overdue ? " overdue" : ""}`}
                   onClick={() => {
