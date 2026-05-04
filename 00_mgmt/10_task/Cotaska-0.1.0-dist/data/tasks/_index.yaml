@@ -2,15 +2,16 @@ tasks:
   - id: T-0105
     title: 仕様変更：進捗ステータスに「保留」を追加
     list: 仕様変更
-    status: doing
+    status: done
     priority: normal
+    progress: 0
     sort_order: 1
     tags:
       - CHG-050
       - 仕様変更
     due_date: null
     task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0105.md
-    updated_at: '2026-05-04T21:19:24+09:00'
+    updated_at: '2026-05-04T12:28:31.782Z'
   - id: T-0010
     title: 仕様変更：並び替え機能
     list: 仕様変更
@@ -1238,15 +1239,16 @@ tasks:
   - id: T-0114
     title: CHG-049-02 ユーザー確認：期限表示を日付表示へ変更
     list: 仕様変更
-    status: todo
+    status: done
     priority: normal
+    progress: 0
     sort_order: 114
     tags:
       - CHG-049
       - ユーザー確認
     due_date: null
     task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0114.md
-    updated_at: '2026-05-04T21:10:02+09:00'
+    updated_at: '2026-05-04T12:28:21.833Z'
   - id: T-0115
     title: CHG-050-00 設計書反映：進捗ステータスに保留を追加
     list: 仕様変更
@@ -1274,16 +1276,17 @@ tasks:
   - id: T-0117
     title: CHG-050-02 ユーザー確認：進捗ステータスに保留を追加
     list: 仕様変更
-    status: todo
+    status: done
     priority: normal
+    progress: 0
     sort_order: 117
     tags:
       - CHG-050
       - ユーザー確認
     due_date: null
     task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0117.md
-    updated_at: '2026-05-04T21:13:51+09:00'
+    updated_at: '2026-05-04T12:28:23.941Z'
 task_file_roots:
   - .
 next_task_id: 118
-last_updated: '2026-05-04T21:19:24+09:00'
+last_updated: '2026-05-04T12:30:13.477Z'
