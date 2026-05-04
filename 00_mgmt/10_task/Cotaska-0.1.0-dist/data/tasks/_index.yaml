@@ -28,7 +28,7 @@ tasks:
     tags: []
     due_date: null
     task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0021.md
-    updated_at: '2026-05-03T12:17:17.096Z'
+    updated_at: '2026-05-04T09:40:52.572Z'
   - id: T-0026
     title: 仕様変更：親子紐づけを手動でメンテ
     list: 仕様変更
@@ -1121,13 +1121,16 @@ tasks:
   - id: T-0108
     title: 仕様変更：子タスクが右に寄りすぎ問題
     list: 仕様変更
-    status: todo
+    status: done
     priority: normal
+    progress: 100
     sort_order: 98
-    tags: []
+    tags:
+      - 仕様変更
+      - CHG-048
     due_date: null
     task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0108.md
-    updated_at: '2026-05-03T13:48:24.028Z'
+    updated_at: '2026-05-04T09:40:26.373Z'
   - id: T-0104
     title: CHG-047-03 詳細ペイン幅変更と関連サブタスク展開サイズ制限
     list: 仕様変更
@@ -1167,7 +1170,46 @@ tasks:
     due_date: null
     task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0107.md
     updated_at: '2026-05-03T22:30:00+09:00'
+  - id: T-0109
+    title: CHG-048-00 サブタスク階層表示のインデント幅仕様を設計書へ反映
+    list: 仕様変更
+    status: done
+    priority: normal
+    progress: 100
+    sort_order: 109
+    tags:
+      - 仕様変更
+      - CHG-048
+    due_date: null
+    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0109.md
+    updated_at: '2026-05-04T18:27:38+09:00'
+  - id: T-0110
+    title: CHG-048-01 メインペインの階層インデント幅を実装調整
+    list: 仕様変更
+    status: done
+    priority: normal
+    progress: 100
+    sort_order: 110
+    tags:
+      - 仕様変更
+      - CHG-048
+    due_date: null
+    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0110.md
+    updated_at: '2026-05-04T18:27:38+09:00'
+  - id: T-0111
+    title: CHG-048-02 子・孫タスクの表示差分と既存操作への影響をユーザ確認
+    list: 仕様変更
+    status: done
+    priority: normal
+    progress: 100
+    sort_order: 111
+    tags:
+      - 仕様変更
+      - CHG-048
+    due_date: null
+    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0111.md
+    updated_at: '2026-05-04T18:40:07+09:00'
 task_file_roots:
   - .
-next_task_id: 109
-last_updated: '2026-05-03T13:48:24.298Z'
+next_task_id: 112
+last_updated: '2026-05-04T09:40:56.176Z'
