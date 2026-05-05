@@ -608,10 +608,42 @@ function App() {
 
   // T-005-06: ゴミ箱移動
   const handleTrashTask = useCallback(async (task) => {
+    const descendants = collectDescendantTasks(tasks, task.id)
+      .filter((child) => !child.is_invalid);
+    const directChildren = tasks
+      .filter((child) => child.parent === task.id && !child.is_invalid);
+    let trashedDescendants = false;
+
+    if (descendants.length > 0) {
+      const trashDescendants = window.confirm(
+        `このタスクにはサブタスクが ${descendants.length} 件あります。\n\n` +
+        "OK: サブタスクもゴミ箱に移動します。\n" +
+        "キャンセル: 親タスクだけゴミ箱に移動し、直下のサブタスクを親なしにします。"
+      );
+
+      if (trashDescendants) {
+        trashedDescendants = true;
+        for (const child of descendants) {
+          await window.cotaskaAPI?.tasks?.trashTask(child.id);
+        }
+      } else {
+        for (const child of directChildren) {
+          await window.cotaskaAPI?.tasks?.update(
+            toFileTaskPayload(child, { parent: null })
+          );
+        }
+      }
+    }
+
     await window.cotaskaAPI?.tasks?.trashTask(task.id);
-    if (selectedTask?.id === task.id) setSelectedTask(null);
+    if (
+      selectedTask?.id === task.id ||
+      (trashedDescendants && descendants.some((child) => child.id === selectedTask?.id))
+    ) {
+      setSelectedTask(null);
+    }
     await loadTasks();
-  }, [loadTasks, selectedTask]);
+  }, [loadTasks, selectedTask, tasks]);
 
   // T-005-06: ゴミ箱内タスク一覧（activeNav === "ゴミ箱" のとき使用）
   useEffect(() => {
