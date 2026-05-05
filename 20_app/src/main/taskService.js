@@ -302,11 +302,11 @@ function collectDescendantTasks(parentId, maxDepth = MAX_TASK_TREE_DEPTH) {
   return descendants;
 }
 
-function estimateParentState(children) {
+function estimateParentState(parent, children) {
+  const parentStatus = normalizeProgressStatus(parent);
+  if (parentStatus !== '未着') return null;
+
   const statuses = children.map((child) => normalizeProgressStatus(child));
-  if (statuses.length > 0 && statuses.every((status) => status === '完了')) {
-    return { progress_status: '完了', status: 'done' };
-  }
   if (statuses.some((status) => status === '仕掛' || status === '完了')) {
     return { progress_status: '仕掛', status: 'todo' };
   }
@@ -323,7 +323,7 @@ function recomputeParentFromChildren(parentId, now) {
 
   const siblings = Object.values(taskCache)
     .filter((child) => child.parent === parentId && child.delete_flag === 0);
-  const estimatedParent = estimateParentState(siblings);
+  const estimatedParent = estimateParentState(parent, siblings);
   if (!estimatedParent) return;
 
   parent.progress_status = estimatedParent.progress_status;
@@ -530,6 +530,41 @@ function updateTask(id, updates) {
       child.status = 'done';
       child.progress_status = '完了';
       child.completed_at = child.completed_at || now;
+      child.updated_at = now;
+      taskCache[child.id] = child;
+      writeTaskFile(child);
+    });
+  }
+
+  // BUG-20260505-02: 親を保留にした場合は未完了の子孫も保留へ同期する。
+  if (isParentTask && prevProgressStatus !== '保留' && task.progress_status === '保留') {
+    descendants.forEach((child) => {
+      const childProgressStatus = normalizeProgressStatus(child);
+      if (child.status === 'done' || childProgressStatus === '完了') return;
+      if (childProgressStatus !== '未着' && childProgressStatus !== '仕掛') return;
+
+      child.status = 'todo';
+      child.progress_status = '保留';
+      child.completed_at = null;
+      child.updated_at = now;
+      taskCache[child.id] = child;
+      writeTaskFile(child);
+    });
+  }
+
+  // BUG-20260505-02: 親の保留を解除した場合は、保留中の子孫だけ同方向へ戻す。
+  if (
+    isParentTask &&
+    prevProgressStatus === '保留' &&
+    task.progress_status !== '保留' &&
+    task.progress_status !== '完了'
+  ) {
+    descendants.forEach((child) => {
+      if (child.status === 'done' || normalizeProgressStatus(child) !== '保留') return;
+
+      child.status = 'todo';
+      child.progress_status = task.progress_status;
+      child.completed_at = null;
       child.updated_at = now;
       taskCache[child.id] = child;
       writeTaskFile(child);

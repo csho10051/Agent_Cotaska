@@ -1467,6 +1467,100 @@ body.is-resizing-detail-sections * {
   cursor: default;
 }
 
+.trash-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 5000;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.trash-confirm-dialog {
+  width: min(460px, 100%);
+  border: 1px solid #3d3d3d;
+  border-radius: 8px;
+  background: #242424;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.45);
+  color: #f2f2f2;
+  padding: 22px;
+}
+
+.trash-confirm-dialog h2 {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.4;
+}
+
+.trash-confirm-message {
+  margin: 12px 0 0;
+  color: #d4d4d4;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.trash-confirm-summary {
+  margin-top: 14px;
+  display: grid;
+  gap: 6px;
+  color: #bdbdbd;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.trash-confirm-actions {
+  margin-top: 20px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.trash-confirm-btn {
+  min-height: 40px;
+  border-radius: 8px;
+  padding: 9px 12px;
+  border: 1px solid transparent;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.trash-confirm-btn--danger {
+  background: #b63b3b;
+  color: #fff;
+}
+
+.trash-confirm-btn--danger:hover {
+  background: #c64646;
+}
+
+.trash-confirm-btn--primary {
+  background: #4a74ff;
+  color: #fff;
+}
+
+.trash-confirm-btn--primary:hover {
+  background: #5b82ff;
+}
+
+.trash-confirm-btn--cancel {
+  border-color: #4a4a4a;
+  background: transparent;
+  color: #d0d0d0;
+}
+
+.trash-confirm-btn--cancel:hover {
+  background: #303030;
+}
+
+@media (max-width: 560px) {
+  .trash-confirm-actions {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* 詳細フッター */
 .detail-footer {
   padding: 0 16px;

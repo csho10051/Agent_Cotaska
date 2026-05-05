@@ -68,9 +68,11 @@ function mapFileTask(taskData) {
   };
 }
 
-function calcParentProgress(subtasks) {
+function calcParentProgress(parent, subtasks) {
+  const parentStatus = normalizeProgressStatusValue(parent.progressStatus, parent.status);
+  if (parentStatus !== "未着") return null;
+
   const statuses = subtasks.map((t) => normalizeProgressStatusValue(t.progressStatus, t.status));
-  if (statuses.length > 0 && statuses.every((status) => status === "完了")) return "完了";
   if (statuses.some((status) => status === "仕掛" || status === "完了")) return "仕掛";
   if (statuses.some((status) => status === "保留")) return "保留";
   return null;
@@ -281,6 +283,7 @@ function App() {
   const [completedTasks, setCompletedTasks] = useState([]);
   const [searchKeyword,  setSearchKeyword]  = useState("");
   const [tags, setTags] = useState([]);
+  const [trashConfirm, setTrashConfirm] = useState(null);
 
   // CHG-032: ペイン幅リサイズ
   const [navWidth,    setNavWidth]    = useState(240);
@@ -336,8 +339,7 @@ function App() {
       let rows   = await window.cotaskaAPI?.tasks?.getAll() ?? [];
       let mapped = enrichTaskHierarchy(rows.map(mapFileTask));
 
-      // T-015-03: 親タスクの進捗ステータスを最悪値ストラテジで自動推定
-      // 子タスクを持つ親は常に子タスク連動で進捗を再計算する。
+      // T-015-03: 親が未着の場合だけ、子タスク状態から進捗を自動開始する。
       const byParent = {};
       mapped.forEach((task) => {
         const pid = task.parent;
@@ -350,7 +352,7 @@ function App() {
       for (const parent of mapped) {
         const children = byParent[parent.id] || [];
         if (children.length === 0) continue;
-        const estimated = calcParentProgress(children);
+        const estimated = calcParentProgress(parent, children);
         if (!estimated) continue;
         const estimatedTaskStatus = estimated === "完了" ? "done" : "todo";
         if (parent.progressStatus !== estimated || parent.status !== estimatedTaskStatus) {
@@ -606,44 +608,45 @@ function App() {
     await loadTags();
   }, [loadTasks, loadTags]);
 
-  // T-005-06: ゴミ箱移動
-  const handleTrashTask = useCallback(async (task) => {
-    const descendants = collectDescendantTasks(tasks, task.id)
-      .filter((child) => !child.is_invalid);
-    const directChildren = tasks
-      .filter((child) => child.parent === task.id && !child.is_invalid);
-    let trashedDescendants = false;
+  const executeTrashTask = useCallback(async (task, descendants = [], directChildren = [], mode = "parent-only") => {
+    const trashDescendants = mode === "all";
 
-    if (descendants.length > 0) {
-      const trashDescendants = window.confirm(
-        `このタスクにはサブタスクが ${descendants.length} 件あります。\n\n` +
-        "OK: サブタスクもゴミ箱に移動します。\n" +
-        "キャンセル: 親タスクだけゴミ箱に移動し、直下のサブタスクを親なしにします。"
-      );
-
-      if (trashDescendants) {
-        trashedDescendants = true;
-        for (const child of descendants) {
-          await window.cotaskaAPI?.tasks?.trashTask(child.id);
-        }
-      } else {
-        for (const child of directChildren) {
-          await window.cotaskaAPI?.tasks?.update(
-            toFileTaskPayload(child, { parent: null })
-          );
-        }
+    if (trashDescendants) {
+      for (const child of descendants) {
+        await window.cotaskaAPI?.tasks?.trashTask(child.id);
+      }
+    } else {
+      for (const child of directChildren) {
+        await window.cotaskaAPI?.tasks?.update(
+          toFileTaskPayload(child, { parent: null })
+        );
       }
     }
 
     await window.cotaskaAPI?.tasks?.trashTask(task.id);
     if (
       selectedTask?.id === task.id ||
-      (trashedDescendants && descendants.some((child) => child.id === selectedTask?.id))
+      (trashDescendants && descendants.some((child) => child.id === selectedTask?.id))
     ) {
       setSelectedTask(null);
     }
     await loadTasks();
-  }, [loadTasks, selectedTask, tasks]);
+  }, [loadTasks, selectedTask]);
+
+  // T-005-06: ゴミ箱移動
+  const handleTrashTask = useCallback(async (task) => {
+    const descendants = collectDescendantTasks(tasks, task.id)
+      .filter((child) => !child.is_invalid);
+    const directChildren = tasks
+      .filter((child) => child.parent === task.id && !child.is_invalid);
+
+    if (descendants.length > 0) {
+      setTrashConfirm({ task, descendants, directChildren });
+      return;
+    }
+
+    await executeTrashTask(task, descendants, directChildren, "parent-only");
+  }, [executeTrashTask, tasks]);
 
   // T-005-06: ゴミ箱内タスク一覧（activeNav === "ゴミ箱" のとき使用）
   useEffect(() => {
@@ -880,6 +883,62 @@ function App() {
           onAddTag={handleAddTag}
         />
       </div>
+      {trashConfirm && (
+        <div
+          className="trash-confirm-overlay"
+          role="presentation"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) setTrashConfirm(null);
+          }}
+        >
+          <div
+            className="trash-confirm-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="trash-confirm-title"
+          >
+            <h2 id="trash-confirm-title">サブタスクも削除しますか？</h2>
+            <p className="trash-confirm-message">
+              「{trashConfirm.task.title}」にはサブタスクが {trashConfirm.descendants.length} 件あります。
+            </p>
+            <div className="trash-confirm-summary">
+              <span>全て削除: 配下タスクもゴミ箱へ移動</span>
+              <span>親だけ削除: 直下のサブタスクを親なしに更新</span>
+            </div>
+            <div className="trash-confirm-actions">
+              <button
+                type="button"
+                className="trash-confirm-btn trash-confirm-btn--danger"
+                onClick={async () => {
+                  const pending = trashConfirm;
+                  setTrashConfirm(null);
+                  await executeTrashTask(pending.task, pending.descendants, pending.directChildren, "all");
+                }}
+              >
+                全て削除
+              </button>
+              <button
+                type="button"
+                className="trash-confirm-btn trash-confirm-btn--primary"
+                onClick={async () => {
+                  const pending = trashConfirm;
+                  setTrashConfirm(null);
+                  await executeTrashTask(pending.task, pending.descendants, pending.directChildren, "parent-only");
+                }}
+              >
+                親だけ削除
+              </button>
+              <button
+                type="button"
+                className="trash-confirm-btn trash-confirm-btn--cancel"
+                onClick={() => setTrashConfirm(null)}
+              >
+                キャンセル
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
