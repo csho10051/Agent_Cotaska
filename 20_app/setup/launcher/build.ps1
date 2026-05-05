@@ -12,6 +12,54 @@ $goExe = "go"
 if (-not (Get-Command $goExe -ErrorAction SilentlyContinue)) {
     $goExe = "C:\Program Files\Go\bin\go.exe"
 }
+$iconPath = Join-Path $scriptDir "icon.ico"
+
+function Build-FallbackLauncher {
+    $cscCandidates = @(
+        (Get-Command "csc.exe" -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty Source),
+        "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe",
+        "C:\Windows\Microsoft.NET\Framework\v4.0.30319\csc.exe"
+    ) | Where-Object { $_ -and (Test-Path $_) }
+
+    $cscExe = $cscCandidates | Select-Object -First 1
+    if (-not $cscExe) {
+        Write-Host "Build FAILED: Go and csc.exe were not found." -ForegroundColor Red
+        exit 1
+    }
+
+    $launcherSource = Join-Path $scriptDir "LauncherFallback.cs"
+    if (-not (Test-Path $launcherSource)) {
+        Write-Host "Build FAILED: $launcherSource not found." -ForegroundColor Red
+        exit 1
+    }
+
+    Write-Host "Go was not found. Building C# fallback launcher..." -ForegroundColor Yellow
+    $iconArg = if (Test-Path $iconPath) { "/win32icon:$iconPath" } else { $null }
+    $args = @(
+        "/nologo",
+        "/target:winexe",
+        "/out:$scriptDir\Cotaska.exe",
+        "/reference:System.Windows.Forms.dll"
+    )
+    if ($iconArg) {
+        $args += $iconArg
+    }
+    $args += $launcherSource
+
+    & $cscExe $args
+    if (($LASTEXITCODE -eq 0) -and (Test-Path "$scriptDir\Cotaska.exe")) {
+        $size = [math]::Round((Get-Item "$scriptDir\Cotaska.exe").Length / 1KB, 1)
+        Write-Host "Build SUCCESS: Cotaska.exe ($size KB)" -ForegroundColor Green
+        exit 0
+    }
+
+    Write-Host "Build FAILED: C# fallback launcher failed." -ForegroundColor Red
+    exit 1
+}
+
+if (-not (Test-Path $goExe) -and -not (Get-Command $goExe -ErrorAction SilentlyContinue)) {
+    Build-FallbackLauncher
+}
 
 # goversioninfo のインストール（アイコン/バージョン情報埋め込み用）
 Write-Host "Installing goversioninfo..." -ForegroundColor Cyan
@@ -22,7 +70,6 @@ $goversioninfo = Join-Path $gopath "bin\goversioninfo.exe"
 $rsrcExe = Join-Path $gopath "bin\rsrc.exe"
 $resourceSysoPath = Join-Path $scriptDir "resource.syso"
 $tmpJsonPath = Join-Path $scriptDir "versioninfo_tmp.json"
-$iconPath = Join-Path $scriptDir "icon.ico"
 
 Remove-Item $resourceSysoPath -ErrorAction SilentlyContinue
 Remove-Item $tmpJsonPath -ErrorAction SilentlyContinue

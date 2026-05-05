@@ -4,6 +4,7 @@
 
 - タスクマネージャ上の `Electron` 表示はアイコンではなく、`CotaskaCore.exe` の `FileDescription` / `ProductName` などのバージョン情報が Electron 由来のまま残っていることを主因候補とする。
 - 既存の rcedit 後処理はアイコンだけを更新しているため、修正時は EXE メタデータ更新と出荷前検証を追加する方針で検討する。
+- Electron Builder の `win.signAndEditExecutable` は Windows のシンボリックリンク作成権限に依存するため `false` とし、CotaskaCore.exe のアイコンと表示名メタデータは `Set-ExeIcon.ps1` の rcedit 後処理で一元更新する。
 
 ## 2026-05-05 BUG-20260505-02 親子進捗連動と保留の優先
 
@@ -48,3 +49,9 @@
 - メインペインのタスク並び替えは既存の `sort_order` と `tasks:reorder` IPC を利用し、保存モデルは追加しない。
 - ドラッグ開始点はタスク行全体ではなく、チェックボックス左隣の `.drag-handle` に限定する。
 
+
+## 2026-05-06 BUG-20260505-03 Task Manager 表示名対策
+
+- Task Manager 表示名は `Electron` を避けることを優先し、内側 Electron 実行ファイル名・メタ情報・アプリ名を `CotaskaCore` に統一した。
+- Windows の AppUserModelID 表示キャッシュ回避のため、release AppUserModelID を `com.cotaska.app.release.v3.<instanceHash>` へ更新した。
+- Codex/検証環境由来の `ELECTRON_RUN_AS_NODE=1` 継承で Electron が即終了するため、ランチャーは子プロセス起動時に同環境変数を除去する。

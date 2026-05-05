@@ -3,7 +3,19 @@ param(
 	[string]$ExePath,
 
 	[Parameter(Mandatory = $true)]
-	[string]$IconPath
+	[string]$IconPath,
+
+	[string]$FileDescription = "CotaskaCore",
+
+	[string]$ProductName = "CotaskaCore",
+
+	[string]$OriginalFilename = "CotaskaCore.exe",
+
+	[string]$InternalFilename = "CotaskaCore",
+
+	[string]$CompanyName = "EbiSenbei",
+
+	[string]$Version = "0.1.0"
 )
 
 $ErrorActionPreference = "Stop"
@@ -15,6 +27,9 @@ if (-not (Test-Path $ExePath)) {
 if (-not (Test-Path $IconPath)) {
 	throw "Icon not found: $IconPath"
 }
+
+$resolvedExePath = (Resolve-Path -LiteralPath $ExePath).Path
+$resolvedIconPath = (Resolve-Path -LiteralPath $IconPath).Path
 
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $appDir = Resolve-Path (Join-Path $scriptDir "..\..")
@@ -56,8 +71,18 @@ try {
 		$nodeScript = @"
 import { rcedit } from '$rceditModuleUrl';
 
-await rcedit('$($ExePath.Replace('\', '/'))', {
-  icon: '$($IconPath.Replace('\', '/'))'
+await rcedit('$($resolvedExePath.Replace('\', '/'))', {
+  icon: '$($resolvedIconPath.Replace('\', '/'))',
+  'version-string': {
+    FileDescription: '$FileDescription',
+    ProductName: '$ProductName',
+    OriginalFilename: '$OriginalFilename',
+    InternalFilename: '$InternalFilename',
+    InternalName: '$InternalFilename',
+    CompanyName: '$CompanyName'
+  },
+  'file-version': '$Version',
+  'product-version': '$Version'
 });
 "@
 
@@ -73,4 +98,4 @@ finally {
 	Pop-Location
 }
 
-Write-Host "EXE icon updated: $ExePath" -ForegroundColor Green
+Write-Host "EXE icon and metadata updated: $ExePath" -ForegroundColor Green

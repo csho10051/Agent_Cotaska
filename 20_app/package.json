@@ -27,9 +27,11 @@
       "output": "release"
     },
     "files": [
-      "dist/renderer/**/*",
-      "src/main/**/*",
-      "package.json"
+      "**/*",
+      "!release/**",
+      "!temp/**",
+      "!setup/node_modules/**",
+      "!*.log"
     ],
     "extraResources": [
       {
@@ -40,6 +42,7 @@
     "asar": true,
     "win": {
       "icon": "setup/launcher/icon.ico",
+      "signAndEditExecutable": false,
       "target": [
         {
           "target": "portable",

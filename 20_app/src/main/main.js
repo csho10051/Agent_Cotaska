@@ -13,6 +13,9 @@ const appLogger  = require("./appLogger");
 let mainWindow = null;
 let hasShownCloudSyncWarning = false;
 let hasShownLaunchFailedGuidance = false;
+const APP_DISPLAY_NAME = "CotaskaCore";
+const APP_USER_MODEL_ID_BASE = "com.cotaska.app";
+const APP_USER_MODEL_ID_REVISION = "v3";
 
 const CLOUD_SYNC_PATH_MARKERS = [
   { token: "\\\\box\\\\", provider: "Box" },
@@ -141,6 +144,12 @@ const appDir = path.resolve(__dirname, "../..");
 const instanceHash = crypto.createHash("md5").update(appDir).digest("hex").slice(0, 8);
 app.setName(`Cotaska-${instanceHash}`);
 app.disableHardwareAcceleration();
+
+function getAppUserModelId() {
+  const isDevRuntime = !app.isPackaged || process.env.NODE_ENV === "development";
+  const runtimeSuffix = isDevRuntime ? "dev" : "release";
+  return `${APP_USER_MODEL_ID_BASE}.${runtimeSuffix}.${APP_USER_MODEL_ID_REVISION}.${instanceHash}`;
+}
 
 const gotSingleInstanceLock = app.requestSingleInstanceLock();
 if (!gotSingleInstanceLock) {
@@ -663,6 +672,7 @@ function createWindow() {
     : path.join(__dirname, "../../setup/launcher/icon.ico");
 
   const win = new BrowserWindow({
+    title: APP_DISPLAY_NAME,
     show: true,
     width: 1280,
     height: 800,
@@ -678,6 +688,7 @@ function createWindow() {
   });
 
   let didShowWindow = false;
+  win.setTitle(APP_DISPLAY_NAME);
 
   win.webContents.on("did-fail-load", (_event, errorCode, errorDescription, validatedURL) => {
     appLogger.logError(
@@ -760,13 +771,11 @@ app.whenReady().then(async () => {
     return;
   }
 
-  app.setName("Cotaska");
-  const baseAppUserModelId = "com.cotaska.app";
-  const isDevRuntime = !app.isPackaged || process.env.NODE_ENV === "development";
-  const runtimeSuffix = isDevRuntime ? "dev" : "release";
-  const appUserModelId = `${baseAppUserModelId}.${runtimeSuffix}.${instanceHash}`;
+  app.setName(APP_DISPLAY_NAME);
+  const appUserModelId = getAppUserModelId();
   app.setAppUserModelId(appUserModelId);
-  logger.info("AppUserModelID configured", { appUserModelId, isDevRuntime, instanceHash });
+  logger.info("AppUserModelID configured", { appUserModelId, appName: app.getName(), instanceHash });
+  appLogger.logInfo("AppUserModelID configured", { appUserModelId, appName: app.getName(), instanceHash });
 
   const pkg = require("../../package.json");
   appLogger.logStartup({

@@ -4,7 +4,7 @@
 # ステップ 3: organize-release.ps1 (配布フォルダの再構成)
 # ステップ 4: ランチャー EXE を配布ルートへコピー
 # ステップ 5: 出荷前検証
-# 追加: CotaskaCore.exe にアイコンを後書き
+# 追加: CotaskaCore.exe にアイコンと表示名メタデータを後書き
 #
 # 使い方:  cd 20_app  ;  .\release-all.ps1
 #          .\release-all.ps1 -Version "0.2.0"
@@ -56,9 +56,8 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 $winUnpackedCore = Join-Path $scriptDir "release\win-unpacked\CotaskaCore.exe"
-$winUnpackedLegacy = Join-Path $scriptDir "release\win-unpacked\Cotaska.exe"
-if (-not (Test-Path $winUnpackedCore) -and -not (Test-Path $winUnpackedLegacy)) {
-    Write-Host "[FAILED] win-unpacked\CotaskaCore.exe (or Cotaska.exe) not found" -ForegroundColor Red
+if (-not (Test-Path $winUnpackedCore)) {
+    Write-Host "[FAILED] win-unpacked\CotaskaCore.exe not found" -ForegroundColor Red
     exit 1
 }
 Write-Host "  OK: Electron パッケージング完了" -ForegroundColor Green
@@ -143,14 +142,14 @@ else {
 }
 
 if ((Test-Path $distCoreExe) -and (Test-Path $launcherIcon)) {
-    Write-Host "  Updating CotaskaCore.exe icon ..." -ForegroundColor Cyan
+    Write-Host "  Updating CotaskaCore.exe icon and metadata ..." -ForegroundColor Cyan
     $setIconPs1 = Join-Path $launcherDir "Set-ExeIcon.ps1"
-    & powershell -ExecutionPolicy Bypass -File $setIconPs1 -ExePath $distCoreExe -IconPath $launcherIcon
+    & powershell -ExecutionPolicy Bypass -File $setIconPs1 -ExePath $distCoreExe -IconPath $launcherIcon -Version $Version
     if ($LASTEXITCODE -ne 0) {
-        Write-Host "[FAILED] CotaskaCore.exe icon update failed" -ForegroundColor Red
+        Write-Host "[FAILED] CotaskaCore.exe icon/metadata update failed" -ForegroundColor Red
         exit 1
     }
-    Write-Host "  OK: CotaskaCore.exe icon updated" -ForegroundColor Green
+    Write-Host "  OK: CotaskaCore.exe icon and metadata updated" -ForegroundColor Green
 }
 
 function Get-AssociatedIconHash {
@@ -197,6 +196,21 @@ function Get-IcoHash {
     }
 }
 
+function Test-ExeVersionInfo {
+    param(
+        [Parameter(Mandatory = $true)][string]$Path,
+        [Parameter(Mandatory = $true)][string]$ExpectedProductName,
+        [Parameter(Mandatory = $true)][string]$ExpectedFileDescription
+    )
+
+    $versionInfo = (Get-Item -LiteralPath $Path).VersionInfo
+    return (
+        $versionInfo.ProductName -eq $ExpectedProductName -and
+        $versionInfo.FileDescription -eq $ExpectedFileDescription -and
+        $versionInfo.OriginalFilename -eq "CotaskaCore.exe"
+    )
+}
+
 # -------------------------------------------------------
 # ステップ 5: 出荷前検証
 # -------------------------------------------------------
@@ -240,6 +254,18 @@ if ((Test-Path $launcherIcon) -and (Test-Path (Join-Path $distRoot "Cotaska.exe"
         Write-Host "  OK  CotaskaCore.exe icon" -ForegroundColor Green
     } else {
         Write-Host "  NG  CotaskaCore.exe icon" -ForegroundColor Red
+        $allOk = $false
+    }
+
+    if (Test-ExeVersionInfo -Path $distCoreExe -ExpectedProductName "CotaskaCore" -ExpectedFileDescription "CotaskaCore") {
+        Write-Host "  OK  CotaskaCore.exe metadata" -ForegroundColor Green
+    } else {
+        $coreVersionInfo = (Get-Item -LiteralPath $distCoreExe).VersionInfo
+        Write-Host "  NG  CotaskaCore.exe metadata" -ForegroundColor Red
+        Write-Host "      FileDescription=$($coreVersionInfo.FileDescription)" -ForegroundColor Red
+        Write-Host "      ProductName=$($coreVersionInfo.ProductName)" -ForegroundColor Red
+        Write-Host "      OriginalFilename=$($coreVersionInfo.OriginalFilename)" -ForegroundColor Red
+        Write-Host "      InternalName=$($coreVersionInfo.InternalName)" -ForegroundColor Red
         $allOk = $false
     }
 }

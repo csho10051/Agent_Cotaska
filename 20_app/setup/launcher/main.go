@@ -23,6 +23,17 @@ func appendLauncherLog(logPath string, message string) {
 	_, _ = f.WriteString(line)
 }
 
+func withoutElectronRunAsNode(env []string) []string {
+	filtered := make([]string, 0, len(env))
+	for _, item := range env {
+		if len(item) >= len("ELECTRON_RUN_AS_NODE=") && item[:len("ELECTRON_RUN_AS_NODE=")] == "ELECTRON_RUN_AS_NODE=" {
+			continue
+		}
+		filtered = append(filtered, item)
+	}
+	return filtered
+}
+
 // allowSetForegroundWindow は子プロセスが Windows のフォアグラウンド制限を
 // 回避してウィンドウを前面に表示できるよう権限を付与する。
 func allowSetForegroundWindow(pid uint32) {
@@ -63,6 +74,7 @@ func main() {
 	}
 
 	cmd := exec.Command(target)
+	cmd.Env = withoutElectronRunAsNode(os.Environ())
 	// コンソールウィンドウを表示しない
 	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 	// 作業ディレクトリを _app/ に設定（Electron が相対パスを解決できるように）
