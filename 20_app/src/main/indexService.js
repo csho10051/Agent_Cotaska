@@ -40,9 +40,10 @@ function normalizeRootPath(rootPath) {
 function deriveRootsFromTasks(taskList) {
   const roots = taskList
     .map((task) => {
-      const pathForRoot = path.isAbsolute(task.task_file_path || '')
-        ? normalizeRelativePath(path.relative(TASKS_DIR, task.task_file_path))
-        : normalizeRelativePath(task.task_file_path);
+      const runtimePath = task._filePath || '';
+      const pathForRoot = path.isAbsolute(runtimePath)
+        ? normalizeRelativePath(path.relative(TASKS_DIR, runtimePath))
+        : normalizeRelativePath(runtimePath);
       const relPath = pathForRoot && !pathForRoot.startsWith('..') ? pathForRoot : '.';
       const dir = path.posix.dirname(relPath || '.');
       return dir && dir !== '/' ? dir : '.';
@@ -69,14 +70,13 @@ function rebuildIndex(taskCache, taskFileRoots = ['.']) {
         sort_order: t.sort_order,
         tags: t.tags || [],
         due_date: t.due_date,
-        task_file_path: normalizeTaskFilePath(t.task_file_path),
         updated_at: t.updated_at
       }))
       .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
 
     const normalizedRoots = Array.isArray(taskFileRoots) && taskFileRoots.length
       ? Array.from(new Set(taskFileRoots.map((root) => normalizeRootPath(root || '.')).filter(Boolean))).sort()
-      : deriveRootsFromTasks(taskList);
+      : deriveRootsFromTasks(Object.values(taskCache));
 
     // インデックスデータ作成
     const indexData = {

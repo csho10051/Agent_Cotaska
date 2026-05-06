@@ -10,7 +10,6 @@ tasks:
       - CHG-050
       - 仕様変更
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0105.md
     updated_at: '2026-05-04T12:28:31.782Z'
   - id: T-0010
     title: 仕様変更：並び替え機能
@@ -20,7 +19,6 @@ tasks:
     sort_order: 2
     tags: []
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0010.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0021
     title: 仕様変更：設定画面の実装
@@ -30,7 +28,6 @@ tasks:
     sort_order: 3
     tags: []
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0021.md
     updated_at: '2026-05-04T09:40:52.572Z'
   - id: T-0026
     title: 仕様変更：親子紐づけを手動でメンテ
@@ -40,7 +37,6 @@ tasks:
     sort_order: 4
     tags: []
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0026.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0028
     title: 仕様変更：バックアップ機能の実装
@@ -50,7 +46,6 @@ tasks:
     sort_order: 5
     tags: []
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0028.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0050
     title: 仕様変更：タスク入力時の入力補正
@@ -63,7 +58,6 @@ tasks:
       - 仕様変更
       - Agent_Hisyo移管
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0050.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0097
     title: 仕様変更：バージョン管理
@@ -73,7 +67,6 @@ tasks:
     sort_order: 7
     tags: []
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0097.md
     updated_at: '2026-05-03T22:39:30+09:00'
   - id: T-0102
     title: CHG-045-DOC 設計書階層記述見直しのユーザ確認
@@ -87,7 +80,6 @@ tasks:
       - 仕様変更
       - CHG-045
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0102.md
     updated_at: '2026-05-03T12:20:06.087Z'
   - id: T-0001
     title: T-047-07 ユーザ動作確認（ドラッグ＆並び替え確認！）
@@ -98,7 +90,6 @@ tasks:
     sort_order: 10
     tags: []
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0001.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0002
     title: リリース主要導線の目視確認（タスク一覧・左ナビ・詳細編集・保存）
@@ -109,7 +100,6 @@ tasks:
     sort_order: 11
     tags: []
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0002.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0003
     title: T-054-04 GitHub push 初回実施（PAT準備後）
@@ -120,7 +110,6 @@ tasks:
     sort_order: 12
     tags: []
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0003.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0004
     title: BUG-20260326-01 リリース版 Cotaska.exe 起動時に画面が表示されない 発生・調査
@@ -133,7 +122,6 @@ tasks:
       - 開発管理
       - 不具合対応
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0004.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0005
     title: 仕様変更：期限未設定
@@ -146,7 +134,6 @@ tasks:
       - 開発管理
       - 仕様変更
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0005.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0006
     title: 運用ルールの見直し
@@ -158,7 +145,6 @@ tasks:
     tags:
       - 開発管理
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0006.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0007
     title: 3/26時点でコミット
@@ -170,7 +156,6 @@ tasks:
     tags:
       - 開発管理
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0007.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0093
     title: 仕様変更：ドラッグ＆並び替え
@@ -181,7 +166,6 @@ tasks:
     sort_order: 17
     tags: []
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0093.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0008
     title: release-all.ps1 作成・リリース実施
@@ -192,7 +176,6 @@ tasks:
     tags:
       - 開発管理
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0008.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0009
     title: 仕様変更：タスクIDを表示
@@ -203,7 +186,6 @@ tasks:
     sort_order: 19
     tags: []
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0009.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0096
     title: CHG-046-02 並び替え操作のビルド確認とユーザ確認
@@ -216,7 +198,6 @@ tasks:
       - 開発管理
       - 仕様変更
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0096.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0011
     title: CHG-030-01 DetailPane 設計変更
@@ -228,7 +209,6 @@ tasks:
       - 開発管理
       - 仕様変更
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0011.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0012
     title: CHG-030-02 MainPane 設計変更
@@ -240,7 +220,6 @@ tasks:
       - 開発管理
       - 仕様変更
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0012.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0013
     title: CHG-030-03 ビルド・配布物生成・起動確認
@@ -252,7 +231,6 @@ tasks:
       - 開発管理
       - 仕様変更
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0013.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0014
     title: CHG-030-04 画面表示のユーザ確認
@@ -265,7 +243,6 @@ tasks:
       - 開発管理
       - 仕様変更
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0014.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0015
     title: テスト！
@@ -276,7 +253,6 @@ tasks:
     sort_order: 25
     tags: []
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0015.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0016
     title: サブタスク（１）
@@ -287,7 +263,6 @@ tasks:
     sort_order: 26
     tags: []
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0016.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0017
     title: 不具合：子タスク連動で親が完了にならない
@@ -298,7 +273,6 @@ tasks:
     sort_order: 27
     tags: []
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0017.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0018
     title: 仕様変更：ファイルリンク機能
@@ -309,7 +283,6 @@ tasks:
     sort_order: 28
     tags: []
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0018.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0020
     title: 仕様変更：未着/仕掛のフィルター機能
@@ -320,7 +293,6 @@ tasks:
     sort_order: 29
     tags: []
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0020.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0022
     title: is_manual_progress フィールド削除（App.jsx / DetailPane.jsx）
@@ -333,7 +305,6 @@ tasks:
       - is_manual_progress削除
       - リファクタ
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0022.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0023
     title: is_manual_progress フィールド削除（DB スキーマ・frontmatter）
@@ -346,7 +317,6 @@ tasks:
       - is_manual_progress削除
       - スキーマ変更
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0023.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0024
     title: 設計ドキュメント更新（is_manual_progress レガシー処理）
@@ -359,7 +329,6 @@ tasks:
       - is_manual_progress削除
       - ドキュメント
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0024.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0025
     title: AIエージェント運用ルール更新（is_manual_progress 参照削除）
@@ -372,7 +341,6 @@ tasks:
       - is_manual_progress削除
       - 運用ルール
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0025.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0027
     title: 仕様変更：セクションの折り畳み機能
@@ -383,7 +351,6 @@ tasks:
     tags:
       - CHG-034
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0027.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0029
     title: 'T-0006-01: AI運用ルール正本の修正・一本化'
@@ -395,7 +362,6 @@ tasks:
       - 開発管理
       - 運用ルール
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0029.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0030
     title: 'T-0006-02: 個別運用ルールへの同期原則追記'
@@ -407,7 +373,6 @@ tasks:
       - 開発管理
       - 運用ルール
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0030.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0031
     title: 'T-0006-03: CURRENT_SPRINT.md の位置づけ整理'
@@ -419,7 +384,6 @@ tasks:
       - 開発管理
       - 運用ルール
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0031.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0032
     title: 仕様変更：画面幅を変更可能とする
@@ -429,7 +393,6 @@ tasks:
     sort_order: 38
     tags: []
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0032.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0033
     title: 仕様変更：タスクの検索機能
@@ -440,7 +403,6 @@ tasks:
     sort_order: 39
     tags: []
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0033.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0034
     title: CHG-031 :仕様変更：タスクIDを表示
@@ -453,7 +415,6 @@ tasks:
       - UI
       - 画面モック
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0034.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0035
     title: 仕様変更：画面レイアウトの見直し
@@ -464,7 +425,6 @@ tasks:
     sort_order: 41
     tags: []
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0035.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0036
     title: 'CHG-032-01: ペイン幅ドラッグリサイズ実装'
@@ -476,7 +436,6 @@ tasks:
       - CHG-032
       - UI
     due_date: '2026-03-26'
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0036.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0037
     title: 'CHG-032-02: ペイン幅リサイズ動作確認（ユーザ確認）'
@@ -488,7 +447,6 @@ tasks:
       - CHG-032
       - UI
     due_date: '2026-03-26'
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0037.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0038
     title: CHG-033 詳細ペインレイアウト整理：実装
@@ -499,7 +457,6 @@ tasks:
     tags:
       - CHG-033
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0038.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0039
     title: CHG-033 詳細ペインレイアウト整理：ユーザ確認
@@ -510,7 +467,6 @@ tasks:
     tags:
       - CHG-033
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0039.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0040
     title: CHG-034 メインペインセクション折りたたみ：実装
@@ -521,7 +477,6 @@ tasks:
     tags:
       - CHG-034
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0040.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0041
     title: CHG-034 メインペインセクション折りたたみ：ユーザ確認
@@ -532,7 +487,6 @@ tasks:
     tags:
       - CHG-034
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0041.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0042
     title: CHG-035-01 シングルインスタンスロックのパス別スコープ化・userData分離
@@ -545,7 +499,6 @@ tasks:
       - 開発管理
       - 仕様変更
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0042.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0043
     title: CHG-035-02 ユーザ確認（多重起動動作確認）
@@ -558,7 +511,6 @@ tasks:
       - 開発管理
       - 仕様変更
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0043.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0044
     title: 仕様変更：起動ﾌｧｲﾙの名前を変更
@@ -569,7 +521,6 @@ tasks:
     sort_order: 50
     tags: []
     due_date: '2026-03-30'
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0044.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0045
     title: 仕様変更：サブタスク管理画面の追加
@@ -580,7 +531,6 @@ tasks:
     sort_order: 51
     tags: []
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0045.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0046
     title: 仕様変更：画面レイアウトの変更
@@ -591,7 +541,6 @@ tasks:
     sort_order: 52
     tags: []
     due_date: '2026-03-30'
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0046.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0048
     title: 仕様変更：期限に時分を追加
@@ -604,7 +553,6 @@ tasks:
       - 仕様変更
       - Agent_Hisyo移管
     due_date: 2026-03-31T10:30
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0048.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0049
     title: 仕様変更：リストなしを追加
@@ -617,7 +565,6 @@ tasks:
       - 仕様変更
       - Agent_Hisyo移管
     due_date: '2026-03-30'
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0049.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0051
     title: CHG-036-01 Electron本体EXE名変更・ランチャー参照先変更・再ビルド
@@ -630,7 +577,6 @@ tasks:
       - 仕様変更
       - CHG-036
     due_date: '2026-03-30'
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0051.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0052
     title: CHG-036-02 ユーザ確認（ランチャー経由の正常起動確認）
@@ -643,7 +589,6 @@ tasks:
       - 仕様変更
       - CHG-036
     due_date: '2026-03-30'
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0052.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0053
     title: 不具合：今日の完了タスクが表示されない
@@ -653,7 +598,6 @@ tasks:
     sort_order: 57
     tags: []
     due_date: '2026-03-30'
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0053.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0054
     title: CHG-037-00 設計反映要否の確認（必要なら設計書更新）
@@ -666,7 +610,6 @@ tasks:
       - 仕様変更
       - CHG-037
     due_date: '2026-03-30'
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0054.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0055
     title: CHG-037-01 「リストなし」表示と未設定タスク表示の実装
@@ -679,7 +622,6 @@ tasks:
       - 仕様変更
       - CHG-037
     due_date: '2026-03-30'
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0055.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0056
     title: CHG-037-02 ユーザ確認（リストなし表示と絞り込み確認）
@@ -692,7 +634,6 @@ tasks:
       - 仕様変更
       - CHG-037
     due_date: '2026-03-30'
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0056.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0057
     title: CHG-038-00 設計反映要否の確認（必要なら設計書更新）
@@ -705,7 +646,6 @@ tasks:
       - 仕様変更
       - CHG-038
     due_date: '2026-03-30'
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0057.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0058
     title: CHG-038-01 詳細ペインフッターに登録日時・完了日時を追加
@@ -718,7 +658,6 @@ tasks:
       - 仕様変更
       - CHG-038
     due_date: '2026-03-30'
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0058.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0059
     title: CHG-038-02 ユーザ確認（フッター表示と完了日時確認）
@@ -731,7 +670,6 @@ tasks:
       - 仕様変更
       - CHG-038
     due_date: '2026-03-30'
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0059.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0060
     title: CHG-039-00 設計反映要否の確認（必要なら設計書更新）
@@ -744,7 +682,6 @@ tasks:
       - 仕様変更
       - CHG-039
     due_date: '2026-03-31'
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0060.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0061
     title: CHG-039-01 期限入力サブ画面と期限時分表示・進捗ステータス位置変更の実装
@@ -757,7 +694,6 @@ tasks:
       - 仕様変更
       - CHG-039
     due_date: '2026-03-31'
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0061.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0062
     title: CHG-039-02 ユーザ確認（表示形式とレイアウト確認）
@@ -770,7 +706,6 @@ tasks:
       - 仕様変更
       - CHG-039
     due_date: '2026-03-31'
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0062.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0063
     title: BUG-20260331-01 メイン画面の期限ホバーで画面が真っ暗になる 調査
@@ -783,7 +718,6 @@ tasks:
       - 開発管理
       - 不具合対応
     due_date: '2026-03-31'
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0063.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0064
     title: 不具合：タスクを下のほうで右クリックで見切れる
@@ -794,7 +728,6 @@ tasks:
     sort_order: 68
     tags: []
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0064.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0065
     title: 仕様変更：通知機能の実装
@@ -805,8 +738,18 @@ tasks:
     sort_order: 69
     tags: []
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0065.md
     updated_at: '2026-05-03T12:17:17.096Z'
+  - id: T-0075
+    title: 不具合：タスクマネージャ上の表示名がElectronになる
+    list: Cotaska
+    status: done
+    priority: normal
+    progress: 100
+    sort_order: 69
+    tags:
+      - BUG-20260505-03
+    due_date: null
+    updated_at: '2026-05-06T01:02:00+09:00'
   - id: T-0072
     title: 不具合：タスクバーのアイコンがElectionのものになっている。
     list: 不具合修正
@@ -816,7 +759,6 @@ tasks:
     sort_order: 70
     tags: []
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0072.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0073
     title: 不具合：タスクIDで検索できない
@@ -827,7 +769,6 @@ tasks:
     sort_order: 71
     tags: []
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0073.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0074
     title: 不具合：孫タスクが表示されない
@@ -838,18 +779,6 @@ tasks:
     sort_order: 72
     tags: []
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0074.md
-    updated_at: '2026-05-03T12:17:17.096Z'
-  - id: T-0075
-    title: 不具合：タスクマネージャ上の表示名がElectron
-    list: Cotaska
-    status: done
-    priority: normal
-    progress: 100
-    sort_order: 73
-    tags: []
-    due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0075.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0080
     title: 'CHG-044-00: 破損タスク検知仕様の詳細化'
@@ -862,7 +791,6 @@ tasks:
       - 開発管理
       - 仕様変更
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0080.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0081
     title: 'CHG-044-01: taskServiceでYAMLパースエラーを破損タスク化'
@@ -875,7 +803,6 @@ tasks:
       - 開発管理
       - 仕様変更
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0081.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0082
     title: 'CHG-044-02: 破損タスクがあっても全体読み込みを継続'
@@ -888,7 +815,6 @@ tasks:
       - 開発管理
       - 仕様変更
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0082.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0083
     title: 'CHG-044-03: メインペインに破損タスクの警告表示を追加'
@@ -901,7 +827,6 @@ tasks:
       - 開発管理
       - 仕様変更
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0083.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0094
     title: CHG-046-00 タスク管理設計へドラッグハンドル並び替え仕様を反映
@@ -914,7 +839,6 @@ tasks:
       - 開発管理
       - 仕様変更
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0094.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0084
     title: 'CHG-044-04: 詳細ペインに検証エラー表示とファイル起動導線を追加'
@@ -927,7 +851,6 @@ tasks:
       - 開発管理
       - 仕様変更
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0084.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0095
     title: CHG-046-01 メインペインのドラッグ開始をハンドルに限定
@@ -940,7 +863,6 @@ tasks:
       - 開発管理
       - 仕様変更
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0095.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0085
     title: 'CHG-044-05: AI作業後のタスク検証スクリプト追加検討'
@@ -953,7 +875,6 @@ tasks:
       - 開発管理
       - 仕様変更
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0085.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0086
     title: 'CHG-044-06: 破損タスク検知と警告表示の手動確認'
@@ -966,7 +887,6 @@ tasks:
       - 開発管理
       - 仕様変更
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0086.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0087
     title: 'CHG-045-00: 最大5階層タスク仕様を設計書へ反映'
@@ -980,7 +900,6 @@ tasks:
       - 仕様変更
       - CHG-045
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0087.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0088
     title: 'CHG-045-01: メインペインを最大5階層まで再帰表示'
@@ -994,7 +913,6 @@ tasks:
       - 仕様変更
       - CHG-045
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0088.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0089
     title: 'CHG-045-02: 6階層目以上を警告付きルート相当表示'
@@ -1008,7 +926,6 @@ tasks:
       - 仕様変更
       - CHG-045
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0089.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0090
     title: 'CHG-045-03: 追加・完了・進捗連動を5階層対応'
@@ -1022,7 +939,6 @@ tasks:
       - 仕様変更
       - CHG-045
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0090.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0091
     title: 'CHG-045-04: 検索・ドラッグ・検証を階層上限対応'
@@ -1036,7 +952,6 @@ tasks:
       - 仕様変更
       - CHG-045
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0091.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0092
     title: 'CHG-045-05: 5階層表示と6階層目警告のユーザ確認'
@@ -1050,7 +965,6 @@ tasks:
       - 仕様変更
       - CHG-045
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0092.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0098
     title: CHG-047-00 詳細ペインの親タスクリンク・関連サブタスク表示仕様を設計書へ反映
@@ -1064,7 +978,6 @@ tasks:
       - 仕様変更
       - CHG-047
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0098.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0099
     title: CHG-047-01 詳細ペインに親タスクリンクと関連サブタスクセクションを実装
@@ -1078,7 +991,6 @@ tasks:
       - 仕様変更
       - CHG-047
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0099.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0100
     title: CHG-047-02 親子タスク詳細表示のユーザ確認
@@ -1092,7 +1004,6 @@ tasks:
       - 仕様変更
       - CHG-047
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0100.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0101
     title: CHG-045-DOC 設計書のサブタスク階層記述を最大5階層仕様へ整合
@@ -1106,7 +1017,6 @@ tasks:
       - 仕様変更
       - CHG-045
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0101.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0103
     title: BUG-20260503-01 T-0002配下サブタスクの進捗変更が反映されない
@@ -1119,7 +1029,6 @@ tasks:
       - 不具合対応
       - BUG-20260503-01
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0103.md
     updated_at: '2026-05-03T12:17:17.096Z'
   - id: T-0108
     title: 仕様変更：子タスクが右に寄りすぎ問題
@@ -1132,7 +1041,6 @@ tasks:
       - 仕様変更
       - CHG-048
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0108.md
     updated_at: '2026-05-04T09:40:26.373Z'
   - id: T-0112
     title: 仕様変更：期限⇒日付に変更
@@ -1144,7 +1052,6 @@ tasks:
       - CHG-049
       - 実装
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0112.md
     updated_at: '2026-05-04T21:10:02+09:00'
   - id: T-0104
     title: CHG-047-03 詳細ペイン幅変更と関連サブタスク展開サイズ制限
@@ -1158,7 +1065,6 @@ tasks:
       - 仕様変更
       - CHG-047
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0104.md
     updated_at: '2026-05-03T18:45:00+09:00'
   - id: T-0106
     title: デバッグモード起動スクリプト追加
@@ -1170,7 +1076,6 @@ tasks:
     tags:
       - 開発管理
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0106.md
     updated_at: '2026-05-03T22:05:00+09:00'
   - id: T-0107
     title: CHG-047-04 タスク詳細と関連サブタスク間の高さ調整
@@ -1183,8 +1088,18 @@ tasks:
       - 仕様変更
       - CHG-047
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0107.md
     updated_at: '2026-05-03T22:30:00+09:00'
+  - id: T-0118
+    title: 不具合：親タスクが削除された場合、子タスクが警告表示になってしまう。
+    list: 不具合修正
+    status: done
+    priority: normal
+    progress: 0
+    sort_order: 108
+    tags:
+      - BUG-20260505-01
+    due_date: null
+    updated_at: '2026-05-05T23:58:24+09:00'
   - id: T-0109
     title: CHG-048-00 サブタスク階層表示のインデント幅仕様を設計書へ反映
     list: 仕様変更
@@ -1196,8 +1111,18 @@ tasks:
       - 仕様変更
       - CHG-048
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0109.md
     updated_at: '2026-05-04T18:27:38+09:00'
+  - id: T-0119
+    title: 不具合：子タスクが完了となった親タスクは仕掛⇒保留にできない。
+    list: 不具合修正
+    status: done
+    priority: normal
+    progress: 0
+    sort_order: 109
+    tags:
+      - BUG-20260505-02
+    due_date: null
+    updated_at: '2026-05-05T14:51:25.546Z'
   - id: T-0110
     title: CHG-048-01 メインペインの階層インデント幅を実装調整
     list: 仕様変更
@@ -1209,7 +1134,6 @@ tasks:
       - 仕様変更
       - CHG-048
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0110.md
     updated_at: '2026-05-04T18:27:38+09:00'
   - id: T-0111
     title: CHG-048-02 子・孫タスクの表示差分と既存操作への影響をユーザ確認
@@ -1222,7 +1146,6 @@ tasks:
       - 仕様変更
       - CHG-048
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0111.md
     updated_at: '2026-05-04T18:40:07+09:00'
   - id: T-0113
     title: CHG-049-00 設計書反映：期限表示を日付表示へ変更
@@ -1234,7 +1157,6 @@ tasks:
       - CHG-049
       - 設計書
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0113.md
     updated_at: '2026-05-04T21:10:02+09:00'
   - id: T-0114
     title: CHG-049-02 ユーザー確認：期限表示を日付表示へ変更
@@ -1247,8 +1169,16 @@ tasks:
       - CHG-049
       - ユーザー確認
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0114.md
     updated_at: '2026-05-04T12:28:21.833Z'
+  - id: T-0124
+    title: テストタスク
+    list: null
+    status: todo
+    priority: normal
+    sort_order: 114
+    tags: []
+    due_date: null
+    updated_at: '2026-05-06T09:12:17.041Z'
   - id: T-0115
     title: CHG-050-00 設計書反映：進捗ステータスに保留を追加
     list: 仕様変更
@@ -1259,7 +1189,6 @@ tasks:
       - CHG-050
       - 設計書
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0115.md
     updated_at: '2026-05-04T21:13:51+09:00'
   - id: T-0116
     title: CHG-050-01 進捗ステータス「保留」実装
@@ -1271,7 +1200,6 @@ tasks:
       - CHG-050
       - 実装
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0116.md
     updated_at: '2026-05-04T21:19:24+09:00'
   - id: T-0117
     title: CHG-050-02 ユーザー確認：進捗ステータスに保留を追加
@@ -1284,9 +1212,52 @@ tasks:
       - CHG-050
       - ユーザー確認
     due_date: null
-    task_file_path: C:/WorkDevelop/Git/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0117.md
     updated_at: '2026-05-04T12:28:23.941Z'
+  - id: T-0120
+    title: 仕様変更：task_file_path保存廃止
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 120
+    tags:
+      - CHG-051
+      - 仕様変更
+    due_date: null
+    updated_at: '2026-05-06T18:13:33+09:00'
+  - id: T-0121
+    title: CHG-051-00 設計書反映：task_file_path保存廃止
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 121
+    tags:
+      - CHG-051
+      - 設計書
+    due_date: null
+    updated_at: '2026-05-06T15:55:20+09:00'
+  - id: T-0122
+    title: CHG-051-01 task_file_path保存廃止の実装
+    list: 仕様変更
+    status: done
+    priority: high
+    sort_order: 122
+    tags:
+      - CHG-051
+      - 実装
+    due_date: null
+    updated_at: '2026-05-06T15:55:20+09:00'
+  - id: T-0123
+    title: CHG-051-02 ユーザー確認：task_file_path保存廃止
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 123
+    tags:
+      - CHG-051
+      - ユーザー確認
+    due_date: null
+    updated_at: '2026-05-06T18:13:33+09:00'
 task_file_roots:
   - .
-next_task_id: 118
-last_updated: '2026-05-04T12:30:13.477Z'
+next_task_id: 125
+last_updated: '2026-05-06T09:14:10.883Z'

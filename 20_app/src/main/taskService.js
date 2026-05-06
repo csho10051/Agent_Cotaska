@@ -71,7 +71,7 @@ function createInvalidTask(filePath, error, reason = null) {
     tags: ['破損タスク'],
     sort_order: 999999,
     delete_flag: 0,
-    task_file_path: absolutePath,
+    validation_file_path: absolutePath,
     created_at: null,
     updated_at: null,
     completed_at: null,
@@ -121,7 +121,7 @@ function resolveTaskFilePath(taskFilePath, fallbackTaskId = null) {
     return path.join(TASKS_DIR, normalizeRelativePath(normalized));
   }
   if (fallbackTaskId) return path.join(TASKS_DIR, `${fallbackTaskId}.md`);
-  throw new Error('task_file_path or fallbackTaskId is required');
+  throw new Error('fallbackTaskId is required');
 }
 
 function ensureParentDir(filePath) {
@@ -191,14 +191,18 @@ function loadTaskFromFile(filePath) {
   try {
     const content = fs.readFileSync(filePath, 'utf-8');
     const parsed = matter(content);
+    const hasLegacyTaskFilePath = Object.prototype.hasOwnProperty.call(parsed.data || {}, 'task_file_path');
     const task = {
       ...parsed.data,
       content: parsed.content,
-      task_file_path: normalizeTaskFilePath(parsed.data.task_file_path || toIndexAbsolutePath(filePath)),
       _filePath: filePath
     };
     // 廃止済みフィールドを読み込み時に除去
     delete task.is_manual_progress;
+    delete task.task_file_path;
+    if (hasLegacyTaskFilePath) {
+      task._needsLegacyPathCleanup = true;
+    }
 
     if (!String(task.id || '').trim()) {
       return createInvalidTask(filePath, null, 'frontmatter に id がありません。');
@@ -214,7 +218,7 @@ function loadTaskFromFile(filePath) {
 function deriveTaskFileRootsFromCache(cache) {
   const roots = Object.values(cache)
     .map((task) => {
-      const filePath = task._filePath || resolveTaskFilePath(task.task_file_path, task.id);
+      const filePath = task._filePath || resolveTaskFilePath(null, task.id);
       const relPath = normalizeRelativePath(toIndexRelativePath(filePath));
       const dir = path.posix.dirname(relPath || '.');
       return dir && dir !== '/' ? dir : '.';
@@ -226,6 +230,8 @@ function deriveTaskFileRootsFromCache(cache) {
 function sanitizeTaskForRenderer(task) {
   const output = { ...task };
   delete output._filePath;
+  delete output._needsLegacyPathCleanup;
+  delete output.task_file_path;
   return output;
 }
 
@@ -262,11 +268,8 @@ function loadAllTasksAndMigratePath() {
 
     if (task.is_invalid) return;
 
-    // 移行: task_file_path が未設定/不一致なら補完して書き戻し
-    const expectedPath = normalizeTaskFilePath(toIndexAbsolutePath(filePath));
-    if (!task.task_file_path || normalizeTaskFilePath(task.task_file_path) !== expectedPath) {
-      task.task_file_path = expectedPath;
-      task._filePath = filePath;
+    // 移行: 廃止済み task_file_path が残っていれば正本から除去する
+    if (task._needsLegacyPathCleanup) {
       writeTaskFile(task);
     }
   });
@@ -355,7 +358,7 @@ async function openTaskService() {
     // ルート群から全タスクファイルを読み込み（移行補完含む）
     loadAllTasksAndMigratePath();
 
-    // _index.yaml を最新スキーマで再生成（task_file_path を確実に保持）
+    // _index.yaml を最新スキーマで再生成
     const indexService = require('./indexService');
     indexService.rebuildIndex(taskCache, taskFileRoots);
 
@@ -433,8 +436,7 @@ function addTask(taskData) {
   const newId = `T-${String(nextTaskId).padStart(4, '0')}`;
   nextTaskId++;
 
-  const explicitPath = normalizeTaskFilePath(taskData.task_file_path || '');
-  const taskFilePath = resolveTaskFilePath(explicitPath, newId);
+  const taskFilePath = resolveTaskFilePath(null, newId);
 
   const now = new Date().toISOString();
   const newTask = {
@@ -449,7 +451,6 @@ function addTask(taskData) {
     tags: taskData.tags || [],
     sort_order: Object.keys(taskCache).length + 1,
     delete_flag: 0,
-    task_file_path: normalizeTaskFilePath(toIndexAbsolutePath(taskFilePath)),
     created_at: now,
     updated_at: now,
     completed_at: null,
@@ -478,7 +479,7 @@ function updateTask(id, updates) {
 
   const task = taskCache[id];
   assertMutableTask(task);
-  const oldFilePath = task._filePath || resolveTaskFilePath(task.task_file_path, id);
+  const oldFilePath = task._filePath || resolveTaskFilePath(null, id);
   const prevStatus = task.status;
   const prevProgressStatus = task.progress_status;
   const now = new Date().toISOString();
@@ -486,6 +487,9 @@ function updateTask(id, updates) {
   // 廃止済みフィールドは入力されても無視する
   if (Object.prototype.hasOwnProperty.call(updates, 'is_manual_progress')) {
     delete updates.is_manual_progress;
+  }
+  if (Object.prototype.hasOwnProperty.call(updates, 'task_file_path')) {
+    delete updates.task_file_path;
   }
 
   // 全フィールドを更新（content を含む）
@@ -506,19 +510,8 @@ function updateTask(id, updates) {
 
   task.updated_at = now;
 
-  // path が変更された場合は対象ファイルを移動
-  const targetFilePath = resolveTaskFilePath(task.task_file_path, id);
-  if (path.resolve(oldFilePath) !== path.resolve(targetFilePath)) {
-    ensureParentDir(targetFilePath);
-    if (fs.existsSync(oldFilePath)) {
-      fs.renameSync(oldFilePath, targetFilePath);
-    }
-    task._filePath = targetFilePath;
-    task.task_file_path = normalizeTaskFilePath(toIndexAbsolutePath(targetFilePath));
-  } else {
-    task._filePath = oldFilePath;
-    task.task_file_path = normalizeTaskFilePath(task.task_file_path || toIndexAbsolutePath(oldFilePath));
-  }
+  task._filePath = oldFilePath;
+  delete task.task_file_path;
 
   // 親タスクが todo/doing/blocked -> done に遷移した場合、直下サブタスクを自動完了
   const descendants = collectDescendantTasks(id);
@@ -593,7 +586,7 @@ function updateTask(id, updates) {
   writeTaskFile(task);
   taskFileRoots = deriveTaskFileRootsFromCache(taskCache);
 
-  return { success: true, updated_at: now, task_file_path: task.task_file_path };
+  return { success: true, updated_at: now };
 }
 
 /**
@@ -610,8 +603,8 @@ function updateTaskContent(id, content) {
 
   task.content = content;
   task.updated_at = now;
-  task.task_file_path = normalizeTaskFilePath(task.task_file_path || toIndexAbsolutePath(task._filePath || resolveTaskFilePath(null, id)));
-  task._filePath = task._filePath || resolveTaskFilePath(task.task_file_path, id);
+  task._filePath = task._filePath || resolveTaskFilePath(null, id);
+  delete task.task_file_path;
 
   taskCache[id] = task;
   writeTaskFile(task);
@@ -637,8 +630,8 @@ function updateTaskTags(id, tags) {
 
   task.tags = normalizedTags;
   task.updated_at = now;
-  task.task_file_path = normalizeTaskFilePath(task.task_file_path || toIndexAbsolutePath(task._filePath || resolveTaskFilePath(null, id)));
-  task._filePath = task._filePath || resolveTaskFilePath(task.task_file_path, id);
+  task._filePath = task._filePath || resolveTaskFilePath(null, id);
+  delete task.task_file_path;
 
   taskCache[id] = task;
   writeTaskFile(task);
@@ -662,8 +655,8 @@ function completeTask(id) {
   task.completed_at = now;
   task.progress_status = '完了';
   task.updated_at = now;
-  task.task_file_path = normalizeTaskFilePath(task.task_file_path || toIndexAbsolutePath(task._filePath || resolveTaskFilePath(null, id)));
-  task._filePath = task._filePath || resolveTaskFilePath(task.task_file_path, id);
+  task._filePath = task._filePath || resolveTaskFilePath(null, id);
+  delete task.task_file_path;
 
   taskCache[id] = task;
   writeTaskFile(task);
@@ -696,8 +689,8 @@ function reopenTask(id) {
   task.status = 'todo';
   task.completed_at = null;
   task.updated_at = now;
-  task.task_file_path = normalizeTaskFilePath(task.task_file_path || toIndexAbsolutePath(task._filePath || resolveTaskFilePath(null, id)));
-  task._filePath = task._filePath || resolveTaskFilePath(task.task_file_path, id);
+  task._filePath = task._filePath || resolveTaskFilePath(null, id);
+  delete task.task_file_path;
 
   taskCache[id] = task;
   writeTaskFile(task);
@@ -720,8 +713,8 @@ function trashTask(id) {
   task.delete_flag = 1;
   task.deleted_at = now;
   task.updated_at = now;
-  task.task_file_path = normalizeTaskFilePath(task.task_file_path || toIndexAbsolutePath(task._filePath || resolveTaskFilePath(null, id)));
-  task._filePath = task._filePath || resolveTaskFilePath(task.task_file_path, id);
+  task._filePath = task._filePath || resolveTaskFilePath(null, id);
+  delete task.task_file_path;
 
   taskCache[id] = task;
   writeTaskFile(task);
@@ -744,8 +737,8 @@ function restoreTask(id) {
   task.delete_flag = 0;
   task.deleted_at = null;
   task.updated_at = now;
-  task.task_file_path = normalizeTaskFilePath(task.task_file_path || toIndexAbsolutePath(task._filePath || resolveTaskFilePath(null, id)));
-  task._filePath = task._filePath || resolveTaskFilePath(task.task_file_path, id);
+  task._filePath = task._filePath || resolveTaskFilePath(null, id);
+  delete task.task_file_path;
 
   taskCache[id] = task;
   writeTaskFile(task);
@@ -763,7 +756,7 @@ function deleteTask(id) {
 
   const task = taskCache[id];
   assertMutableTask(task);
-  const filePath = task._filePath || resolveTaskFilePath(task.task_file_path, id);
+  const filePath = task._filePath || resolveTaskFilePath(null, id);
   const archivePath = path.join(ARCHIVE_DIR, `${id}-archived.md`);
 
   // archive ディレクトリが無ければ作成
@@ -925,20 +918,34 @@ function getTaskSearchRoots() {
   return taskFileRoots.map((root) => path.join(TASKS_DIR, normalizeRootPath(root || '.')));
 }
 
+function getTaskFilePath(id) {
+  const task = taskCache[id];
+  if (!task) {
+    throw new Error(`Task ${id} not found`);
+  }
+  return task._filePath || resolveTaskFilePath(null, id);
+}
+
+function getTaskBaseDir(id) {
+  return path.dirname(getTaskFilePath(id));
+}
+
 /**
  * ファイルに書き込み
  */
 function writeTaskFile(task) {
-  const filePath = task._filePath || resolveTaskFilePath(task.task_file_path, task.id);
+  const filePath = task._filePath || resolveTaskFilePath(null, task.id);
   ensureParentDir(filePath);
   task._filePath = filePath;
-  task.task_file_path = normalizeTaskFilePath(toIndexAbsolutePath(filePath));
+  delete task.task_file_path;
 
   // frontmatter 用オブジェクト（content は除く）
   const frontmatter = { ...task };
   delete frontmatter.content;
   delete frontmatter._filePath;
+  delete frontmatter._needsLegacyPathCleanup;
   delete frontmatter.is_manual_progress;
+  delete frontmatter.task_file_path;
 
   // gray-matter で frontmatter + content を生成
   const markdown = matter.stringify(task.content || '', frontmatter);
@@ -968,5 +975,7 @@ module.exports = {
   rebuildCache,
   getCache,
   getTaskFileRoots,
-  getTaskSearchRoots
+  getTaskSearchRoots,
+  getTaskFilePath,
+  getTaskBaseDir
 };

@@ -10,8 +10,6 @@ parent: null
 tags: []
 sort_order: 68
 delete_flag: 1
-task_file_path: >-
-  D:/Development/Git/EbiSenbei_dev/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0069.md
 created_at: '2026-04-20T05:48:49.640Z'
 updated_at: '2026-04-28T07:18:27.349Z'
 completed_at: null

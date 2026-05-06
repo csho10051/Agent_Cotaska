@@ -12,14 +12,6 @@ const SUBTASK_PANEL_STORAGE_KEY = "cotaska.detailSubtasksHeight";
 
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 
-function getTaskBaseDir(taskFilePath) {
-  const raw = String(taskFilePath || "").trim();
-  if (!raw) return "";
-  const normalized = raw.replace(/\\/g, "/");
-  const idx = normalized.lastIndexOf("/");
-  return idx >= 0 ? normalized.slice(0, idx) : "";
-}
-
 function formatDatetime(value) {
   if (!value) return "";
 
@@ -368,15 +360,8 @@ function DetailPaneBody({
   const handleOpenInExternalApp = async () => {
     setOpenExternalError("");
 
-    const taskFilePath = String(task.task_file_path || "").trim();
-
-    if (!taskFilePath) {
-      setOpenExternalError("対象ファイルパスが見つかりません。");
-      return;
-    }
-
     try {
-      const result = await window.cotaskaAPI?.shell?.openPath?.(taskFilePath);
+      const result = await window.cotaskaAPI?.shell?.openTaskFile?.(task.id);
       if (!result?.ok) {
         setOpenExternalError(result?.error || "既定アプリで開けませんでした。");
       }
@@ -398,8 +383,7 @@ function DetailPaneBody({
 
     setOpenExternalError("");
     try {
-      const baseDir = getTaskBaseDir(task.task_file_path);
-      const result = await window.cotaskaAPI?.shell?.openTarget?.(href, baseDir);
+      const result = await window.cotaskaAPI?.shell?.openTaskTarget?.(task.id, href);
       if (!result?.ok) {
         setOpenExternalError(result?.error || "リンク先を開けませんでした。");
       }
@@ -468,7 +452,7 @@ function DetailPaneBody({
             タスクファイルの読み込みに失敗しました
           </div>
           <div className="detail-validation-body">
-            <div>対象ファイル: {task.task_file_path || "不明"}</div>
+            <div>対象ファイル: {task.validation_file_path || "不明"}</div>
             {task.validation_error_name && <div>種類: {task.validation_error_name}</div>}
             {validationLocation && <div>位置: {validationLocation}</div>}
             {task.validation_error && <div>内容: {task.validation_error}</div>}

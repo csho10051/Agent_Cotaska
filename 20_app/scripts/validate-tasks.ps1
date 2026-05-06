@@ -123,7 +123,6 @@ function Test-TaskFile {
         tags = $true
         sort_order = $true
         delete_flag = $true
-        task_file_path = $true
         created_at = $true
         updated_at = $true
         completed_at = $true

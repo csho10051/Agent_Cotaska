@@ -10,8 +10,6 @@ parent: T-0041
 tags: []
 sort_order: 42
 delete_flag: 1
-task_file_path: >-
-  C:/WorkDevelop/Agent_Cotaska/Cotaska/00_mgmt/10_task/Cotaska-0.1.0-dist/data/tasks/T-0043.md
 created_at: '2026-03-26T09:52:44.420Z'
 updated_at: '2026-03-26T09:53:02.826Z'
 completed_at: null

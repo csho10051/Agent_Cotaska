@@ -4,8 +4,9 @@
 # 既存の配布フォルダはタイムスタンプ付きでバックアップしてから置き換える。
 # 目的:
 # 1) タスクマスター配布フォルダをタイムスタンプ付きでバックアップ
-# 2) 最新リリース出力から Cotaska.exe を差し替え
-# 3) 最新リリース出力から _app フォルダを差し替え
+# 2) バックアップを zip 化し、元の退避フォルダを削除
+# 3) 最新リリース出力から Cotaska.exe を差し替え
+# 4) 最新リリース出力から _app フォルダを差し替え
 #
 # 使い方:
 #   cd 20_app
@@ -164,6 +165,36 @@ function Remove-PathWithLockHint {
     }
 }
 
+function Compress-BackupAndRemoveFolder {
+    param(
+        [Parameter(Mandatory = $true)][string]$BackupRoot,
+        [Parameter(Mandatory = $true)][string]$BackupDir
+    )
+
+    $resolvedBackupRoot = (Resolve-Path -LiteralPath $BackupRoot).Path
+    $resolvedBackupDir = (Resolve-Path -LiteralPath $BackupDir).Path
+    $backupRootFullPath = [System.IO.Path]::GetFullPath($resolvedBackupRoot)
+    $backupDirFullPath = [System.IO.Path]::GetFullPath($resolvedBackupDir)
+
+    if (-not $backupRootFullPath.StartsWith($backupDirFullPath + [System.IO.Path]::DirectorySeparatorChar, [System.StringComparison]::OrdinalIgnoreCase)) {
+        throw "Refusing to remove backup folder outside backup directory: $backupRootFullPath"
+    }
+
+    $backupZip = "$backupRootFullPath.zip"
+    if (Test-Path -LiteralPath $backupZip) {
+        Remove-Item -LiteralPath $backupZip -Force
+    }
+
+    Compress-Archive -LiteralPath $backupRootFullPath -DestinationPath $backupZip -CompressionLevel Optimal -Force
+
+    if (-not (Test-Path -LiteralPath $backupZip)) {
+        throw "Backup zip was not created: $backupZip"
+    }
+
+    Remove-Item -LiteralPath $backupRootFullPath -Recurse -Force
+    return $backupZip
+}
+
 function Assert-PathExists {
     param(
         [Parameter(Mandatory = $true)][string]$Path,
@@ -206,13 +237,13 @@ $backupRoot = Join-Path $backupDir "Cotaska-0.1.0-dist_$timestamp"
 
 if ($StopRunningCotaska) {
     # 実行中の Cotaska 関連プロセスがあると _app\resources\app.asar を置換できないため停止する。
-    Write-Host "[1/5] Stopping related processes..."
+    Write-Host "[1/6] Stopping related processes..."
     Get-Process -Name "Cotaska", "CotaskaCore", "electron", "crashpad_handler" -ErrorAction SilentlyContinue |
         Stop-Process -Force -ErrorAction SilentlyContinue
     Start-Sleep -Milliseconds 500
 }
 
-Write-Host "[2/5] Validating source/target paths..."
+Write-Host "[2/6] Validating source/target paths..."
 # コピー元とコピー先に必要なファイル・フォルダが揃っていることを先に検証する。
 Assert-PathExists -Path $releaseRoot -Label "Release root"
 Assert-PathExists -Path $taskMasterRoot -Label "Task-master root"
@@ -221,16 +252,20 @@ Assert-PathExists -Path $srcApp -Label "Release _app folder"
 Assert-PathExists -Path (Join-Path $srcTools "validate-tasks.ps1") -Label "Release validate-tasks.ps1"
 Assert-PathExists -Path $srcAiAgentRule -Label "Release AI agent rule"
 
-Write-Host "[3/5] Creating backup: $backupRoot"
+Write-Host "[3/6] Creating backup: $backupRoot"
 # 失敗時に戻せるよう、現在のタスクマスター配布フォルダを丸ごとバックアップする。
 Copy-Item -LiteralPath $taskMasterRoot -Destination $backupRoot -Recurse -Force
 
-Write-Host "[4/5] Replacing Cotaska.exe"
+Write-Host "[4/6] Compressing backup and removing backup folder"
+# 退避フォルダは zip にまとめ、圧縮成功後はフォルダを削除して backup 配下を軽く保つ。
+$backupZip = Compress-BackupAndRemoveFolder -BackupRoot $backupRoot -BackupDir $backupDir
+
+Write-Host "[5/6] Replacing Cotaska.exe"
 # 実行ファイルとAIエージェント運用ルールを最新リリースから上書きする。
 Copy-Item -LiteralPath $srcExe -Destination $dstExe -Force
 Copy-Item -LiteralPath $srcAiAgentRule -Destination $dstAiAgentRule -Force
 
-Write-Host "[5/5] Replacing _app folder"
+Write-Host "[6/6] Replacing _app folder"
 # Electron アプリ本体はフォルダ単位で差し替える。
 if (Test-Path -LiteralPath $dstApp) {
     Remove-PathWithLockHint -Path $dstApp
@@ -246,5 +281,5 @@ Copy-Item -LiteralPath $srcTools -Destination $dstTools -Recurse -Force
 
 Write-Host ""
 Write-Host "Done"
-Write-Host "Backup: $backupRoot"
+Write-Host "Backup: $backupZip"
 Write-Host "Updated: $taskMasterRoot"

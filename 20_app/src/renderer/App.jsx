@@ -46,7 +46,6 @@ function mapFileTask(taskData) {
     id:        taskData.id,
     title:     taskData.title,
     content:   taskData.content || "",
-    task_file_path: taskData.task_file_path || null,
     status:    taskData.status,
     progressStatus,
     priority:  taskData.priority || "normal",
@@ -65,6 +64,7 @@ function mapFileTask(taskData) {
     validation_error_name: taskData.validation_error_name || "",
     validation_error_line: taskData.validation_error_line ?? null,
     validation_error_column: taskData.validation_error_column ?? null,
+    validation_file_path: taskData.validation_file_path || null,
   };
 }
 

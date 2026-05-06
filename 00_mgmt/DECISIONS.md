@@ -1,5 +1,11 @@
 # DECISIONS
 
+## 2026-05-06 CHG-051 task_file_path保存廃止
+
+- Obsidian を参考に、タスクファイル正本と `_index.yaml` へ `task_file_path` を保存しない方針として仕様変更を起票した。
+- ファイルパスはタスクの意味情報ではなく、アプリが読み込み時に解決する実行時メタデータとして扱う。
+- 外部アプリ起動などファイルパスが必要な処理は、renderer が保存済みパスを直接使うのではなく、`taskId` 起点で main process が現在の実ファイルを解決する方針とする。
+
 ## 2026-05-05 BUG-20260505-03 タスクマネージャ表示名
 
 - タスクマネージャ上の `Electron` 表示はアイコンではなく、`CotaskaCore.exe` の `FileDescription` / `ProductName` などのバージョン情報が Electron 由来のまま残っていることを主因候補とする。

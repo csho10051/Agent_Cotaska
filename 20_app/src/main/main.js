@@ -510,9 +510,7 @@ ipcMain.handle("shell:openPath", async (_e, targetPath) => {
   }
 });
 
-ipcMain.handle("shell:openTarget", async (_e, target, baseDir) => {
-  await servicesReady;
-
+async function openShellTarget(target, baseDir) {
   const rawTarget = String(target || "").trim();
   const rawBaseDir = String(baseDir || "").trim();
   if (!rawTarget) {
@@ -579,6 +577,47 @@ ipcMain.handle("shell:openTarget", async (_e, target, baseDir) => {
     return { ok: true, targetType, opened: normalizedPath };
   } catch (err) {
     logger.error("shell:openTarget path exception", err);
+    return { ok: false, error: err.message || "リンク先の起動に失敗しました。" };
+  }
+}
+
+ipcMain.handle("shell:openTaskFile", async (_e, taskId) => {
+  await servicesReady;
+
+  try {
+    const filePath = taskService.getTaskFilePath(taskId);
+    if (!fs.existsSync(filePath)) {
+      logger.warn("shell:openTaskFile target not found", { taskId, path: filePath });
+      return { ok: false, error: "対象ファイルが見つかりません。" };
+    }
+
+    const openResult = await shell.openPath(filePath);
+    if (openResult) {
+      logger.error("shell:openTaskFile failed", { taskId, path: filePath, detail: openResult });
+      return { ok: false, error: `既定アプリで開けませんでした: ${openResult}` };
+    }
+
+    logger.info("shell:openTaskFile success", { taskId });
+    return { ok: true };
+  } catch (err) {
+    logger.error("shell:openTaskFile failed", err);
+    return { ok: false, error: err.message || "タスクファイルを開けませんでした。" };
+  }
+});
+
+ipcMain.handle("shell:openTarget", async (_e, target, baseDir) => {
+  await servicesReady;
+  return openShellTarget(target, baseDir);
+});
+
+ipcMain.handle("shell:openTaskTarget", async (_e, taskId, target) => {
+  await servicesReady;
+
+  try {
+    const baseDir = taskService.getTaskBaseDir(taskId);
+    return openShellTarget(target, baseDir);
+  } catch (err) {
+    logger.error("shell:openTaskTarget failed", err);
     return { ok: false, error: err.message || "リンク先の起動に失敗しました。" };
   }
 });

@@ -110,13 +110,13 @@ if (Test-Path $distToolsDir) {
     Remove-Item $distToolsDir -Recurse -Force
 }
 New-Item -ItemType Directory -Path $distToolsDir | Out-Null
-$validateTasksScript = Join-Path $sourceToolsDir "validate-tasks.ps1"
-if (Test-Path $validateTasksScript) {
-    Copy-Item $validateTasksScript -Destination (Join-Path $distToolsDir "validate-tasks.ps1") -Force
-    Write-Host "  OK: tools/ synced" -ForegroundColor Green
+$toolScripts = Get-ChildItem -LiteralPath $sourceToolsDir -Filter "*.ps1" -File -ErrorAction SilentlyContinue
+if ($toolScripts.Count -gt 0) {
+    $toolScripts | Copy-Item -Destination $distToolsDir -Force
+    Write-Host "  OK: tools/ synced ($($toolScripts.Count) script(s))" -ForegroundColor Green
 }
 else {
-    Write-Host "  [WARN] validate-tasks.ps1 not found: $validateTasksScript" -ForegroundColor Yellow
+    Write-Host "  [WARN] No tool scripts found: $sourceToolsDir" -ForegroundColor Yellow
 }
 
 # -------------------------------------------------------
