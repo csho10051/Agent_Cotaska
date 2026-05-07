@@ -1170,15 +1170,6 @@ tasks:
       - ユーザー確認
     due_date: null
     updated_at: '2026-05-04T12:28:21.833Z'
-  - id: T-0124
-    title: テストタスク
-    list: null
-    status: todo
-    priority: normal
-    sort_order: 114
-    tags: []
-    due_date: null
-    updated_at: '2026-05-06T09:12:17.041Z'
   - id: T-0115
     title: CHG-050-00 設計書反映：進捗ステータスに保留を追加
     list: 仕様変更
@@ -1190,6 +1181,15 @@ tasks:
       - 設計書
     due_date: null
     updated_at: '2026-05-04T21:13:51+09:00'
+  - id: T-0125
+    title: 調査：Cotaska_AIエージェント運用ルール.md
+    list: null
+    status: todo
+    priority: normal
+    sort_order: 115
+    tags: []
+    due_date: null
+    updated_at: '2026-05-06T14:09:07.018Z'
   - id: T-0116
     title: CHG-050-01 進捗ステータス「保留」実装
     list: 仕様変更
@@ -1201,6 +1201,15 @@ tasks:
       - 実装
     due_date: null
     updated_at: '2026-05-04T21:19:24+09:00'
+  - id: T-0126
+    title: 仕様変更：リリースのフォルダ名変えたい
+    list: null
+    status: todo
+    priority: normal
+    sort_order: 116
+    tags: []
+    due_date: null
+    updated_at: '2026-05-06T14:11:54.245Z'
   - id: T-0117
     title: CHG-050-02 ユーザー確認：進捗ステータスに保留を追加
     list: 仕様変更
@@ -1213,6 +1222,15 @@ tasks:
       - ユーザー確認
     due_date: null
     updated_at: '2026-05-04T12:28:23.941Z'
+  - id: T-0127
+    title: 仕様変更：タスクファイルのprogress不要では？
+    list: null
+    status: todo
+    priority: normal
+    sort_order: 117
+    tags: []
+    due_date: null
+    updated_at: '2026-05-06T14:12:21.642Z'
   - id: T-0120
     title: 仕様変更：task_file_path保存廃止
     list: 仕様変更
@@ -1259,5 +1277,5 @@ tasks:
     updated_at: '2026-05-06T18:13:33+09:00'
 task_file_roots:
   - .
-next_task_id: 125
-last_updated: '2026-05-06T09:14:10.883Z'
+next_task_id: 128
+last_updated: '2026-05-06T14:12:21.885Z'
