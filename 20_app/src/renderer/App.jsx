@@ -210,19 +210,63 @@ function sortByTaskOrder(arr) {
   );
 }
 
-function taskMatchesSearch(task, keyword) {
-  const searchable = [
+function compareTaskId(a, b) {
+  return String(a.id || "").localeCompare(String(b.id || ""), "ja", { numeric: true });
+}
+
+function sortDisplayTasks(arr, sortState) {
+  const { key = "id", direction = "asc" } = sortState || {};
+  if (key === "order") return sortByTaskOrder(arr);
+
+  const dir = direction === "desc" ? -1 : 1;
+
+  return [...arr].sort((a, b) => {
+    let result = 0;
+    if (key === "date") {
+      const aDate = dueDatePart(a.due_date);
+      const bDate = dueDatePart(b.due_date);
+      if (!aDate && !bDate) result = 0;
+      else if (!aDate) result = 1;
+      else if (!bDate) result = -1;
+      else result = aDate.localeCompare(bDate) * dir;
+    } else if (key === "title") {
+      result = String(a.title || "").localeCompare(String(b.title || ""), "ja", { numeric: true }) * dir;
+    } else {
+      result = compareTaskId(a, b) * dir;
+    }
+    return result || compareTaskId(a, b);
+  });
+}
+
+function normalizeSearchInput(value) {
+  return String(value || "").trim().toLowerCase();
+}
+
+function buildSearchableValues(task) {
+  const tags = task.tags || [];
+  return [
     task.id,
     task.title,
     task.content,
     task.list,
     task.priority,
     task.progressStatus,
-    ...(task.tags || []),
+    task.due_date,
+    dueDatePart(task.due_date),
+    formatDue(task.due_date),
+    ...tags,
+    ...tags.map((tag) => `#${tag}`),
+  ].map(normalizeSearchInput).filter(Boolean);
+}
+
+function taskMatchesSearch(task, keyword) {
+  const keywords = normalizeSearchInput(keyword).split(/\s+/).filter(Boolean);
+  if (keywords.length === 0) return false;
+
+  const searchable = [
+    ...buildSearchableValues(task),
   ];
-  return searchable.some((value) =>
-    String(value || "").toLowerCase().includes(keyword)
-  );
+  return keywords.every((kw) => searchable.some((value) => value.includes(kw)));
 }
 
 const FIXED_VIEWS = new Set(["すべて", "今日", "明日", "次の7日間", "仕掛", "保留", "完了", "ゴミ箱", "受信トレイ", "リストなし"]);
@@ -282,6 +326,8 @@ function App() {
   const [trashedTasks,   setTrashedTasks]   = useState([]);
   const [completedTasks, setCompletedTasks] = useState([]);
   const [searchKeyword,  setSearchKeyword]  = useState("");
+  const [searchSort, setSearchSort] = useState({ key: "id", direction: "asc" });
+  const [listSort, setListSort] = useState({ key: "order", direction: "asc" });
   const [tags, setTags] = useState([]);
   const [trashConfirm, setTrashConfirm] = useState(null);
 
@@ -708,8 +754,10 @@ function App() {
     if (!searchKeyword.trim()) {
       visibleTasks = [];
     } else {
-      const kw = searchKeyword.toLowerCase();
-      visibleTasks = sortByTaskOrder(tasks.filter((t) => taskMatchesSearch(t, kw)));
+      visibleTasks = sortDisplayTasks(
+        tasks.filter((t) => taskMatchesSearch(t, searchKeyword)),
+        searchSort
+      );
     }
   } else if (activeNav === "ゴミ箱") {
     visibleTasks = trashedTasks;
@@ -718,32 +766,36 @@ function App() {
   } else if (loading) {
     visibleTasks = [];
   } else if (activeNav === "すべて") {
-    visibleTasks = sortByTaskOrder(tasks.filter((t) => t.status !== "done"));
+    visibleTasks = sortDisplayTasks(tasks.filter((t) => t.status !== "done"), listSort);
   } else if (activeNav === "仕掛") {
-    visibleTasks = sortByTaskOrder(tasks.filter((t) => t.progressStatus === "仕掛" && t.status !== "done"));
+    visibleTasks = sortDisplayTasks(tasks.filter((t) => t.progressStatus === "仕掛" && t.status !== "done"), listSort);
   } else if (activeNav === "保留") {
-    visibleTasks = sortByTaskOrder(tasks.filter((t) => t.progressStatus === "保留" && t.status !== "done"));
+    visibleTasks = sortDisplayTasks(tasks.filter((t) => t.progressStatus === "保留" && t.status !== "done"), listSort);
   } else if (activeNav === "明日") {
     const tomorrow = addDays(localDateString(), 1);
-    visibleTasks = sortByTaskOrder(tasks.filter((t) => dueDatePart(t.due_date) === tomorrow && t.status !== "done"));
+    visibleTasks = sortDisplayTasks(tasks.filter((t) => dueDatePart(t.due_date) === tomorrow && t.status !== "done"), listSort);
   } else if (activeNav === "今日" || activeNav === "次の7日間") {
     visibleSections = buildSections(tasks, activeNav);
+    visibleSections = visibleSections.map((section) => ({
+      ...section,
+      tasks: sortDisplayTasks(section.tasks, listSort),
+    }));
     visibleTasks    = visibleSections.flatMap((s) => s.tasks);
   } else if (activeNav === "受信トレイ" || activeNav === "リストなし") {
     // T-007-05: 完了済みタスクは完了ビューへ
     // T-031: list_id を list に変更
-    visibleTasks = sortByTaskOrder(tasks.filter((t) =>
+    visibleTasks = sortDisplayTasks(tasks.filter((t) =>
       (t.list === null || t.list === undefined) && t.status !== "done"
-    ));
+    ), listSort);
   } else {
     if (activeNav.startsWith(TAG_NAV_PREFIX)) {
       const activeTag = activeNav.slice(TAG_NAV_PREFIX.length);
       // CHG-011: 完了タスクは完了セクションへ移動するため status フィルタを追加
-      visibleTasks = sortByTaskOrder(tasks.filter((t) => (t.tags || []).includes(activeTag) && t.status !== "done"));
+      visibleTasks = sortDisplayTasks(tasks.filter((t) => (t.tags || []).includes(activeTag) && t.status !== "done"), listSort);
     } else {
       // T-031: list_id ではなく list（文字列）でフィルタ
       // CHG-011: 完了タスクは完了セクションへ移動するため status フィルタを追加
-      visibleTasks = sortByTaskOrder(tasks.filter((t) => t.list === activeNav && t.status !== "done"));
+      visibleTasks = sortDisplayTasks(tasks.filter((t) => t.list === activeNav && t.status !== "done"), listSort);
     }
   }
 
@@ -849,7 +901,7 @@ function App() {
         onDuplicateTask={!isSearchMode && activeNav !== "ゴミ箱" && activeNav !== "完了" ? handleDuplicateTask : null}
         onSetTaskList={!isSearchMode && activeNav !== "ゴミ箱" && activeNav !== "完了" ? handleSetTaskList : null}
         onSetTaskDue={!isSearchMode && activeNav !== "ゴミ箱" ? handleSetTaskDue : null}
-        onReorderTask={!isSearchMode && activeNav !== "ゴミ箱" && activeNav !== "完了" ? handleReorderTask : null}
+        onReorderTask={!isSearchMode && activeNav !== "ゴミ箱" && activeNav !== "完了" && listSort.key === "order" ? handleReorderTask : null}
         onSetTaskTags={!isSearchMode && activeNav !== "ゴミ箱" ? handleSetTaskTags : null}
         lists={lists}
         tags={tags}
@@ -858,6 +910,11 @@ function App() {
         isSearchMode={isSearchMode}
         searchKeyword={searchKeyword}
         onSearchChange={setSearchKeyword}
+        searchSort={searchSort}
+        onSearchSortChange={setSearchSort}
+        listSort={listSort}
+        onListSortChange={setListSort}
+        showListSort={!isSearchMode && activeNav !== "ゴミ箱" && activeNav !== "完了"}
       />
       <div
         className="resize-handle resize-handle--detail"

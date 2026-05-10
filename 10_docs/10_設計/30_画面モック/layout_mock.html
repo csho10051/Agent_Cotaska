@@ -156,8 +156,51 @@
     }
     .header-actions {
       display: flex;
-      gap: 12px;
+      align-items: center;
+      gap: 8px;
       color: #777;
+    }
+    .list-sort {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 4px;
+    }
+    .list-sort-icon {
+      color: #777;
+      font-size: 14px;
+      line-height: 1;
+      padding: 0 2px;
+    }
+    .list-sort-select {
+      border: none;
+      background: transparent;
+      color: #333;
+      font-size: 12px;
+      outline: none;
+      height: 24px;
+      max-width: 72px;
+    }
+    .list-sort-direction {
+      width: 24px;
+      height: 24px;
+      border: none;
+      border-radius: 6px;
+      background: #f5f5f5;
+      color: #aaa;
+      line-height: 1;
+    }
+    .h-icon {
+      width: 20px;
+      height: 20px;
+      opacity: 0.36;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
     }
 
     .quick-add {
@@ -626,8 +669,17 @@
       <div class="main-header">
         <div class="view-title">今日</div>
         <div class="header-actions">
-          <span>⇅</span>
-          <span>⋯</span>
+          <div class="list-sort">
+            <span class="list-sort-icon" title="並び替え">⇅</span>
+            <select class="list-sort-select" aria-label="リスト表示の並び替え項目">
+              <option>標準</option>
+              <option>ID</option>
+              <option>日付</option>
+              <option>名前</option>
+            </select>
+            <button class="list-sort-direction" type="button" title="標準順では無効" disabled>↑</button>
+          </div>
+          <span class="h-icon">⋯</span>
         </div>
       </div>
 

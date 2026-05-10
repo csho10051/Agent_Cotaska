@@ -97,6 +97,16 @@ function assertMutableTask(task) {
   }
 }
 
+function localDateString(d = new Date()) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function ensureDueDateOnComplete(task, completedDate = localDateString()) {
+  if (!task.due_date) {
+    task.due_date = completedDate;
+  }
+}
+
 function normalizeRootPath(rootPath) {
   const normalized = normalizeTaskFilePath(rootPath);
   if (!normalized) return '.';
@@ -501,6 +511,7 @@ function updateTask(id, updates) {
   if (task.status === 'done') {
     task.progress_status = '完了';
     task.completed_at = task.completed_at || now;
+    ensureDueDateOnComplete(task);
   } else {
     if (task.progress_status === '完了') {
       task.progress_status = '仕掛';
@@ -523,6 +534,7 @@ function updateTask(id, updates) {
       child.status = 'done';
       child.progress_status = '完了';
       child.completed_at = child.completed_at || now;
+      ensureDueDateOnComplete(child);
       child.updated_at = now;
       taskCache[child.id] = child;
       writeTaskFile(child);
@@ -654,6 +666,7 @@ function completeTask(id) {
   task.status = 'done';
   task.completed_at = now;
   task.progress_status = '完了';
+  ensureDueDateOnComplete(task);
   task.updated_at = now;
   task._filePath = task._filePath || resolveTaskFilePath(null, id);
   delete task.task_file_path;
@@ -665,6 +678,7 @@ function completeTask(id) {
     child.status = 'done';
     child.completed_at = child.completed_at || now;
     child.progress_status = '完了';
+    ensureDueDateOnComplete(child);
     child.updated_at = now;
     taskCache[child.id] = child;
     writeTaskFile(child);
@@ -850,6 +864,7 @@ function reorderTasks(payload = {}) {
     if (task.status === 'done') {
       task.progress_status = '完了';
       task.completed_at = task.completed_at || now;
+      ensureDueDateOnComplete(task);
     } else if (task.progress_status === '完了') {
       task.progress_status = '仕掛';
       task.completed_at = null;

@@ -31,7 +31,8 @@ const MAX_TASK_TREE_DEPTH = 5;
  */
 function MainPane({
   viewTitle, tasks, sections, progressSections, completedSectionTasks = [], selectedTaskId, isTrashed, isCompleted,
-  isSearchMode, onSearchChange,
+  isSearchMode, onSearchChange, searchSort = { key: "id", direction: "asc" }, onSearchSortChange,
+  listSort = { key: "order", direction: "asc" }, onListSortChange, showListSort = false,
   onTaskClick, onAddTask, onAddSubtask, onToggleComplete,
   onTrashTask, onRestoreTask, onDeleteTask, onDuplicateTask, onSetTaskList, onSetTaskDue,
   onReorderTask,
@@ -78,6 +79,24 @@ function MainPane({
     setLocalSearch("");
     clearTimeout(searchTimer.current);
     onSearchChange?.("");
+  };
+  const handleSearchSortKeyChange = (e) => {
+    onSearchSortChange?.({ ...searchSort, key: e.target.value });
+  };
+  const handleSearchSortDirectionToggle = () => {
+    onSearchSortChange?.({
+      ...searchSort,
+      direction: searchSort.direction === "asc" ? "desc" : "asc",
+    });
+  };
+  const handleListSortKeyChange = (e) => {
+    onListSortChange?.({ ...listSort, key: e.target.value });
+  };
+  const handleListSortDirectionToggle = () => {
+    onListSortChange?.({
+      ...listSort,
+      direction: listSort.direction === "asc" ? "desc" : "asc",
+    });
   };
 
   useEffect(() => {
@@ -494,27 +513,76 @@ function MainPane({
       <div className="main-header">
         {isSearchMode ? (
           /* 検索バー */
-          <div className="search-bar">
-            <span className="search-icon">🔍</span>
-            <input
-              className="search-input"
-              type="text"
-              placeholder="タスクを検索..."
-              value={localSearch}
-              onChange={handleSearchInput}
-              autoFocus
-              onKeyDown={(e) => e.key === "Escape" && handleSearchClear()}
-            />
-            {localSearch && (
-              <button className="search-clear-btn" onClick={handleSearchClear}>✕</button>
-            )}
+          <div className="search-header">
+            <div className="search-bar">
+              <span className="search-icon">🔍</span>
+              <input
+                className="search-input"
+                type="text"
+                placeholder="タスクを検索..."
+                value={localSearch}
+                onChange={handleSearchInput}
+                autoFocus
+                onKeyDown={(e) => e.key === "Escape" && handleSearchClear()}
+              />
+              {localSearch && (
+                <button className="search-clear-btn" onClick={handleSearchClear}>✕</button>
+              )}
+            </div>
+            <div className="search-sort">
+              <span className="search-sort-icon" title="並び替え">⇅</span>
+              <select
+                className="search-sort-select"
+                value={searchSort.key}
+                onChange={handleSearchSortKeyChange}
+                aria-label="検索結果の並び替え項目"
+              >
+                <option value="id">ID</option>
+                <option value="date">日付</option>
+                <option value="title">名前</option>
+              </select>
+              <button
+                className="search-sort-direction"
+                type="button"
+                onClick={handleSearchSortDirectionToggle}
+                title={searchSort.direction === "asc" ? "昇順" : "降順"}
+                aria-label="検索結果の昇順と降順を切り替え"
+              >
+                {searchSort.direction === "asc" ? "↑" : "↓"}
+              </button>
+            </div>
           </div>
         ) : (
           /* 通常ヘッダー */
           <>
             <div className="view-title">{viewTitle}</div>
             <div className="header-actions">
-              <div className="h-icon" title="ソート">⇅</div>
+              {showListSort && (
+                <div className="list-sort">
+                  <span className="list-sort-icon" title="並び替え">⇅</span>
+                  <select
+                    className="list-sort-select"
+                    value={listSort.key}
+                    onChange={handleListSortKeyChange}
+                    aria-label="リスト表示の並び替え項目"
+                  >
+                    <option value="order">標準</option>
+                    <option value="id">ID</option>
+                    <option value="date">日付</option>
+                    <option value="title">名前</option>
+                  </select>
+                  <button
+                    className="list-sort-direction"
+                    type="button"
+                    onClick={handleListSortDirectionToggle}
+                    title={listSort.direction === "asc" ? "昇順" : "降順"}
+                    aria-label="リスト表示の昇順と降順を切り替え"
+                    disabled={listSort.key === "order"}
+                  >
+                    {listSort.direction === "asc" ? "↑" : "↓"}
+                  </button>
+                </div>
+              )}
               <div className="h-icon" title="メニュー">⋯</div>
             </div>
           </>

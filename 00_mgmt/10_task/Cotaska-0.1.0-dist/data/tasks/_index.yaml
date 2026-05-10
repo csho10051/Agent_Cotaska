@@ -19,7 +19,7 @@ tasks:
     sort_order: 2
     tags: []
     due_date: null
-    updated_at: '2026-05-03T12:17:17.096Z'
+    updated_at: '2026-05-10T14:27:04+09:00'
   - id: T-0021
     title: 仕様変更：設定画面の実装
     list: 仕様変更
@@ -1231,6 +1231,24 @@ tasks:
     tags: []
     due_date: null
     updated_at: '2026-05-06T14:12:21.642Z'
+  - id: T-0128
+    title: 仕様変更：検索時の並び替え
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 118
+    tags: []
+    due_date: null
+    updated_at: '2026-05-10T14:24:01+09:00'
+  - id: T-0129
+    title: 不具合：検索時の不具合
+    list: 不具合修正
+    status: done
+    priority: normal
+    sort_order: 119
+    tags: []
+    due_date: null
+    updated_at: '2026-05-10T14:24:01+09:00'
   - id: T-0120
     title: 仕様変更：task_file_path保存廃止
     list: 仕様変更
@@ -1275,7 +1293,137 @@ tasks:
       - ユーザー確認
     due_date: null
     updated_at: '2026-05-06T18:13:33+09:00'
+  - id: T-0138
+    title: 仕様変更：自動で完了日付をセット
+    list: 仕様変更
+    status: todo
+    priority: normal
+    progress: 0
+    sort_order: 128
+    tags: []
+    due_date: null
+    updated_at: '2026-05-10T05:47:06.440Z'
+  - id: T-0130
+    title: BUG-20260510-01 検索モードの複数キーワード・タグ・日付検索を修正
+    list: 不具合修正
+    status: done
+    priority: normal
+    sort_order: 130
+    tags:
+      - BUG-20260510-01
+    due_date: null
+    updated_at: '2026-05-10T13:20:08+09:00'
+  - id: T-0131
+    title: BUG-20260510-01 ユーザー確認：検索モード修正
+    list: 不具合修正
+    status: done
+    priority: normal
+    sort_order: 131
+    tags:
+      - BUG-20260510-01
+      - ユーザー確認
+    due_date: null
+    updated_at: '2026-05-10T14:24:01+09:00'
+  - id: T-0132
+    title: CHG-052-00 設計書反映：検索結果並び替え
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 132
+    tags:
+      - CHG-052
+      - 設計書
+    due_date: null
+    updated_at: '2026-05-10T14:04:13+09:00'
+  - id: T-0133
+    title: CHG-052-01 検索結果並び替え UI と表示順切替を実装
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 133
+    tags:
+      - CHG-052
+      - 実装
+    due_date: null
+    updated_at: '2026-05-10T14:04:13+09:00'
+  - id: T-0134
+    title: CHG-052-02 ユーザー確認：検索結果並び替え
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 134
+    tags:
+      - CHG-052
+      - ユーザー確認
+    due_date: null
+    updated_at: '2026-05-10T14:24:01+09:00'
+  - id: T-0135
+    title: CHG-053-00 設計書反映：リスト表示並び替え
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 135
+    tags:
+      - CHG-053
+      - 設計書
+    due_date: null
+    updated_at: '2026-05-10T14:27:04+09:00'
+  - id: T-0136
+    title: CHG-053-01 リスト表示並び替え UI と表示順切替を実装
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 136
+    tags:
+      - CHG-053
+      - 実装
+    due_date: null
+    updated_at: '2026-05-10T14:27:04+09:00'
+  - id: T-0137
+    title: CHG-053-02 ユーザー確認：リスト表示並び替え
+    list: 仕様変更
+    status: todo
+    priority: normal
+    sort_order: 137
+    tags:
+      - CHG-053
+      - ユーザー確認
+    due_date: null
+    updated_at: '2026-05-10T14:27:04+09:00'
+  - id: T-0139
+    title: CHG-054-00 設計書反映：完了時日付自動設定
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 139
+    tags:
+      - CHG-054
+      - 設計書
+    due_date: null
+    updated_at: '2026-05-10T14:42:04+09:00'
+  - id: T-0140
+    title: CHG-054-01 完了時に日付空欄なら完了日付を自動設定
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 140
+    tags:
+      - CHG-054
+      - 実装
+    due_date: null
+    updated_at: '2026-05-10T14:42:04+09:00'
+  - id: T-0141
+    title: CHG-054-02 ユーザー確認：完了時日付自動設定
+    list: 仕様変更
+    status: todo
+    priority: normal
+    sort_order: 141
+    tags:
+      - CHG-054
+      - ユーザー確認
+    due_date: null
+    updated_at: '2026-05-10T14:42:04+09:00'
 task_file_roots:
   - .
-next_task_id: 128
-last_updated: '2026-05-06T14:12:21.885Z'
+next_task_id: 142
+last_updated: '2026-05-10T05:47:06.682Z'
