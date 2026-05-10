@@ -1,83 +1,94 @@
 tasks:
-  - id: T-0105
-    title: 仕様変更：進捗ステータスに「保留」を追加
+  - id: T-0010
+    title: 仕様変更：並び替え機能
     list: 仕様変更
     status: done
     priority: normal
     sort_order: 1
-    tags:
-      - CHG-050
-      - 仕様変更
+    tags: []
     due_date: null
-    updated_at: '2026-05-04T12:28:31.782Z'
-  - id: T-0010
-    title: 仕様変更：並び替え機能
+    updated_at: '2026-05-10T21:03:30+09:00'
+  - id: T-0026
+    title: 仕様変更：親子紐づけを手動でメンテ
     list: 仕様変更
     status: todo
     priority: normal
     sort_order: 2
     tags: []
     due_date: null
-    updated_at: '2026-05-10T14:27:04+09:00'
-  - id: T-0021
-    title: 仕様変更：設定画面の実装
+    updated_at: '2026-05-10T11:59:31.686Z'
+  - id: T-0028
+    title: 仕様変更：バックアップ機能の実装
     list: 仕様変更
     status: todo
     priority: normal
     sort_order: 3
     tags: []
     due_date: null
-    updated_at: '2026-05-04T09:40:52.572Z'
-  - id: T-0026
-    title: 仕様変更：親子紐づけを手動でメンテ
-    list: 仕様変更
+    updated_at: '2026-05-10T11:59:40.197Z'
+  - id: T-0050
+    title: 仕様変更：タスク入力時の入力補正
+    list: Cotaska
     status: todo
     priority: normal
     sort_order: 4
-    tags: []
+    tags:
+      - 仕様変更
+      - Agent_Hisyo移管
     due_date: null
-    updated_at: '2026-05-03T12:17:17.096Z'
-  - id: T-0028
-    title: 仕様変更：バックアップ機能の実装
+    updated_at: '2026-05-10T11:59:40.197Z'
+  - id: T-0021
+    title: 仕様変更：設定画面の実装
     list: 仕様変更
     status: todo
     priority: normal
     sort_order: 5
     tags: []
     due_date: null
-    updated_at: '2026-05-03T12:17:17.096Z'
-  - id: T-0050
-    title: 仕様変更：タスク入力時の入力補正
-    list: Cotaska
-    status: todo
-    priority: normal
-    sort_order: 6
-    tags:
-      - 仕様変更
-      - Agent_Hisyo移管
-    due_date: null
-    updated_at: '2026-05-03T12:17:17.096Z'
+    updated_at: '2026-05-10T11:59:40.197Z'
   - id: T-0097
     title: 仕様変更：バージョン管理
     list: 仕様変更
     status: todo
     priority: normal
-    sort_order: 7
+    sort_order: 6
     tags: []
     due_date: null
-    updated_at: '2026-05-03T22:39:30+09:00'
-  - id: T-0102
-    title: CHG-045-DOC 設計書階層記述見直しのユーザ確認
+    updated_at: '2026-05-10T11:59:25.820Z'
+  - id: T-0137
+    title: CHG-053-02 ユーザー確認：リスト表示並び替え
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 7
+    tags:
+      - CHG-053
+      - ユーザー確認
+    due_date: null
+    updated_at: '2026-05-10T21:00:21+09:00'
+  - id: T-0105
+    title: 仕様変更：進捗ステータスに「保留」を追加
     list: 仕様変更
     status: done
     priority: normal
     sort_order: 8
     tags:
+      - CHG-050
+      - 仕様変更
+    due_date: null
+    updated_at: '2026-05-10T11:59:25.820Z'
+  - id: T-0102
+    title: CHG-045-DOC 設計書階層記述見直しのユーザ確認
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 9
+    tags:
       - 開発管理
       - 仕様変更
       - CHG-045
     due_date: null
-    updated_at: '2026-05-03T12:20:06.087Z'
+    updated_at: '2026-05-10T11:59:25.820Z'
   - id: T-0001
     title: T-047-07 ユーザ動作確認（ドラッグ＆並び替え確認！）
     list: 仕様変更
@@ -698,38 +709,38 @@ tasks:
     list: Cotaska
     status: done
     priority: normal
-    sort_order: 69
+    sort_order: 70
     tags:
       - BUG-20260505-03
     due_date: null
-    updated_at: '2026-05-06T01:02:00+09:00'
+    updated_at: '2026-05-10T11:59:25.820Z'
   - id: T-0072
     title: 不具合：タスクバーのアイコンがElectionのものになっている。
     list: 不具合修正
     status: done
     priority: normal
-    sort_order: 70
-    tags: []
-    due_date: null
-    updated_at: '2026-05-03T12:17:17.096Z'
-  - id: T-0073
-    title: 不具合：タスクIDで検索できない
-    list: Cotaska
-    status: done
-    priority: normal
     sort_order: 71
     tags: []
     due_date: null
-    updated_at: '2026-05-03T12:17:17.096Z'
-  - id: T-0074
-    title: 不具合：孫タスクが表示されない
+    updated_at: '2026-05-10T11:59:25.820Z'
+  - id: T-0073
+    title: 不具合：タスクIDで検索できない
     list: Cotaska
     status: done
     priority: normal
     sort_order: 72
     tags: []
     due_date: null
-    updated_at: '2026-05-03T12:17:17.096Z'
+    updated_at: '2026-05-10T11:59:25.820Z'
+  - id: T-0074
+    title: 不具合：孫タスクが表示されない
+    list: Cotaska
+    status: done
+    priority: normal
+    sort_order: 73
+    tags: []
+    due_date: null
+    updated_at: '2026-05-10T11:59:25.820Z'
   - id: T-0080
     title: 'CHG-044-00: 破損タスク検知仕様の詳細化'
     list: 仕様変更
@@ -965,460 +976,449 @@ tasks:
     list: 仕様変更
     status: done
     priority: normal
-    sort_order: 98
+    sort_order: 94
     tags:
       - 仕様変更
       - CHG-048
     due_date: null
-    updated_at: '2026-05-04T09:40:26.373Z'
+    updated_at: '2026-05-10T11:59:25.820Z'
   - id: T-0112
     title: 仕様変更：期限⇒日付に変更
     list: 仕様変更
     status: done
     priority: high
-    sort_order: 102
+    sort_order: 95
     tags:
       - CHG-049
       - 実装
     due_date: null
-    updated_at: '2026-05-04T21:10:02+09:00'
+    updated_at: '2026-05-10T11:59:25.820Z'
   - id: T-0104
     title: CHG-047-03 詳細ペイン幅変更と関連サブタスク展開サイズ制限
     list: 仕様変更
     status: done
     priority: normal
-    sort_order: 104
+    sort_order: 96
     tags:
       - 開発管理
       - 仕様変更
       - CHG-047
     due_date: null
-    updated_at: '2026-05-03T18:45:00+09:00'
+    updated_at: '2026-05-10T11:59:25.820Z'
   - id: T-0106
     title: デバッグモード起動スクリプト追加
     list: 開発管理
     status: done
     priority: normal
-    sort_order: 106
+    sort_order: 97
     tags:
       - 開発管理
     due_date: null
-    updated_at: '2026-05-03T22:05:00+09:00'
+    updated_at: '2026-05-10T11:59:25.820Z'
   - id: T-0107
     title: CHG-047-04 タスク詳細と関連サブタスク間の高さ調整
     list: 仕様変更
     status: done
     priority: normal
-    sort_order: 107
+    sort_order: 98
     tags:
       - 仕様変更
       - CHG-047
     due_date: null
-    updated_at: '2026-05-03T22:30:00+09:00'
+    updated_at: '2026-05-10T11:59:25.820Z'
   - id: T-0118
     title: 不具合：親タスクが削除された場合、子タスクが警告表示になってしまう。
     list: 不具合修正
     status: done
     priority: normal
-    sort_order: 108
+    sort_order: 99
     tags:
       - BUG-20260505-01
     due_date: null
-    updated_at: '2026-05-05T23:58:24+09:00'
+    updated_at: '2026-05-10T11:59:25.820Z'
   - id: T-0109
     title: CHG-048-00 サブタスク階層表示のインデント幅仕様を設計書へ反映
     list: 仕様変更
     status: done
     priority: normal
-    sort_order: 109
+    sort_order: 100
     tags:
       - 仕様変更
       - CHG-048
     due_date: null
-    updated_at: '2026-05-04T18:27:38+09:00'
+    updated_at: '2026-05-10T11:59:25.820Z'
   - id: T-0119
     title: 不具合：子タスクが完了となった親タスクは仕掛⇒保留にできない。
     list: 不具合修正
     status: done
     priority: normal
-    sort_order: 109
+    sort_order: 101
     tags:
       - BUG-20260505-02
     due_date: null
-    updated_at: '2026-05-05T14:51:25.546Z'
+    updated_at: '2026-05-10T11:59:25.820Z'
   - id: T-0110
     title: CHG-048-01 メインペインの階層インデント幅を実装調整
     list: 仕様変更
     status: done
     priority: normal
-    sort_order: 110
+    sort_order: 102
     tags:
       - 仕様変更
       - CHG-048
     due_date: null
-    updated_at: '2026-05-04T18:27:38+09:00'
+    updated_at: '2026-05-10T11:59:25.820Z'
   - id: T-0111
     title: CHG-048-02 子・孫タスクの表示差分と既存操作への影響をユーザ確認
     list: 仕様変更
     status: done
     priority: normal
-    sort_order: 111
+    sort_order: 103
     tags:
       - 仕様変更
       - CHG-048
     due_date: null
-    updated_at: '2026-05-04T18:40:07+09:00'
+    updated_at: '2026-05-10T11:59:25.820Z'
   - id: T-0113
     title: CHG-049-00 設計書反映：期限表示を日付表示へ変更
     list: 仕様変更
     status: done
     priority: high
-    sort_order: 113
+    sort_order: 104
     tags:
       - CHG-049
       - 設計書
     due_date: null
-    updated_at: '2026-05-04T21:10:02+09:00'
+    updated_at: '2026-05-10T11:59:25.820Z'
   - id: T-0114
     title: CHG-049-02 ユーザー確認：期限表示を日付表示へ変更
     list: 仕様変更
     status: done
     priority: normal
-    sort_order: 114
+    sort_order: 105
     tags:
       - CHG-049
       - ユーザー確認
     due_date: null
-    updated_at: '2026-05-04T12:28:21.833Z'
+    updated_at: '2026-05-10T11:59:25.820Z'
   - id: T-0115
     title: CHG-050-00 設計書反映：進捗ステータスに保留を追加
     list: 仕様変更
     status: done
     priority: normal
-    sort_order: 115
+    sort_order: 106
     tags:
       - CHG-050
       - 設計書
     due_date: null
-    updated_at: '2026-05-04T21:13:51+09:00'
+    updated_at: '2026-05-10T11:59:25.820Z'
   - id: T-0125
     title: 調査：Cotaska_AIエージェント運用ルール.md
     list: null
     status: done
     priority: normal
-    sort_order: 115
+    sort_order: 107
     tags: []
     due_date: null
-    updated_at: '2026-05-10T14:51:44+09:00'
+    updated_at: '2026-05-10T11:59:25.820Z'
   - id: T-0116
     title: CHG-050-01 進捗ステータス「保留」実装
     list: 仕様変更
     status: done
     priority: high
-    sort_order: 116
+    sort_order: 108
     tags:
       - CHG-050
       - 実装
     due_date: null
-    updated_at: '2026-05-04T21:19:24+09:00'
+    updated_at: '2026-05-10T11:59:25.820Z'
   - id: T-0126
     title: 仕様変更：リリースのフォルダ名変えたい
     list: 仕様変更
     status: done
     priority: normal
-    sort_order: 116
+    sort_order: 109
     tags: []
     due_date: null
-    updated_at: '2026-05-10T15:06:21+09:00'
+    updated_at: '2026-05-10T11:59:25.820Z'
   - id: T-0117
     title: CHG-050-02 ユーザー確認：進捗ステータスに保留を追加
     list: 仕様変更
     status: done
     priority: normal
-    sort_order: 117
+    sort_order: 110
     tags:
       - CHG-050
       - ユーザー確認
     due_date: null
-    updated_at: '2026-05-04T12:28:23.941Z'
+    updated_at: '2026-05-10T11:59:25.820Z'
   - id: T-0127
     title: 仕様変更：タスクファイルのprogress不要では？
     list: 仕様変更
-    status: doing
+    status: done
     priority: normal
-    sort_order: 117
+    sort_order: 111
     tags: []
-    due_date: null
-    updated_at: '2026-05-10T15:43:36+09:00'
+    due_date: '2026-05-10'
+    updated_at: '2026-05-10T11:59:25.820Z'
   - id: T-0128
     title: 仕様変更：検索時の並び替え
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 112
+    tags: []
+    due_date: null
+    updated_at: '2026-05-10T11:59:25.820Z'
+  - id: T-0129
+    title: 不具合：検索時の不具合
+    list: 不具合修正
+    status: done
+    priority: normal
+    sort_order: 113
+    tags: []
+    due_date: null
+    updated_at: '2026-05-10T11:59:25.820Z'
+  - id: T-0120
+    title: 仕様変更：task_file_path保存廃止
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 114
+    tags:
+      - CHG-051
+      - 仕様変更
+    due_date: null
+    updated_at: '2026-05-10T11:59:25.820Z'
+  - id: T-0121
+    title: CHG-051-00 設計書反映：task_file_path保存廃止
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 115
+    tags:
+      - CHG-051
+      - 設計書
+    due_date: null
+    updated_at: '2026-05-10T11:59:25.820Z'
+  - id: T-0122
+    title: CHG-051-01 task_file_path保存廃止の実装
+    list: 仕様変更
+    status: done
+    priority: high
+    sort_order: 116
+    tags:
+      - CHG-051
+      - 実装
+    due_date: null
+    updated_at: '2026-05-10T11:59:25.820Z'
+  - id: T-0123
+    title: CHG-051-02 ユーザー確認：task_file_path保存廃止
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 117
+    tags:
+      - CHG-051
+      - ユーザー確認
+    due_date: null
+    updated_at: '2026-05-10T11:59:25.820Z'
+  - id: T-0138
+    title: 仕様変更：自動で完了日付をセット
     list: 仕様変更
     status: done
     priority: normal
     sort_order: 118
     tags: []
     due_date: null
-    updated_at: '2026-05-10T14:24:01+09:00'
-  - id: T-0129
-    title: 不具合：検索時の不具合
-    list: 不具合修正
-    status: done
-    priority: normal
-    sort_order: 119
-    tags: []
-    due_date: null
-    updated_at: '2026-05-10T14:24:01+09:00'
-  - id: T-0120
-    title: 仕様変更：task_file_path保存廃止
-    list: 仕様変更
-    status: done
-    priority: normal
-    sort_order: 120
-    tags:
-      - CHG-051
-      - 仕様変更
-    due_date: null
-    updated_at: '2026-05-06T18:13:33+09:00'
-  - id: T-0121
-    title: CHG-051-00 設計書反映：task_file_path保存廃止
-    list: 仕様変更
-    status: done
-    priority: normal
-    sort_order: 121
-    tags:
-      - CHG-051
-      - 設計書
-    due_date: null
-    updated_at: '2026-05-06T15:55:20+09:00'
-  - id: T-0122
-    title: CHG-051-01 task_file_path保存廃止の実装
-    list: 仕様変更
-    status: done
-    priority: high
-    sort_order: 122
-    tags:
-      - CHG-051
-      - 実装
-    due_date: null
-    updated_at: '2026-05-06T15:55:20+09:00'
-  - id: T-0123
-    title: CHG-051-02 ユーザー確認：task_file_path保存廃止
-    list: 仕様変更
-    status: done
-    priority: normal
-    sort_order: 123
-    tags:
-      - CHG-051
-      - ユーザー確認
-    due_date: null
-    updated_at: '2026-05-06T18:13:33+09:00'
-  - id: T-0138
-    title: 仕様変更：自動で完了日付をセット
-    list: 仕様変更
-    status: done
-    priority: normal
-    sort_order: 128
-    tags: []
-    due_date: null
-    updated_at: '2026-05-10T06:01:53.898Z'
+    updated_at: '2026-05-10T11:59:25.820Z'
   - id: T-0130
     title: BUG-20260510-01 検索モードの複数キーワード・タグ・日付検索を修正
     list: 不具合修正
     status: done
     priority: normal
-    sort_order: 130
+    sort_order: 119
     tags:
       - BUG-20260510-01
     due_date: null
-    updated_at: '2026-05-10T13:20:08+09:00'
+    updated_at: '2026-05-10T11:59:25.820Z'
   - id: T-0131
     title: BUG-20260510-01 ユーザー確認：検索モード修正
     list: 不具合修正
     status: done
     priority: normal
-    sort_order: 131
+    sort_order: 120
     tags:
       - BUG-20260510-01
       - ユーザー確認
     due_date: null
-    updated_at: '2026-05-10T14:24:01+09:00'
+    updated_at: '2026-05-10T11:59:25.820Z'
   - id: T-0132
     title: CHG-052-00 設計書反映：検索結果並び替え
     list: 仕様変更
     status: done
     priority: normal
-    sort_order: 132
+    sort_order: 121
     tags:
       - CHG-052
       - 設計書
     due_date: null
-    updated_at: '2026-05-10T14:04:13+09:00'
+    updated_at: '2026-05-10T11:59:25.820Z'
   - id: T-0133
     title: CHG-052-01 検索結果並び替え UI と表示順切替を実装
     list: 仕様変更
     status: done
     priority: normal
-    sort_order: 133
+    sort_order: 122
     tags:
       - CHG-052
       - 実装
     due_date: null
-    updated_at: '2026-05-10T14:04:13+09:00'
+    updated_at: '2026-05-10T11:59:25.820Z'
   - id: T-0134
     title: CHG-052-02 ユーザー確認：検索結果並び替え
     list: 仕様変更
     status: done
     priority: normal
-    sort_order: 134
+    sort_order: 123
     tags:
       - CHG-052
       - ユーザー確認
     due_date: null
-    updated_at: '2026-05-10T14:24:01+09:00'
+    updated_at: '2026-05-10T11:59:25.820Z'
   - id: T-0135
     title: CHG-053-00 設計書反映：リスト表示並び替え
     list: 仕様変更
     status: done
     priority: normal
-    sort_order: 135
+    sort_order: 124
     tags:
       - CHG-053
       - 設計書
     due_date: null
-    updated_at: '2026-05-10T14:27:04+09:00'
+    updated_at: '2026-05-10T11:59:25.820Z'
   - id: T-0136
     title: CHG-053-01 リスト表示並び替え UI と表示順切替を実装
     list: 仕様変更
     status: done
     priority: normal
-    sort_order: 136
+    sort_order: 125
     tags:
       - CHG-053
       - 実装
     due_date: null
-    updated_at: '2026-05-10T14:27:04+09:00'
-  - id: T-0137
-    title: CHG-053-02 ユーザー確認：リスト表示並び替え
-    list: 仕様変更
-    status: todo
-    priority: normal
-    sort_order: 137
-    tags:
-      - CHG-053
-      - ユーザー確認
-    due_date: null
-    updated_at: '2026-05-10T14:27:04+09:00'
+    updated_at: '2026-05-10T11:59:25.820Z'
   - id: T-0139
     title: CHG-054-00 設計書反映：完了時日付自動設定
     list: 仕様変更
     status: done
     priority: normal
-    sort_order: 139
+    sort_order: 126
     tags:
       - CHG-054
       - 設計書
     due_date: null
-    updated_at: '2026-05-10T14:42:04+09:00'
+    updated_at: '2026-05-10T11:59:25.820Z'
   - id: T-0140
     title: CHG-054-01 完了時に日付空欄なら完了日付を自動設定
     list: 仕様変更
     status: done
     priority: normal
-    sort_order: 140
+    sort_order: 127
     tags:
       - CHG-054
       - 実装
     due_date: null
-    updated_at: '2026-05-10T14:42:04+09:00'
+    updated_at: '2026-05-10T11:59:25.820Z'
   - id: T-0141
     title: CHG-054-02 ユーザー確認：完了時日付自動設定
     list: 仕様変更
     status: done
     priority: normal
-    sort_order: 141
+    sort_order: 128
     tags:
       - CHG-054
       - ユーザー確認
     due_date: null
-    updated_at: '2026-05-10T06:01:47.805Z'
+    updated_at: '2026-05-10T11:59:25.820Z'
   - id: T-0142
     title: CHG-055-01 設計反映：リリースフォルダ名固定
     list: 仕様変更
     status: done
     priority: normal
-    sort_order: 142
+    sort_order: 129
     tags:
       - CHG-055
       - 設計
     due_date: null
-    updated_at: '2026-05-10T15:06:21+09:00'
+    updated_at: '2026-05-10T11:59:25.820Z'
   - id: T-0143
     title: CHG-055-02 実装：リリース生成・同期スクリプト更新
     list: 仕様変更
     status: done
     priority: normal
-    sort_order: 143
+    sort_order: 130
     tags:
       - CHG-055
       - 実装
     due_date: null
-    updated_at: '2026-05-10T15:06:21+09:00'
+    updated_at: '2026-05-10T11:59:25.820Z'
   - id: T-0144
     title: CHG-055-03 ユーザー確認：リリースフォルダ名固定
     list: 仕様変更
     status: done
     priority: normal
-    sort_order: 144
+    sort_order: 131
     tags:
       - CHG-055
       - ユーザー確認
     due_date: null
-    updated_at: '2026-05-10T15:06:21+09:00'
+    updated_at: '2026-05-10T11:59:25.820Z'
   - id: T-0145
     title: CHG-056-01 設計反映：progressフィールド廃止
     list: 仕様変更
     status: done
     priority: normal
-    sort_order: 145
+    sort_order: 132
     tags:
       - CHG-056
       - 設計
     due_date: null
-    updated_at: '2026-05-10T15:41:00+09:00'
+    updated_at: '2026-05-10T11:59:25.820Z'
   - id: T-0146
     title: CHG-056-02 実装：保存モデル・index出力からprogress削除
     list: 仕様変更
     status: done
     priority: normal
-    sort_order: 146
+    sort_order: 133
     tags:
       - CHG-056
       - 実装
     due_date: null
-    updated_at: '2026-05-10T15:43:36+09:00'
+    updated_at: '2026-05-10T11:59:25.820Z'
   - id: T-0147
     title: CHG-056-03 データ移行：既存タスクからprogress削除
     list: 仕様変更
     status: done
     priority: normal
-    sort_order: 147
+    sort_order: 134
     tags:
       - CHG-056
       - データ移行
     due_date: null
-    updated_at: '2026-05-10T15:47:01+09:00'
+    updated_at: '2026-05-10T11:59:25.820Z'
   - id: T-0148
     title: CHG-056-04 ユーザー確認：progressフィールド廃止
     list: 仕様変更
-    status: todo
+    status: done
     priority: normal
-    sort_order: 148
+    sort_order: 135
     tags:
       - CHG-056
       - ユーザー確認
-    due_date: null
-    updated_at: '2026-05-10T15:29:07+09:00'
+    due_date: '2026-05-10'
+    updated_at: '2026-05-10T11:59:25.820Z'
 task_file_roots:
   - .
 next_task_id: 149
-last_updated: '2026-05-10T06:47:14.551Z'
+last_updated: '2026-05-10T12:03:42.094Z'
