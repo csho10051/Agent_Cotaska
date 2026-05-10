@@ -4,6 +4,7 @@
 # ステップ 3: organize-release.ps1 (配布フォルダの再構成)
 # ステップ 4: ランチャー EXE を配布ルートへコピー
 # ステップ 5: 出荷前検証
+# ステップ 6: Cotaska-dist.zip 作成
 # 追加: CotaskaCore.exe にアイコンと表示名メタデータを後書き
 #
 # 使い方:  cd 20_app  ;  .\release-all.ps1
@@ -20,6 +21,7 @@ $repoRoot    = (Resolve-Path (Join-Path $scriptDir "..")).Path
 $nodeDir     = Resolve-Path (Join-Path $scriptDir "..\..\v22.14.0")
 $launcherDir = Join-Path $scriptDir "setup\launcher"
 $distRoot    = Join-Path $scriptDir "release\Cotaska-dist"
+$distZip     = Join-Path $scriptDir "release\Cotaska-dist.zip"
 $distCoreExe = Join-Path $distRoot "_app\CotaskaCore.exe"
 $launcherIcon = Join-Path $launcherDir "icon.ico"
 $sourceDataDir = Join-Path $scriptDir "..\data"
@@ -275,10 +277,30 @@ if ((Test-Path $launcherIcon) -and (Test-Path (Join-Path $distRoot "Cotaska.exe"
 
 Write-Host ""
 if ($allOk) {
+    # -------------------------------------------------------
+    # ステップ 6: GitHub Releases 添付用 zip 作成
+    # -------------------------------------------------------
+    Write-Host "`n[Step 6] Creating release zip ..." -ForegroundColor Cyan
+    if (-not (Test-Path -LiteralPath $distRoot)) {
+        Write-Host "[FAILED] Dist folder not found: $distRoot" -ForegroundColor Red
+        exit 1
+    }
+    if (Test-Path -LiteralPath $distZip) {
+        Remove-Item -LiteralPath $distZip -Force
+    }
+    Compress-Archive -LiteralPath $distRoot -DestinationPath $distZip -CompressionLevel Optimal
+    if (-not (Test-Path -LiteralPath $distZip)) {
+        Write-Host "[FAILED] Release zip was not created: $distZip" -ForegroundColor Red
+        exit 1
+    }
+    $zipSizeMB = [math]::Round((Get-Item -LiteralPath $distZip).Length / 1MB, 1)
+    Write-Host "  OK: Release zip created -> $distZip ($zipSizeMB MB)" -ForegroundColor Green
+
     Write-Host "=======================================" -ForegroundColor Green
     Write-Host " Release v$Version Complete!" -ForegroundColor Green
     Write-Host "=======================================" -ForegroundColor Green
     Write-Host "  Dist: $distRoot" -ForegroundColor Cyan
+    Write-Host "  Zip : $distZip" -ForegroundColor Cyan
     Write-Host "  Next: Launch $distRoot\Cotaska.exe and verify." -ForegroundColor Cyan
 } else {
     Write-Host "=======================================" -ForegroundColor Red

@@ -1418,7 +1418,16 @@ tasks:
       - ユーザー確認
     due_date: '2026-05-10'
     updated_at: '2026-05-10T11:59:25.820Z'
+  - id: T-0149
+    title: CotaskaをGitHub Releasesへアップロード
+    list: null
+    status: todo
+    priority: normal
+    sort_order: 139
+    tags: []
+    due_date: null
+    updated_at: '2026-05-10T12:33:13.715Z'
 task_file_roots:
   - .
-next_task_id: 149
-last_updated: '2026-05-10T12:03:42.094Z'
+next_task_id: 150
+last_updated: '2026-05-10T12:33:13.956Z'
