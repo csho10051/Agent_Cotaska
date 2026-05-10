@@ -26,17 +26,11 @@ $sourceDataDir = Join-Path $scriptDir "..\data"
 $distDataDir = Join-Path $distRoot "data"
 $sourceToolsDir = Join-Path $scriptDir "scripts"
 $distToolsDir = Join-Path $distRoot "tools"
-$sourceAiAgentRuleItem = Get-ChildItem -LiteralPath $repoRoot -Filter "Cotaska_AI*.md" -Recurse -File |
-    Select-Object -First 1
-if ($null -ne $sourceAiAgentRuleItem) {
-    $aiAgentRuleFileName = $sourceAiAgentRuleItem.Name
-    $sourceAiAgentRule = $sourceAiAgentRuleItem.FullName
-}
-else {
-    $aiAgentRuleFileName = "Cotaska_AI*.md"
-    $sourceAiAgentRule = $null
-}
+$sourceAiAgentRule = Join-Path $repoRoot "10_docs\20_実装準備\10_運用ルール\Cotaska_AIエージェント運用ルール.md"
+$aiAgentRuleFileName = Split-Path -Leaf $sourceAiAgentRule
 $distAiAgentRule = Join-Path $distRoot $aiAgentRuleFileName
+$sourceReadme = Join-Path $repoRoot "README.md"
+$distReadme = Join-Path $distRoot "README.md"
 
 $env:PATH = "$nodeDir;$env:PATH"
 
@@ -133,13 +127,19 @@ if (Test-Path $launcherExe) {
     Write-Host "  [WARN] $launcherExe not found. Using existing launcher." -ForegroundColor Yellow
 }
 
-if ($sourceAiAgentRule -and (Test-Path $sourceAiAgentRule)) {
-    Copy-Item $sourceAiAgentRule -Destination $distAiAgentRule -Force
-    Write-Host "  OK: AI agent rule copied -> $distAiAgentRule" -ForegroundColor Green
+if (-not (Test-Path -LiteralPath $sourceAiAgentRule)) {
+    Write-Host "  [FAILED] AI agent rule not found: $sourceAiAgentRule" -ForegroundColor Red
+    exit 1
 }
-else {
-    Write-Host "  [WARN] AI agent rule not found: $sourceAiAgentRule" -ForegroundColor Yellow
+Copy-Item -LiteralPath $sourceAiAgentRule -Destination $distAiAgentRule -Force
+Write-Host "  OK: AI agent rule copied -> $distAiAgentRule" -ForegroundColor Green
+
+if (-not (Test-Path -LiteralPath $sourceReadme)) {
+    Write-Host "  [FAILED] README not found: $sourceReadme" -ForegroundColor Red
+    exit 1
 }
+Copy-Item -LiteralPath $sourceReadme -Destination $distReadme -Force
+Write-Host "  OK: README copied -> $distReadme" -ForegroundColor Green
 
 if ((Test-Path $distCoreExe) -and (Test-Path $launcherIcon)) {
     Write-Host "  Updating CotaskaCore.exe icon and metadata ..." -ForegroundColor Cyan
