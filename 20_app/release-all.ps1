@@ -19,7 +19,7 @@ $scriptDir   = Split-Path -Parent $MyInvocation.MyCommand.Path
 $repoRoot    = (Resolve-Path (Join-Path $scriptDir "..")).Path
 $nodeDir     = Resolve-Path (Join-Path $scriptDir "..\..\v22.14.0")
 $launcherDir = Join-Path $scriptDir "setup\launcher"
-$distRoot    = Join-Path $scriptDir "release\Cotaska-$Version-dist"
+$distRoot    = Join-Path $scriptDir "release\Cotaska-dist"
 $distCoreExe = Join-Path $distRoot "_app\CotaskaCore.exe"
 $launcherIcon = Join-Path $launcherDir "icon.ico"
 $sourceDataDir = Join-Path $scriptDir "..\data"
@@ -104,7 +104,8 @@ if (Test-Path $distToolsDir) {
     Remove-Item $distToolsDir -Recurse -Force
 }
 New-Item -ItemType Directory -Path $distToolsDir | Out-Null
-$toolScripts = Get-ChildItem -LiteralPath $sourceToolsDir -Filter "*.ps1" -File -ErrorAction SilentlyContinue
+$toolScripts = Get-ChildItem -LiteralPath $sourceToolsDir -File -ErrorAction SilentlyContinue |
+    Where-Object { $_.Extension -in @(".ps1", ".cmd", ".bat") }
 if ($toolScripts.Count -gt 0) {
     $toolScripts | Copy-Item -Destination $distToolsDir -Force
     Write-Host "  OK: tools/ synced ($($toolScripts.Count) script(s))" -ForegroundColor Green
@@ -224,7 +225,9 @@ $checks = @(
     @{ Path = (Join-Path $distRoot "data");                    Label = "data/" },
     @{ Path = (Join-Path $distRoot "data\tasks");              Label = "data/tasks/" },
     @{ Path = (Join-Path $distRoot "tools\validate-tasks.ps1"); Label = "tools/validate-tasks.ps1" },
+    @{ Path = (Join-Path $distRoot "tools\remove-progress-field.cmd"); Label = "tools/remove-progress-field.cmd" },
     @{ Path = (Join-Path $distRoot $aiAgentRuleFileName);       Label = $aiAgentRuleFileName },
+    @{ Path = (Join-Path $distRoot "README.md");                Label = "README.md" },
     @{ Path = (Join-Path $distRoot "logs");                    Label = "logs/" }
 )
 

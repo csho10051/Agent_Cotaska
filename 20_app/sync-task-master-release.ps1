@@ -1,5 +1,5 @@
-﻿# sync-task-master-release.ps1
-# release\Cotaska-0.1.0-dist に作成された最新リリース成果物を、
+# sync-task-master-release.ps1
+# release\Cotaska-dist に作成された最新リリース成果物を、
 # 00_mgmt 配下のタスクマスター用配布フォルダへ反映する同期スクリプト。
 # 既存の配布フォルダはタイムスタンプ付きでバックアップしてから置き換える。
 # 目的:
@@ -209,8 +209,8 @@ function Assert-PathExists {
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $repoRoot = (Resolve-Path (Join-Path $scriptDir "..")).Path
 
-$releaseRoot = Join-Path $scriptDir "release\Cotaska-0.1.0-dist"
-$taskMasterRoot = Join-Path $repoRoot "00_mgmt\10_task\Cotaska-0.1.0-dist"
+$releaseRoot = Join-Path $scriptDir "release\Cotaska-dist"
+$taskMasterRoot = Join-Path $repoRoot "00_mgmt\Cotaska_タスク管理ツール"
 
 # リリース成果物側の Cotaska.exe、_app、tools、AIエージェント運用ルールを同期対象にする。
 $srcExe = Join-Path $releaseRoot "Cotaska.exe"
@@ -231,7 +231,7 @@ $dstAiAgentRule = Join-Path $taskMasterRoot $aiAgentRuleFileName
 
 # 置き換え前の配布フォルダ全体を backup 配下へ退避するための保存先を作る。
 $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
-$backupDir = Join-Path (Split-Path $taskMasterRoot) "backup"
+$backupDir = Join-Path $repoRoot "00_mgmt\10_task\backup"
 if (-not (Test-Path -LiteralPath $backupDir)) { New-Item -ItemType Directory -Path $backupDir | Out-Null }
 $backupRoot = Join-Path $backupDir "Cotaska-0.1.0-dist_$timestamp"
 

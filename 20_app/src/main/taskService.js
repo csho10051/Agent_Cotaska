@@ -76,7 +76,6 @@ function createInvalidTask(filePath, error, reason = null) {
     updated_at: null,
     completed_at: null,
     deleted_at: null,
-    progress: 0,
     content: [
       'このタスクファイルは読み込みに失敗しました。',
       '',
@@ -202,6 +201,7 @@ function loadTaskFromFile(filePath) {
     const content = fs.readFileSync(filePath, 'utf-8');
     const parsed = matter(content);
     const hasLegacyTaskFilePath = Object.prototype.hasOwnProperty.call(parsed.data || {}, 'task_file_path');
+    const hasLegacyProgress = Object.prototype.hasOwnProperty.call(parsed.data || {}, 'progress');
     const task = {
       ...parsed.data,
       content: parsed.content,
@@ -210,7 +210,8 @@ function loadTaskFromFile(filePath) {
     // 廃止済みフィールドを読み込み時に除去
     delete task.is_manual_progress;
     delete task.task_file_path;
-    if (hasLegacyTaskFilePath) {
+    delete task.progress;
+    if (hasLegacyTaskFilePath || hasLegacyProgress) {
       task._needsLegacyPathCleanup = true;
     }
 
@@ -500,6 +501,9 @@ function updateTask(id, updates) {
   }
   if (Object.prototype.hasOwnProperty.call(updates, 'task_file_path')) {
     delete updates.task_file_path;
+  }
+  if (Object.prototype.hasOwnProperty.call(updates, 'progress')) {
+    delete updates.progress;
   }
 
   // 全フィールドを更新（content を含む）
@@ -961,6 +965,7 @@ function writeTaskFile(task) {
   delete frontmatter._needsLegacyPathCleanup;
   delete frontmatter.is_manual_progress;
   delete frontmatter.task_file_path;
+  delete frontmatter.progress;
 
   // gray-matter で frontmatter + content を生成
   const markdown = matter.stringify(task.content || '', frontmatter);

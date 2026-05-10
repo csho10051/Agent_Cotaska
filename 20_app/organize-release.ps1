@@ -1,5 +1,5 @@
 # T-048-04: リリース配布フォルダ構成整理スクリプト
-# 目的: ビルド後の Cotaska-0.1.0-dist を新しい構成に整理
+# 目的: ビルド後の Cotaska-dist を新しい構成に整理
 # 用途: npm run dist:dir 後に実行し、_app の外へ data/, logs/ を抽出
 #
 # 使い方: .\organize-release.ps1 -BuildDir "release" -Version "0.1.0"
@@ -9,7 +9,7 @@ param(
   [string]$Version = "0.1.0"
 )
 
-$distDir = Join-Path $BuildDir "Cotaska-$Version-dist"
+$distDir = Join-Path $BuildDir "Cotaska-dist"
 $appDir = Join-Path $distDir "_app"
 $dataDir = Join-Path $distDir "data"
 $logsDir = Join-Path $distDir "logs"
@@ -122,7 +122,8 @@ $distDir/
   ├── logs/          (アプリログ)
   ├── Cotaska.exe    (ランチャー)
   ├── launcher.log
-  └── README.txt
+  ├── Cotaska_AIエージェント運用ルール.md
+  └── README.md
 "@
 Write-Host $finalStructure -ForegroundColor Cyan
 

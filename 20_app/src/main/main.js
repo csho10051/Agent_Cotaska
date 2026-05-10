@@ -74,7 +74,7 @@ async function maybeShowCloudSyncWarning() {
     detail:
       "クラウド同期フォルダ上では Cotaska が起動失敗する場合があります。\n\n" +
       "推奨:\n" +
-      "- Cotaska-0.1.0-dist をローカル固定パスへ移動して起動してください\n" +
+      "- Cotaska-dist をローカル固定パスへ移動して起動してください\n" +
       "- どうしてもクラウド配下で使う場合は、対象フォルダをオフライン固定にしてください",
   });
 }
@@ -110,7 +110,7 @@ function showLaunchFailedGuidance(details) {
       `実行フォルダ: ${runtimeRoot}\n\n` +
       `${provider} 配下での実行が原因の可能性があります。\n\n` +
       "対応方法:\n" +
-      "1. Cotaska-0.1.0-dist をローカル固定パスへコピーして起動\n" +
+      "1. Cotaska-dist をローカル固定パスへコピーして起動\n" +
       "2. もしくはクラウド同期フォルダでオフライン固定を設定\n" +
       "3. logs/app-YYYY-MM-DD.log と launcher.log を確認",
   });

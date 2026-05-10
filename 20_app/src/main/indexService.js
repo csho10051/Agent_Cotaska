@@ -66,7 +66,6 @@ function rebuildIndex(taskCache, taskFileRoots = ['.']) {
         list: t.list,
         status: t.status,
         priority: t.priority,
-        progress: t.progress,
         sort_order: t.sort_order,
         tags: t.tags || [],
         due_date: t.due_date,

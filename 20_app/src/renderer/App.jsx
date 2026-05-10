@@ -49,7 +49,6 @@ function mapFileTask(taskData) {
     status:    taskData.status,
     progressStatus,
     priority:  taskData.priority || "normal",
-    progress:  taskData.progress || 0,
     parent:    taskData.parent ?? null,           // parent_idではなくparent
     list:      taskData.list ?? null,             // list_idではなくlist（文字列）
     tags:      taskData.tags || [],               // frontmatterの新フィールド
@@ -87,7 +86,6 @@ function toFileTaskPayload(task, patch = {}) {
     status: task.status,
     progress_status: task.progressStatus || (task.status === "done" ? "完了" : "未着"),
     priority: task.priority || "normal",
-    progress: task.progress ?? 0,
     parent: task.parent ?? null,         // parent_idではなくparent
     list: task.list ?? null,             // list_idではなくlist（文字列）
     tags: task.tags || [],
@@ -478,7 +476,6 @@ function App() {
       status:   "todo",
       progress_status: "未着",
       priority: "normal",
-      progress: 0,
       due_date,
       list,  // list_id ではなく list（リスト名）
       tags: defaultTags,
@@ -495,7 +492,6 @@ function App() {
       status:    "todo",
       progress_status: "未着",
       priority:  "normal",
-      progress:  0,
       parent:    parentTask.id,      // parent_id ではなく parent
       list:      parentTask.list,     // list_id ではなく list
       due_date:  parentTask.due_date || null,
@@ -542,7 +538,6 @@ function App() {
       status:    "todo",
       progress_status: "未着",
       priority:  task.priority || "normal",
-      progress:  0,
       parent:    task.parent ?? null,
       list:      task.list ?? null,
       due_date:  task.due_date || null,

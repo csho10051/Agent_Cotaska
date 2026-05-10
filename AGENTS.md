@@ -12,7 +12,7 @@ Goals:
 - Make AI work auditable for humans.
 
 Primary task management rule reference:
-- `00_mgmt/10_task/Cotaska-0.1.0-dist/Cotaska_AIエージェント運用ルール.md`
+- `00_mgmt/Cotaska_タスク管理ツール/Cotaska_AIエージェント運用ルール.md`
 - For task management behavior, this rule has priority over this file when guidance overlaps.
 
 ---
@@ -109,9 +109,7 @@ id: T-001
 title: タスク名
 status: todo|doing|blocked|done
 priority: high|medium|normal
-progress_status: 未着手|進行中|完了
-is_manual_progress: 0|1
-progress: 0
+progress_status: 未着|仕掛|保留|完了
 due_date: 2026-03-20   # or null
 list: リスト名         # null means no list
 parent: null           # parent task id (T-XXX) or null
