@@ -1427,7 +1427,96 @@ tasks:
     tags: []
     due_date: null
     updated_at: '2026-05-10T12:33:13.715Z'
+  - id: T-0150
+    title: CHG-057 ローカルAI CLIチャット連携
+    list: 仕様変更
+    status: todo
+    priority: high
+    sort_order: 140
+    tags:
+      - CHG-057
+      - 仕様変更
+      - AI連携
+      - CLI連携
+    due_date: null
+    updated_at: '2026-05-14T11:10:00+09:00'
+  - id: T-0151
+    title: 'CHG-057-01 設計反映: ローカルAI CLIチャット連携'
+    list: 仕様変更
+    status: todo
+    priority: high
+    sort_order: 141
+    tags:
+      - CHG-057
+      - 設計
+      - AI連携
+    due_date: null
+    updated_at: '2026-05-14T11:10:00+09:00'
+  - id: T-0152
+    title: 'CHG-057-02 実装: 共通CLI基盤とCodex CLI初期対応'
+    list: 仕様変更
+    status: todo
+    priority: high
+    sort_order: 142
+    tags:
+      - CHG-057
+      - 実装
+      - Codex
+      - AI連携
+    due_date: null
+    updated_at: '2026-05-14T11:10:00+09:00'
+  - id: T-0153
+    title: 'CHG-057-03 ユーザー確認: ローカルAI CLIチャット連携'
+    list: 仕様変更
+    status: todo
+    priority: normal
+    sort_order: 143
+    tags:
+      - CHG-057
+      - ユーザー確認
+      - AI連携
+    due_date: null
+    updated_at: '2026-05-14T11:10:00+09:00'
+  - id: T-0154
+    title: 'CHG-057-04 実装: GitHub Copilot CLIプロバイダ追加'
+    list: 仕様変更
+    status: todo
+    priority: normal
+    sort_order: 144
+    tags:
+      - CHG-057
+      - 実装
+      - GitHub Copilot
+      - AI連携
+    due_date: null
+    updated_at: '2026-05-14T11:10:00+09:00'
+  - id: T-0155
+    title: 'CHG-057-05 実装: Claude Codeプロバイダ追加'
+    list: 仕様変更
+    status: todo
+    priority: normal
+    sort_order: 145
+    tags:
+      - CHG-057
+      - 実装
+      - Claude Code
+      - AI連携
+    due_date: null
+    updated_at: '2026-05-14T11:10:00+09:00'
+  - id: T-0156
+    title: 'CHG-057-06 実装: Gemini CLIプロバイダ追加'
+    list: 仕様変更
+    status: todo
+    priority: normal
+    sort_order: 146
+    tags:
+      - CHG-057
+      - 実装
+      - Gemini
+      - AI連携
+    due_date: null
+    updated_at: '2026-05-14T11:10:00+09:00'
 task_file_roots:
   - .
-next_task_id: 150
-last_updated: '2026-05-10T12:33:13.956Z'
+next_task_id: 157
+last_updated: '2026-05-14T11:10:00+09:00'

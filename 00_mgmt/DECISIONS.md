@@ -103,3 +103,9 @@
 
 - 検索モードの空白区切り入力は AND 条件として扱い、各キーワードがタスクの検索対象情報のいずれかに含まれる場合に一致とする。
 - タグは `タグ名` と `#タグ名` の両方を検索対象に含め、日付は `due_date` の保存値・日付部分・画面表示形式を検索対象に含める。
+## 2026-05-14 CHG-057 Codex CLIチャット連携
+
+- CotaskaからCodexとやり取りする初期方式は、OpenAI APIキーをCotaskaへ保持する方式ではなく、ローカルのCodex CLIをmain processから呼び出す方式として起票する。
+- Codexの応答はチャット表示用メッセージとタスク反映用の構造化アクションに分け、タスク反映はユーザー承認後のみ既存の `taskService` 経由で行う。
+- rendererからCLIを直接起動せず、`window.cotaskaAPI` / IPCを通じてmain process側で実行・検証する方針とする。
+- 2026-05-14追記: Codex CLI専用ではなく、GitHub Copilot CLI、Claude Code、Gemini CLIも追加可能なローカルAI CLIプロバイダ方式として扱う。初期実装は共通基盤とCodex CLI、他CLIは段階タスクで追加する。
