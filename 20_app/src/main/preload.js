@@ -58,6 +58,16 @@ contextBridge.exposeInMainWorld("cotaskaAPI", {
     });
   },
 
+  onDetailContentFontAdjust: (callback) => {
+    const listener = (_event, delta) => {
+      callback(delta);
+    };
+    ipcRenderer.on("detail-content-font:adjust", listener);
+    return () => {
+      ipcRenderer.removeListener("detail-content-font:adjust", listener);
+    };
+  },
+
   // リスナー削除
   removeTasksChangedListener: () => {
     ipcRenderer.removeAllListeners("tasks:changed");

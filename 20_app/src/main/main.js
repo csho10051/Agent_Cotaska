@@ -748,6 +748,12 @@ function createWindow() {
     }
   });
 
+  win.webContents.on("zoom-changed", (event, zoomDirection) => {
+    event.preventDefault();
+    win.webContents.setZoomFactor(1);
+    win.webContents.send("detail-content-font:adjust", zoomDirection === "in" ? 1 : -1);
+  });
+
   // 開発時は Vite dev server、ビルド後は dist/renderer/index.html を読み込む
   if (process.env.NODE_ENV === "development") {
     const port = process.env.VITE_PORT || "5173";
@@ -778,8 +784,34 @@ function createWindow() {
   // Developer Tools を開くショートカット（Ctrl+Shift+I / F12）を登録
   win.webContents.on("before-input-event", (event, input) => {
     const key = String(input.key || "").toLowerCase();
+    const code = String(input.code || "");
     const isCtrlShiftI = input.control && input.shift && key === "i";
     const isF12 = key === "f12";
+    const isDetailFontIncrease =
+      input.control && !input.alt && !input.meta &&
+      (input.key === "+" ||
+        input.key === "=" ||
+        key === "+" ||
+        key === "=" ||
+        key === "add" ||
+        key === "plus" ||
+        key === "numadd" ||
+        key === "num+" ||
+        code === "Equal" ||
+        code === "Semicolon" ||
+        code === "NumpadAdd");
+    const isDetailFontDecrease =
+      input.control && !input.alt && !input.meta &&
+      (input.key === "-" ||
+        input.key === "_" ||
+        key === "-" ||
+        key === "_" ||
+        key === "subtract" ||
+        key === "minus" ||
+        key === "numsubtract" ||
+        key === "num-" ||
+        code === "Minus" ||
+        code === "NumpadSubtract");
 
     if (isCtrlShiftI || isF12) {
       if (win.webContents.isDevToolsOpened()) {
@@ -787,6 +819,12 @@ function createWindow() {
       } else {
         win.webContents.openDevTools();
       }
+      event.preventDefault();
+      return;
+    }
+
+    if (isDetailFontIncrease || isDetailFontDecrease) {
+      win.webContents.send("detail-content-font:adjust", isDetailFontIncrease ? 1 : -1);
       event.preventDefault();
     }
   });

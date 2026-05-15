@@ -9,6 +9,10 @@ const SUBTASK_PANEL_MIN_HEIGHT = 120;
 const SUBTASK_PANEL_MAX_HEIGHT = 520;
 const SUBTASK_PANEL_DEFAULT_HEIGHT = 260;
 const SUBTASK_PANEL_STORAGE_KEY = "cotaska.detailSubtasksHeight";
+const DETAIL_CONTENT_FONT_MIN = 12;
+const DETAIL_CONTENT_FONT_MAX = 22;
+const DETAIL_CONTENT_FONT_DEFAULT = 14;
+const DETAIL_CONTENT_FONT_STORAGE_KEY = "cotaska.detailContentFontSize";
 
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 
@@ -185,8 +189,15 @@ function DetailPaneBody({
     if (!Number.isFinite(saved)) return SUBTASK_PANEL_DEFAULT_HEIGHT;
     return clamp(saved, SUBTASK_PANEL_MIN_HEIGHT, SUBTASK_PANEL_MAX_HEIGHT);
   });
+  const [detailContentFontSize, setDetailContentFontSize] = useState(() => {
+    if (typeof window === "undefined") return DETAIL_CONTENT_FONT_DEFAULT;
+    const saved = Number(window.localStorage?.getItem(DETAIL_CONTENT_FONT_STORAGE_KEY));
+    if (!Number.isFinite(saved)) return DETAIL_CONTENT_FONT_DEFAULT;
+    return clamp(saved, DETAIL_CONTENT_FONT_MIN, DETAIL_CONTENT_FONT_MAX);
+  });
   const [subtaskNodeExpanded, setSubtaskNodeExpanded] = useState({});
   const subtaskResizeRef = useRef(null);
+  const detailPaneRef = useRef(null);
   const markdownHighlightRef = useRef(null);
   const [openExternalError, setOpenExternalError] = useState("");
 
@@ -218,6 +229,10 @@ function DetailPaneBody({
   useEffect(() => {
     window.localStorage?.setItem(SUBTASK_PANEL_STORAGE_KEY, String(subtaskPanelHeight));
   }, [subtaskPanelHeight]);
+
+  useEffect(() => {
+    window.localStorage?.setItem(DETAIL_CONTENT_FONT_STORAGE_KEY, String(detailContentFontSize));
+  }, [detailContentFontSize]);
 
   useEffect(() => {
     const handleResizeMove = (event) => {
@@ -254,6 +269,81 @@ function DetailPaneBody({
     };
     document.body.classList.add("is-resizing-detail-sections");
   };
+
+  const adjustDetailContentFontSize = (delta) => {
+    setDetailContentFontSize((current) =>
+      clamp(current + delta, DETAIL_CONTENT_FONT_MIN, DETAIL_CONTENT_FONT_MAX)
+    );
+  };
+
+  useEffect(() => {
+    const isTextZoomShortcut = (event) => {
+      if (!event.ctrlKey || event.altKey || event.metaKey) return 0;
+      const key = String(event.key || "").toLowerCase();
+      const code = String(event.code || "");
+      if (
+        event.key === "+" ||
+        event.key === "=" ||
+        key === "+" ||
+        key === "=" ||
+        key === "add" ||
+        key === "plus" ||
+        code === "Equal" ||
+        code === "Semicolon" ||
+        code === "NumpadAdd"
+      ) {
+        return 1;
+      }
+      if (
+        event.key === "-" ||
+        event.key === "_" ||
+        key === "-" ||
+        key === "_" ||
+        key === "subtract" ||
+        key === "minus" ||
+        code === "Minus" ||
+        code === "NumpadSubtract"
+      ) {
+        return -1;
+      }
+      return 0;
+    };
+
+    const handleDetailShortcutKeyDown = (event) => {
+      const delta = isTextZoomShortcut(event);
+      if (delta === 0) return;
+      event.preventDefault();
+      event.stopPropagation();
+      adjustDetailContentFontSize(delta);
+    };
+
+    const handleDetailShortcutWheel = (event) => {
+      if (!event.ctrlKey) return;
+      event.preventDefault();
+      event.stopPropagation();
+      adjustDetailContentFontSize(event.deltaY < 0 ? 1 : -1);
+    };
+
+    const removeMainShortcutListener = window.cotaskaAPI?.onDetailContentFontAdjust?.((delta) => {
+      adjustDetailContentFontSize(Number(delta) > 0 ? 1 : -1);
+    });
+
+    const pane = detailPaneRef.current;
+    window.addEventListener("keydown", handleDetailShortcutKeyDown, true);
+    document.addEventListener("keydown", handleDetailShortcutKeyDown, true);
+    document.addEventListener("wheel", handleDetailShortcutWheel, { capture: true, passive: false });
+    window.addEventListener("wheel", handleDetailShortcutWheel, { capture: true, passive: false });
+    pane?.addEventListener("wheel", handleDetailShortcutWheel, { capture: true, passive: false });
+
+    return () => {
+      removeMainShortcutListener?.();
+      window.removeEventListener("keydown", handleDetailShortcutKeyDown, true);
+      document.removeEventListener("keydown", handleDetailShortcutKeyDown, true);
+      document.removeEventListener("wheel", handleDetailShortcutWheel, { capture: true });
+      window.removeEventListener("wheel", handleDetailShortcutWheel, { capture: true });
+      pane?.removeEventListener("wheel", handleDetailShortcutWheel, { capture: true });
+    };
+  }, []);
 
   const progressBadgeClass = (targetTask) => {
     if (targetTask.is_invalid) return "invalid";
@@ -466,6 +556,7 @@ function DetailPaneBody({
   };
 
   const highlightedContentHtml = renderMarkdownEditorHtml(contentText);
+  const detailContentFontStyle = { fontSize: `${detailContentFontSize}px` };
   const handleEditorScroll = (event) => {
     if (markdownHighlightRef.current) {
       markdownHighlightRef.current.scrollTop = event.currentTarget.scrollTop;
@@ -474,7 +565,11 @@ function DetailPaneBody({
   };
 
   return (
-    <div className="detail-pane">
+    <div
+      ref={detailPaneRef}
+      className="detail-pane"
+      style={{ "--detail-content-font-size": `${detailContentFontSize}px` }}
+    >
       {/* === detail-header: チェック + タイトル + 右上アクション === */}
       <div className="detail-header">
         <input type="checkbox" className="d-check" checked={completed} onChange={handleComplete} disabled={isInvalid} />
@@ -693,6 +788,7 @@ function DetailPaneBody({
         {previewMode ? (
           <div
             className={`detail-preview${contentText ? "" : " detail-preview--empty"}`}
+            style={detailContentFontStyle}
             onClick={handlePreviewLinkClick}
             dangerouslySetInnerHTML={{
               __html: contentText ? markdown.render(contentText) : "<p>プレビューはありません。</p>",
@@ -703,11 +799,13 @@ function DetailPaneBody({
             <div
               ref={markdownHighlightRef}
               className="markdown-editor-highlight"
+              style={detailContentFontStyle}
               aria-hidden="true"
               dangerouslySetInnerHTML={{ __html: highlightedContentHtml }}
             />
             <textarea
               className="detail-content markdown-editor-input"
+              style={detailContentFontStyle}
               value={contentText}
               placeholder="メモを入力..."
               readOnly={isInvalid}

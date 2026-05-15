@@ -588,6 +588,12 @@ body.is-resizing-detail-sections * {
   z-index: 1;
 }
 
+.detail-pane .detail-meta,
+.detail-pane .detail-parent-link,
+.detail-pane .detail-subtasks {
+  font-size: var(--detail-content-font-size, 14px);
+}
+
 /* 詳細ペイン：タスク未選択状態 */
 .detail-pane--empty {
   align-items: center;
@@ -914,7 +920,7 @@ body.is-resizing-detail-sections * {
 }
 
 .detail-content {
-  font-size: 14px;
+  font-size: var(--detail-content-font-size, 14px);
   line-height: 1.5;
   outline: none;
   border: none;
@@ -949,7 +955,7 @@ body.is-resizing-detail-sections * {
   margin: 0;
   border: 0;
   font-family: inherit;
-  font-size: 14px;
+  font-size: var(--detail-content-font-size, 14px);
   line-height: 1.5;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
@@ -991,7 +997,7 @@ body.is-resizing-detail-sections * {
 }
 
 .markdown-editor-line {
-  min-height: 21px;
+  min-height: calc(var(--detail-content-font-size, 14px) * 1.5);
 }
 
 .md-heading {
@@ -1060,7 +1066,7 @@ body.is-resizing-detail-sections * {
 
 .detail-preview {
   flex: 1;
-  font-size: 14px;
+  font-size: var(--detail-content-font-size, 14px);
   line-height: 1.6;
   color: #333;
   min-height: 0;
