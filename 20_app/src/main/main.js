@@ -46,6 +46,20 @@ function getRuntimeRootPath() {
   return path.resolve(__dirname, "../..");
 }
 
+function getAppInfo() {
+  const pkg = require("../../package.json");
+  const distributionFolder = app.isPackaged
+    ? path.basename(getRuntimeRootPath())
+    : "Cotaska-dist";
+
+  return {
+    productName: "Cotaska",
+    currentVersion: `Cotaska ${pkg.version}`,
+    distributionFolder,
+    updateGuidance: "利用者確認付きの手動ダウンロード案内",
+  };
+}
+
 async function maybeShowCloudSyncWarning() {
   if (hasShownCloudSyncWarning || !app.isPackaged) {
     return;
@@ -205,6 +219,8 @@ function startVite() {
 
 // ── IPC ハンドラ登録 ──────────────────────────────────────────
 ipcMain.handle("ping", () => "pong");
+
+ipcMain.handle("app:getInfo", () => getAppInfo());
 
 ipcMain.handle("tasks:getAll", async () => {
   await servicesReady;

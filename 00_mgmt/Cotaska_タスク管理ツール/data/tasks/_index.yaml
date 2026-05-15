@@ -40,12 +40,12 @@ tasks:
   - id: T-0021
     title: 仕様変更：設定画面の実装
     list: 仕様変更
-    status: todo
+    status: done
     priority: normal
     sort_order: 5
     tags: []
-    due_date: null
-    updated_at: '2026-05-10T11:59:40.197Z'
+    due_date: '2026-05-15'
+    updated_at: '2026-05-15T14:16:10.906Z'
   - id: T-0097
     title: 仕様変更：バージョン管理
     list: 仕様変更
@@ -55,7 +55,7 @@ tasks:
     tags:
       - CHG-057
     due_date: null
-    updated_at: '2026-05-13T22:15:38+09:00'
+    updated_at: '2026-05-15T13:30:21.956Z'
   - id: T-0137
     title: CHG-053-02 ユーザー確認：リスト表示並び替え
     list: 仕様変更
@@ -1455,14 +1455,14 @@ tasks:
   - id: T-0151
     title: CHG-057-02 実装：現在バージョン取得と表示
     list: 仕様変更
-    status: todo
+    status: done
     priority: normal
     sort_order: 141
     tags:
       - CHG-057
       - 実装
     due_date: null
-    updated_at: '2026-05-13T22:15:38+09:00'
+    updated_at: '2026-05-15T22:59:28+09:00'
   - id: T-0155
     title: 'CHG-058-01 設計反映: ローカルAI CLIチャット連携'
     list: 仕様変更
@@ -1702,6 +1702,16 @@ tasks:
       - ユーザー確認
     due_date: '2026-05-15'
     updated_at: '2026-05-15T21:22:14+09:00'
+  - id: T-0175
+    title: 不具合：プレビューモードでテーブル形式の場合罫線が出ない
+    list: 不具合修正
+    status: done
+    priority: normal
+    sort_order: 165
+    tags:
+      - BUG-20260515-01
+    due_date: null
+    updated_at: '2026-05-15T22:33:35+09:00'
   - id: T-0170
     title: Cotaska v0.1.1 ビルド・リリース
     list: リリース
@@ -1713,7 +1723,123 @@ tasks:
       - v0.1.1
     due_date: 2026-05-15T00:00:00.000Z
     updated_at: 2026-05-15T03:44:27.000Z
+  - id: T-0176
+    title: 仕様変更：設定画面の未実装項目を実装する
+    list: 仕様変更
+    status: todo
+    priority: normal
+    sort_order: 176
+    tags:
+      - 設定画面
+      - 仕様変更
+    due_date: null
+    updated_at: '2026-05-15T14:11:08.476Z'
+  - id: T-0177
+    title: 設計反映：設定保存モデルと設定画面未実装項目
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 177
+    tags:
+      - 設定画面
+      - 設計
+    due_date: null
+    updated_at: '2026-05-15T23:28:00+09:00'
+  - id: T-0178
+    title: 実装：設定値の保存基盤と IPC
+    list: 仕様変更
+    status: todo
+    priority: high
+    sort_order: 178
+    tags:
+      - 設定画面
+      - 実装
+      - IPC
+    due_date: null
+    updated_at: '2026-05-15T23:15:00+09:00'
+  - id: T-0179
+    title: 実装：表示名設定の保存とアプリ表示反映
+    list: 仕様変更
+    status: todo
+    priority: normal
+    sort_order: 179
+    tags:
+      - 設定画面
+      - 実装
+    due_date: null
+    updated_at: '2026-05-15T23:15:00+09:00'
+  - id: T-0180
+    title: 実装：外部エディタ設定とタスクファイル起動
+    list: 仕様変更
+    status: todo
+    priority: high
+    sort_order: 180
+    tags:
+      - 設定画面
+      - 実装
+      - 外部エディタ
+    due_date: null
+    updated_at: '2026-05-15T23:15:00+09:00'
+  - id: T-0181
+    title: 実装：通知時間設定を通知判定へ反映
+    list: 仕様変更
+    status: todo
+    priority: normal
+    sort_order: 181
+    tags:
+      - 設定画面
+      - 実装
+      - 通知
+    due_date: null
+    updated_at: '2026-05-15T23:15:00+09:00'
+  - id: T-0182
+    title: 実装：文字サイズ設定をタスク詳細へ反映
+    list: 仕様変更
+    status: todo
+    priority: normal
+    sort_order: 182
+    tags:
+      - 設定画面
+      - 実装
+      - 文字サイズ
+    due_date: null
+    updated_at: '2026-05-15T23:15:00+09:00'
+  - id: T-0183
+    title: 実装：アプリ情報の更新確認と手動ダウンロード案内
+    list: 仕様変更
+    status: todo
+    priority: normal
+    sort_order: 183
+    tags:
+      - 設定画面
+      - 実装
+      - アプリ情報
+    due_date: null
+    updated_at: '2026-05-15T23:15:00+09:00'
+  - id: T-0184
+    title: 実装：バックアップ画面の初期機能
+    list: 仕様変更
+    status: todo
+    priority: normal
+    sort_order: 184
+    tags:
+      - 設定画面
+      - 実装
+      - バックアップ
+    due_date: null
+    updated_at: '2026-05-15T23:15:00+09:00'
+  - id: T-0185
+    title: 確認：設定画面未実装項目のユーザー確認
+    list: 仕様変更
+    status: todo
+    priority: normal
+    sort_order: 185
+    tags:
+      - 設定画面
+      - ユーザー確認
+    due_date: null
+    updated_at: '2026-05-15T23:15:00+09:00'
 task_file_roots:
   - .
-next_task_id: 175
-last_updated: '2026-05-15T21:22:14+09:00'
+next_task_id: 186
+last_updated: '2026-05-15T14:16:11.158Z'

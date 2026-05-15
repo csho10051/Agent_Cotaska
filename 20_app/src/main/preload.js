@@ -6,6 +6,10 @@ contextBridge.exposeInMainWorld("cotaskaAPI", {
   // 疎通確認
   ping: () => ipcRenderer.invoke("ping"),
 
+  app: {
+    getInfo: () => ipcRenderer.invoke("app:getInfo"),
+  },
+
   // タスク操作（ファイルベース）
   tasks: {
     getAll:           ()                                => ipcRenderer.invoke("tasks:getAll"),

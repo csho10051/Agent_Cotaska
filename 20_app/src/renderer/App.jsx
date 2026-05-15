@@ -4,6 +4,7 @@ import Sidebar    from "./components/Sidebar";
 import NavPanel   from "./components/NavPanel";
 import MainPane   from "./components/MainPane";
 import DetailPane from "./components/DetailPane";
+import SettingsPane from "./components/SettingsPane";
 
 const TAG_NAV_PREFIX = "tag:";
 const MAX_TASK_TREE_DEPTH = 5;
@@ -731,6 +732,7 @@ function App() {
   }, [loadTasks]);
 
   // T-004-05: サイドバーアイコンに応じてナビパネルの表示を制御
+  const isSettingsMode = activeIcon === "設定";
   const navVisible = activeIcon === "リスト";
 
   const tagCounts = useMemo(() => {
@@ -853,6 +855,10 @@ function App() {
         activeIcon={activeIcon}
         onIconClick={setActiveIcon}
       />
+      {isSettingsMode ? (
+        <SettingsPane />
+      ) : (
+      <>
       {navVisible && !detailPaneExpanded && (
         <>
           <div style={{ width: navWidth, flexShrink: 0, overflow: "hidden", display: "flex", alignSelf: "stretch" }}>
@@ -1007,6 +1013,8 @@ function App() {
             </div>
           </div>
         </div>
+      )}
+      </>
       )}
     </div>
   );
