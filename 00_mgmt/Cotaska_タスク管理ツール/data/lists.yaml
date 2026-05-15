@@ -9,7 +9,12 @@ lists:
     icon: icon-doc
     created_at: '2026-03-26T00:24:48.633Z'
     updated_at: '2026-03-26T00:24:48.633Z'
+  - name: 販売戦略
+    color: '#e67e22'
+    icon: icon-doc
+    created_at: '2026-05-10T13:41:58.017Z'
+    updated_at: '2026-05-10T13:42:08.536Z'
 tags:
   - 開発管理
   - 仕様変更
-last_updated: '2026-03-26T00:24:48.633Z'
+last_updated: '2026-05-10T13:42:08.536Z'

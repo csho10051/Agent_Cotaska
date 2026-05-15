@@ -49,12 +49,13 @@ tasks:
   - id: T-0097
     title: 仕様変更：バージョン管理
     list: 仕様変更
-    status: todo
+    status: doing
     priority: normal
     sort_order: 6
-    tags: []
+    tags:
+      - CHG-057
     due_date: null
-    updated_at: '2026-05-10T11:59:25.820Z'
+    updated_at: '2026-05-13T22:15:38+09:00'
   - id: T-0137
     title: CHG-053-02 ユーザー確認：リスト表示並び替え
     list: 仕様変更
@@ -1421,27 +1422,49 @@ tasks:
   - id: T-0149
     title: CotaskaをGitHub Releasesへアップロード
     list: null
-    status: todo
+    status: done
     priority: normal
     sort_order: 139
     tags: []
-    due_date: null
-    updated_at: '2026-05-10T12:33:13.715Z'
+    due_date: '2026-05-10'
+    updated_at: '2026-05-10T13:27:06.218Z'
   - id: T-0150
-    title: CHG-057 ローカルAI CLIチャット連携
+    title: CHG-057-01 設計反映：バージョン情報表示
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 140
+    tags:
+      - CHG-057
+      - 設計
+    due_date: null
+    updated_at: '2026-05-13T22:35:09+09:00'
+  - id: T-0154
+    title: CHG-058 ローカルAI CLIチャット連携
     list: 仕様変更
     status: todo
     priority: high
     sort_order: 140
     tags:
-      - CHG-057
+      - CHG-058
       - 仕様変更
       - AI連携
       - CLI連携
     due_date: null
     updated_at: '2026-05-14T11:10:00+09:00'
   - id: T-0151
-    title: 'CHG-057-01 設計反映: ローカルAI CLIチャット連携'
+    title: CHG-057-02 実装：現在バージョン取得と表示
+    list: 仕様変更
+    status: todo
+    priority: normal
+    sort_order: 141
+    tags:
+      - CHG-057
+      - 実装
+    due_date: null
+    updated_at: '2026-05-13T22:15:38+09:00'
+  - id: T-0155
+    title: 'CHG-058-01 設計反映: ローカルAI CLIチャット連携'
     list: 仕様変更
     status: todo
     priority: high
@@ -1453,7 +1476,18 @@ tasks:
     due_date: null
     updated_at: '2026-05-14T11:10:00+09:00'
   - id: T-0152
-    title: 'CHG-057-02 実装: 共通CLI基盤とCodex CLI初期対応'
+    title: CHG-057-03 ユーザー確認：バージョン情報表示
+    list: 仕様変更
+    status: todo
+    priority: normal
+    sort_order: 142
+    tags:
+      - CHG-057
+      - ユーザー確認
+    due_date: null
+    updated_at: '2026-05-13T22:15:38+09:00'
+  - id: T-0156
+    title: 'CHG-058-02 実装: 共通CLI基盤とCodex CLI初期対応'
     list: 仕様変更
     status: todo
     priority: high
@@ -1464,9 +1498,19 @@ tasks:
       - Codex
       - AI連携
     due_date: null
-    updated_at: '2026-05-14T11:10:00+09:00'
+    updated_at: '2026-05-15T01:44:38.122Z'
   - id: T-0153
-    title: 'CHG-057-03 ユーザー確認: ローカルAI CLIチャット連携'
+    title: タスク１
+    list: null
+    status: done
+    priority: normal
+    progress: 0
+    sort_order: 143
+    tags: []
+    due_date: '2026-05-13'
+    updated_at: '2026-05-13T14:02:45.612Z'
+  - id: T-0157
+    title: 'CHG-058-03 ユーザー確認: ローカルAI CLIチャット連携'
     list: 仕様変更
     status: todo
     priority: normal
@@ -1476,9 +1520,9 @@ tasks:
       - ユーザー確認
       - AI連携
     due_date: null
-    updated_at: '2026-05-14T11:10:00+09:00'
-  - id: T-0154
-    title: 'CHG-057-04 実装: GitHub Copilot CLIプロバイダ追加'
+    updated_at: '2026-05-15T01:44:42.946Z'
+  - id: T-0158
+    title: 'CHG-058-04 実装: GitHub Copilot CLIプロバイダ追加'
     list: 仕様変更
     status: todo
     priority: normal
@@ -1489,9 +1533,9 @@ tasks:
       - GitHub Copilot
       - AI連携
     due_date: null
-    updated_at: '2026-05-14T11:10:00+09:00'
-  - id: T-0155
-    title: 'CHG-057-05 実装: Claude Codeプロバイダ追加'
+    updated_at: '2026-05-15T01:44:49.189Z'
+  - id: T-0159
+    title: 'CHG-058-05 実装: Claude Codeプロバイダ追加'
     list: 仕様変更
     status: todo
     priority: normal
@@ -1502,9 +1546,9 @@ tasks:
       - Claude Code
       - AI連携
     due_date: null
-    updated_at: '2026-05-14T11:10:00+09:00'
-  - id: T-0156
-    title: 'CHG-057-06 実装: Gemini CLIプロバイダ追加'
+    updated_at: '2026-05-15T01:44:53.613Z'
+  - id: T-0160
+    title: 'CHG-058-06 実装: Gemini CLIプロバイダ追加'
     list: 仕様変更
     status: todo
     priority: normal
@@ -1515,8 +1559,8 @@ tasks:
       - Gemini
       - AI連携
     due_date: null
-    updated_at: '2026-05-14T11:10:00+09:00'
+    updated_at: '2026-05-15T01:44:58.017Z'
 task_file_roots:
   - .
-next_task_id: 157
-last_updated: '2026-05-14T11:10:00+09:00'
+next_task_id: 161
+last_updated: '2026-05-15T01:58:53.237Z'
