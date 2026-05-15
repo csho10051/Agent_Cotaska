@@ -88,8 +88,25 @@ function rebuildIndex(taskCache, taskFileRoots = ['.']) {
       last_updated: new Date().toISOString()
     };
 
-    // _index.yaml に書き込み
     const yaml = YAML.dump(indexData, { lineWidth: -1 });
+    if (fs.existsSync(INDEX_PATH)) {
+      const currentYaml = fs.readFileSync(INDEX_PATH, 'utf-8');
+      try {
+        const currentData = YAML.load(currentYaml) || {};
+        const comparableCurrentYaml = YAML.dump(
+          { ...currentData, last_updated: indexData.last_updated },
+          { lineWidth: -1 }
+        );
+        if (comparableCurrentYaml === yaml) {
+          console.log(`[IndexService] Index unchanged: ${taskList.length} tasks`);
+          return { success: true, taskCount: taskList.length, last_updated: currentData.last_updated || null, skipped: true };
+        }
+      } catch {
+        // If the existing index is broken, overwrite it with the regenerated one below.
+      }
+    }
+
+    // _index.yaml に書き込み
     fs.writeFileSync(INDEX_PATH, yaml, 'utf-8');
 
     console.log(`[IndexService] Rebuilt index: ${taskList.length} tasks`);

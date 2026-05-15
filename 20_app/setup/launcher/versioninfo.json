@@ -3,13 +3,13 @@
     "FileVersion": {
       "Major": 0,
       "Minor": 1,
-      "Patch": 0,
+      "Patch": 1,
       "Build": 0
     },
     "ProductVersion": {
       "Major": 0,
       "Minor": 1,
-      "Patch": 0,
+      "Patch": 1,
       "Build": 0
     },
     "FileFlagsMask": "3f",
@@ -22,14 +22,14 @@
     "Comments": "",
     "CompanyName": "",
     "FileDescription": "Cotaska Launcher",
-    "FileVersion": "0.1.0",
+    "FileVersion": "0.1.1",
     "InternalName": "Cotaska",
     "LegalCopyright": "",
     "LegalTrademarks": "",
     "OriginalFilename": "Cotaska.exe",
     "PrivateBuild": "",
     "ProductName": "Cotaska",
-    "ProductVersion": "0.1.0",
+    "ProductVersion": "0.1.1",
     "SpecialBuild": ""
   },
   "VarFileInfo": {

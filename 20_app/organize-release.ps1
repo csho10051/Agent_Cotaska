@@ -2,11 +2,11 @@
 # 目的: ビルド後の Cotaska-dist を新しい構成に整理
 # 用途: npm run dist:dir 後に実行し、_app の外へ data/, logs/ を抽出
 #
-# 使い方: .\organize-release.ps1 -BuildDir "release" -Version "0.1.0"
+# 使い方: .\organize-release.ps1 -BuildDir "release" -Version "0.1.1"
 
 param(
   [string]$BuildDir = "release",
-  [string]$Version = "0.1.0"
+  [string]$Version = "0.1.1"
 )
 
 $distDir = Join-Path $BuildDir "Cotaska-dist"
@@ -14,6 +14,26 @@ $appDir = Join-Path $distDir "_app"
 $dataDir = Join-Path $distDir "data"
 $logsDir = Join-Path $distDir "logs"
 $winUnpackedDir = Join-Path $BuildDir "win-unpacked"
+
+function Remove-PathWithRetry {
+  param(
+    [Parameter(Mandatory = $true)][string]$Path,
+    [int]$Retries = 5,
+    [int]$DelayMilliseconds = 500
+  )
+
+  for ($i = 1; $i -le $Retries; $i++) {
+    try {
+      Remove-Item -LiteralPath $Path -Recurse -Force -ErrorAction Stop
+      return
+    } catch {
+      if ($i -eq $Retries) {
+        throw
+      }
+      Start-Sleep -Milliseconds $DelayMilliseconds
+    }
+  }
+}
 
 Write-Host "=== Cotaska Release Structure Organization ===" -ForegroundColor Green
 Write-Host "Distribution Dir: $distDir" -ForegroundColor Gray
@@ -23,7 +43,7 @@ Write-Host "App Dir: $appDir" -ForegroundColor Gray
 Write-Host "`n[Step 0] Refreshing _app from win-unpacked..."
 if (Test-Path $winUnpackedDir) {
   if (Test-Path $appDir) {
-    Remove-Item $appDir -Recurse -Force
+    Remove-PathWithRetry -Path $appDir
   }
   New-Item -ItemType Directory -Path $appDir -Force | Out-Null
   Copy-Item -Path (Join-Path $winUnpackedDir "*") -Destination $appDir -Recurse -Force
@@ -53,7 +73,7 @@ if (Test-Path $resourcesDataDir) {
   $tasksTarget = Join-Path $dataDir "tasks"
   if (Test-Path $tasksSource) {
     if (Test-Path $tasksTarget) {
-      Remove-Item $tasksTarget -Recurse -Force
+      Remove-PathWithRetry -Path $tasksTarget
     }
     Copy-Item $tasksSource -Destination $tasksTarget -Recurse
     Write-Host "  Copied: tasks/ → data/tasks/"
@@ -64,7 +84,7 @@ if (Test-Path $resourcesDataDir) {
   $archiveTarget = Join-Path $dataDir "archive"
   if (Test-Path $archiveSource) {
     if (Test-Path $archiveTarget) {
-      Remove-Item $archiveTarget -Recurse -Force
+      Remove-PathWithRetry -Path $archiveTarget
     }
     Copy-Item $archiveSource -Destination $archiveTarget -Recurse
     Write-Host "  Copied: archive/ → data/archive/"
@@ -97,12 +117,12 @@ $resourcesDataDir = Join-Path $appDir "resources\30_data"
 $workspaceDir = Join-Path $appDir "workspace"
 
 if (Test-Path $resourcesDataDir) {
-  Remove-Item $resourcesDataDir -Recurse -Force
+  Remove-PathWithRetry -Path $resourcesDataDir
   Write-Host "  Removed: _app/resources/30_data/"
 }
 
 if (Test-Path $workspaceDir) {
-  Remove-Item $workspaceDir -Recurse -Force
+  Remove-PathWithRetry -Path $workspaceDir
   Write-Host "  Removed: _app/workspace/"
 }
 

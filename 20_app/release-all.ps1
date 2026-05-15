@@ -11,7 +11,7 @@
 #          .\release-all.ps1 -Version "0.2.0"
 
 param(
-    [string]$Version = "0.1.0"
+    [string]$Version = "0.1.1"
 )
 
 $ErrorActionPreference = "Stop"
@@ -35,6 +35,26 @@ $sourceReadme = Join-Path $repoRoot "README.md"
 $distReadme = Join-Path $distRoot "README.md"
 
 $env:PATH = "$nodeDir;$env:PATH"
+
+function Remove-PathWithRetry {
+    param(
+        [Parameter(Mandatory = $true)][string]$Path,
+        [int]$Retries = 5,
+        [int]$DelayMilliseconds = 500
+    )
+
+    for ($i = 1; $i -le $Retries; $i++) {
+        try {
+            Remove-Item -LiteralPath $Path -Recurse -Force -ErrorAction Stop
+            return
+        } catch {
+            if ($i -eq $Retries) {
+                throw
+            }
+            Start-Sleep -Milliseconds $DelayMilliseconds
+        }
+    }
+}
 
 Write-Host ""
 Write-Host "=======================================" -ForegroundColor Green
@@ -155,6 +175,24 @@ if ((Test-Path $distCoreExe) -and (Test-Path $launcherIcon)) {
     Write-Host "  OK: CotaskaCore.exe icon and metadata updated" -ForegroundColor Green
 }
 
+if ((Test-Path $distLauncher) -and (Test-Path $launcherIcon)) {
+    Write-Host "  Updating Cotaska.exe icon and metadata ..." -ForegroundColor Cyan
+    $setIconPs1 = Join-Path $launcherDir "Set-ExeIcon.ps1"
+    & powershell -ExecutionPolicy Bypass -File $setIconPs1 `
+        -ExePath $distLauncher `
+        -IconPath $launcherIcon `
+        -FileDescription "Cotaska Launcher" `
+        -ProductName "Cotaska" `
+        -OriginalFilename "Cotaska.exe" `
+        -InternalFilename "Cotaska" `
+        -Version $Version
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "[FAILED] Cotaska.exe icon/metadata update failed" -ForegroundColor Red
+        exit 1
+    }
+    Write-Host "  OK: Cotaska.exe icon and metadata updated" -ForegroundColor Green
+}
+
 function Get-AssociatedIconHash {
     param(
         [Parameter(Mandatory = $true)][string]$Path
@@ -203,15 +241,31 @@ function Test-ExeVersionInfo {
     param(
         [Parameter(Mandatory = $true)][string]$Path,
         [Parameter(Mandatory = $true)][string]$ExpectedProductName,
-        [Parameter(Mandatory = $true)][string]$ExpectedFileDescription
+        [Parameter(Mandatory = $true)][string]$ExpectedFileDescription,
+        [Parameter(Mandatory = $true)][string]$ExpectedOriginalFilename
     )
 
     $versionInfo = (Get-Item -LiteralPath $Path).VersionInfo
     return (
         $versionInfo.ProductName -eq $ExpectedProductName -and
         $versionInfo.FileDescription -eq $ExpectedFileDescription -and
-        $versionInfo.OriginalFilename -eq "CotaskaCore.exe"
+        $versionInfo.OriginalFilename -eq $ExpectedOriginalFilename
     )
+}
+
+function Restore-CoreExeIfMissing {
+    if ((-not (Test-Path -LiteralPath $distCoreExe)) -and (Test-Path -LiteralPath $winUnpackedCore)) {
+        Write-Host "  Restoring CotaskaCore.exe to dist _app ..." -ForegroundColor Yellow
+        Copy-Item -LiteralPath $winUnpackedCore -Destination $distCoreExe -Force
+        if (Test-Path $launcherIcon) {
+            $setIconPs1 = Join-Path $launcherDir "Set-ExeIcon.ps1"
+            & powershell -ExecutionPolicy Bypass -File $setIconPs1 -ExePath $distCoreExe -IconPath $launcherIcon -Version $Version
+            if ($LASTEXITCODE -ne 0) {
+                Write-Host "[FAILED] Restored CotaskaCore.exe metadata update failed" -ForegroundColor Red
+                exit 1
+            }
+        }
+    }
 }
 
 # -------------------------------------------------------
@@ -262,7 +316,20 @@ if ((Test-Path $launcherIcon) -and (Test-Path (Join-Path $distRoot "Cotaska.exe"
         $allOk = $false
     }
 
-    if (Test-ExeVersionInfo -Path $distCoreExe -ExpectedProductName "CotaskaCore" -ExpectedFileDescription "CotaskaCore") {
+    $distLauncher = Join-Path $distRoot "Cotaska.exe"
+    if (Test-ExeVersionInfo -Path $distLauncher -ExpectedProductName "Cotaska" -ExpectedFileDescription "Cotaska Launcher" -ExpectedOriginalFilename "Cotaska.exe") {
+        Write-Host "  OK  Cotaska.exe metadata" -ForegroundColor Green
+    } else {
+        $launcherVersionInfo = (Get-Item -LiteralPath $distLauncher).VersionInfo
+        Write-Host "  NG  Cotaska.exe metadata" -ForegroundColor Red
+        Write-Host "      FileDescription=$($launcherVersionInfo.FileDescription)" -ForegroundColor Red
+        Write-Host "      ProductName=$($launcherVersionInfo.ProductName)" -ForegroundColor Red
+        Write-Host "      OriginalFilename=$($launcherVersionInfo.OriginalFilename)" -ForegroundColor Red
+        Write-Host "      InternalName=$($launcherVersionInfo.InternalName)" -ForegroundColor Red
+        $allOk = $false
+    }
+
+    if (Test-ExeVersionInfo -Path $distCoreExe -ExpectedProductName "CotaskaCore" -ExpectedFileDescription "CotaskaCore" -ExpectedOriginalFilename "CotaskaCore.exe") {
         Write-Host "  OK  CotaskaCore.exe metadata" -ForegroundColor Green
     } else {
         $coreVersionInfo = (Get-Item -LiteralPath $distCoreExe).VersionInfo
@@ -288,9 +355,54 @@ if ($allOk) {
     if (Test-Path -LiteralPath $distZip) {
         Remove-Item -LiteralPath $distZip -Force
     }
-    Compress-Archive -LiteralPath $distRoot -DestinationPath $distZip -CompressionLevel Optimal
+    Restore-CoreExeIfMissing
+    if (-not (Test-Path -LiteralPath $distCoreExe)) {
+        Write-Host "[FAILED] CotaskaCore.exe missing before zip creation" -ForegroundColor Red
+        exit 1
+    }
+    $distName = Split-Path -Leaf $distRoot
+    $zipStagingRoot = Join-Path $env:TEMP "cotaska-release-zip"
+    $zipStagingDist = Join-Path $zipStagingRoot $distName
+    if (Test-Path -LiteralPath $zipStagingRoot) {
+        Remove-PathWithRetry -Path $zipStagingRoot
+    }
+    New-Item -ItemType Directory -Path $zipStagingRoot -Force | Out-Null
+    Copy-Item -LiteralPath $distRoot -Destination $zipStagingRoot -Recurse -Force
+    if (-not (Test-Path -LiteralPath (Join-Path $zipStagingDist "_app\CotaskaCore.exe"))) {
+        Write-Host "[FAILED] CotaskaCore.exe missing from zip staging folder" -ForegroundColor Red
+        exit 1
+    }
+    Push-Location $zipStagingRoot
+    try {
+        tar.exe -a -cf $distZip $distName
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "[FAILED] Release zip creation failed" -ForegroundColor Red
+            exit 1
+        }
+    }
+    finally {
+        Pop-Location
+        Remove-PathWithRetry -Path $zipStagingRoot
+    }
     if (-not (Test-Path -LiteralPath $distZip)) {
         Write-Host "[FAILED] Release zip was not created: $distZip" -ForegroundColor Red
+        exit 1
+    }
+    $zipListing = tar.exe -tf $distZip
+    $requiredZipEntries = @(
+        "Cotaska-dist/Cotaska.exe",
+        "Cotaska-dist/_app/CotaskaCore.exe",
+        "Cotaska-dist/_app/resources/app.asar"
+    )
+    foreach ($entry in $requiredZipEntries) {
+        if ($zipListing -notcontains $entry) {
+            Write-Host "[FAILED] Release zip missing required entry: $entry" -ForegroundColor Red
+            exit 1
+        }
+    }
+    Restore-CoreExeIfMissing
+    if (-not (Test-Path -LiteralPath $distCoreExe)) {
+        Write-Host "[FAILED] CotaskaCore.exe missing from dist after zip creation" -ForegroundColor Red
         exit 1
     }
     $zipSizeMB = [math]::Round((Get-Item -LiteralPath $distZip).Length / 1MB, 1)

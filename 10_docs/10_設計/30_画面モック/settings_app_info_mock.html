@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cotaska - 設定画面モック CHG-057</title>
+  <title>Cotaska - 設定画面モック アプリ情報</title>
   <style>
     :root {
       --settings-panel-bg: #15181d;
@@ -15,19 +15,24 @@
       --settings-panel-item-active-bg: #263342;
       --settings-panel-item-active: #ffffff;
       --settings-panel-item-active-accent: #62a8ff;
+      --content-bg: #f4f6f8;
+      --border: #e3e8ef;
+      --text: #253044;
+      --muted: #6f7d91;
+      --blue: #1f6fb2;
     }
     * { box-sizing: border-box; }
     html, body { height: 100%; }
     body {
       margin: 0;
       font-family: "Segoe UI", "Meiryo", sans-serif;
-      background: #f4f6f8;
-      color: #253044;
+      background: var(--content-bg);
+      color: var(--text);
     }
     .app {
       height: 100vh;
       display: grid;
-      grid-template-columns: 52px 256px minmax(520px, 1fr);
+      grid-template-columns: 52px 256px minmax(560px, 1fr);
       overflow: hidden;
     }
     .sidebar {
@@ -55,7 +60,6 @@
       color: #fff;
     }
     .spacer { flex: 1; }
-
     .settings-nav {
       background: var(--settings-panel-bg);
       border-right: 1px solid var(--settings-panel-border);
@@ -63,16 +67,16 @@
       overflow-y: auto;
     }
     .settings-title {
-      font-size: 20px;
-      font-weight: 700;
       margin: 0 0 18px;
       color: var(--settings-panel-title);
+      font-size: 20px;
+      font-weight: 700;
     }
     .nav-group-label {
       margin: 22px 10px 8px;
+      color: var(--settings-panel-label);
       font-size: 11px;
       font-weight: 700;
-      color: var(--settings-panel-label);
       letter-spacing: .08em;
     }
     .settings-item {
@@ -84,7 +88,6 @@
       border-radius: 7px;
       color: var(--settings-panel-item);
       font-size: 13px;
-      transition: background .15s ease, color .15s ease;
     }
     .settings-item:hover {
       background: var(--settings-panel-item-hover);
@@ -96,7 +99,6 @@
       font-weight: 700;
       box-shadow: inset 3px 0 0 var(--settings-panel-item-active-accent);
     }
-
     .content {
       overflow-y: auto;
       padding: 28px 36px 48px;
@@ -115,7 +117,7 @@
     }
     .page-subtitle {
       margin: 6px 0 0;
-      color: #6f7d91;
+      color: var(--muted);
       font-size: 13px;
     }
     .close-btn {
@@ -129,7 +131,7 @@
     }
     .section {
       background: #fff;
-      border: 1px solid #e3e8ef;
+      border: 1px solid var(--border);
       border-radius: 8px;
       margin-bottom: 16px;
       overflow: hidden;
@@ -173,8 +175,8 @@
     }
     .version {
       margin-top: 4px;
-      font-size: 13px;
       color: #516073;
+      font-size: 13px;
     }
     .source {
       margin-top: 8px;
@@ -185,8 +187,8 @@
       border-radius: 5px;
       background: #f2f5f8;
       color: #667386;
-      font-size: 11px;
       font-family: "Consolas", "Courier New", monospace;
+      font-size: 11px;
     }
     .primary-btn,
     .secondary-btn {
@@ -198,40 +200,14 @@
       white-space: nowrap;
     }
     .primary-btn {
-      border: 1px solid #1f6fb2;
-      background: #1f6fb2;
+      border: 1px solid var(--blue);
+      background: var(--blue);
       color: #fff;
     }
     .secondary-btn {
       border: 1px solid #d8e0ea;
       background: #fff;
       color: #435166;
-    }
-    .rows {
-      padding: 4px 18px 18px;
-    }
-    .row {
-      min-height: 44px;
-      display: grid;
-      grid-template-columns: 168px 1fr auto;
-      gap: 14px;
-      align-items: center;
-      border-top: 1px solid #eef2f6;
-      font-size: 13px;
-    }
-    .row:first-child { border-top: none; }
-    .label { color: #718095; }
-    .value { color: #253044; }
-    .status-chip {
-      display: inline-flex;
-      align-items: center;
-      height: 24px;
-      padding: 0 9px;
-      border-radius: 12px;
-      background: #e9f7ef;
-      color: #1f7a44;
-      font-size: 12px;
-      font-weight: 700;
     }
     .update-box {
       margin: 0 18px 18px;
@@ -245,18 +221,42 @@
       align-items: center;
     }
     .update-title {
+      color: #2b5f8f;
       font-size: 13px;
       font-weight: 700;
-      color: #2b5f8f;
     }
     .update-text {
       margin-top: 3px;
-      font-size: 12px;
       color: #657285;
+      font-size: 12px;
     }
+    .rows { padding: 4px 18px 18px; }
+    .row {
+      min-height: 44px;
+      display: grid;
+      grid-template-columns: 168px 1fr auto;
+      gap: 14px;
+      align-items: center;
+      border-top: 1px solid #eef2f6;
+      font-size: 13px;
+    }
+    .row:first-child { border-top: none; }
+    .label { color: #718095; }
+    .value { color: var(--text); }
     .muted {
       color: #7b8798;
       font-size: 12px;
+    }
+    .status-chip {
+      display: inline-flex;
+      align-items: center;
+      height: 24px;
+      padding: 0 9px;
+      border-radius: 12px;
+      background: #e9f7ef;
+      color: #1f7a44;
+      font-size: 12px;
+      font-weight: 700;
     }
     @media (max-width: 860px) {
       .app { grid-template-columns: 52px 1fr; }

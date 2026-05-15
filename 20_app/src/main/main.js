@@ -797,12 +797,32 @@ function createWindow() {
     }
   });
 
-  // ウォッチャーを起動（ファイル変更検出 → tasks:changed 通知）
-  watcher.startWatcher(win).catch(err => {
-    logger.error("Failed to start watcher:", err);
+  return win;
+}
+
+async function initializeServicesAfterWindowReady() {
+  await new Promise((resolve) => setImmediate(resolve));
+  logger.info("Initializing task/list services...");
+  const svcStartTime = Date.now();
+
+  await taskService.openTaskService();
+  await listService.openListService();
+
+  const svcDuration = Date.now() - svcStartTime;
+  logger.info("Services initialized");
+  appLogger.logServiceInitialization({
+    taskCount: Object.keys(taskService.getCache()).length,
+    listCount: listService.getAllLists().length,
+    duration: svcDuration,
   });
 
-  return win;
+  reminderService.start(() => taskService.getAllTasks());
+
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    watcher.startWatcher(mainWindow).catch(err => {
+      logger.error("Failed to start watcher:", err);
+    });
+  }
 }
 
 app.whenReady().then(async () => {
@@ -845,24 +865,11 @@ app.whenReady().then(async () => {
   }
 
   // サービスを初期化
-  logger.info("Initializing task/list services...");
-  const svcStartTime = Date.now();
-  servicesReady = (async () => {
-    await taskService.openTaskService();
-    await listService.openListService();
-  })();
-  await servicesReady;
-  const svcDuration = Date.now() - svcStartTime;
-  logger.info("Services initialized");
-  appLogger.logServiceInitialization({
-    taskCount: Object.keys(taskService.getCache()).length,
-    listCount: listService.getAllLists().length,
-    duration: svcDuration,
+  servicesReady = initializeServicesAfterWindowReady().catch((err) => {
+    logger.error("Services initialization failed", err);
+    appLogger.logError("Services initialization failed", err);
+    throw err;
   });
-
-  // T-0065: due_date に時刻がある未完了タスクを5分前に通知
-  reminderService.start(() => taskService.getAllTasks());
-
   mainWindow = createWindow();
   logger.info("Main window created");
 

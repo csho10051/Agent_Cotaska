@@ -336,6 +336,7 @@ function App() {
     if (!Number.isFinite(saved)) return DETAIL_PANE_DEFAULT_WIDTH;
     return Math.max(DETAIL_PANE_MIN_WIDTH, Math.min(DETAIL_PANE_MAX_WIDTH, saved));
   });
+  const [detailPaneExpanded, setDetailPaneExpanded] = useState(false);
   const resizeDragRef = useRef(null);
 
   // T-005-02: DB からタスク一覧を読み込む
@@ -376,6 +377,10 @@ function App() {
   useEffect(() => {
     window.localStorage?.setItem("cotaska.detailPaneWidth", String(detailWidth));
   }, [detailWidth]);
+
+  useEffect(() => {
+    if (!selectedTask) setDetailPaneExpanded(false);
+  }, [selectedTask]);
 
   const loadTasks = useCallback(async () => {
     setLoading(true);
@@ -848,7 +853,7 @@ function App() {
         activeIcon={activeIcon}
         onIconClick={setActiveIcon}
       />
-      {navVisible && (
+      {navVisible && !detailPaneExpanded && (
         <>
           <div style={{ width: navWidth, flexShrink: 0, overflow: "hidden", display: "flex", alignSelf: "stretch" }}>
             <NavPanel
@@ -879,52 +884,62 @@ function App() {
           />
         </>
       )}
-      <MainPane
-        viewTitle={isSearchMode ? "検索" : (activeNav.startsWith(TAG_NAV_PREFIX) ? `タグ: #${activeNav.slice(TAG_NAV_PREFIX.length)}` : activeNav)}
-        tasks={visibleTasks}
-        sections={visibleSections}
-        progressSections={progressSections}
-        completedSectionTasks={completedSectionTasks}
-        selectedTaskId={selectedTask?.id}
-        onTaskClick={setSelectedTask}
-        onAddTask={!isSearchMode && activeNav !== "ゴミ箱" && activeNav !== "完了" ? handleAddTask : null}
-        onAddSubtask={!isSearchMode && activeNav !== "ゴミ箱" && activeNav !== "完了" ? handleAddSubtask : null}
-        onToggleComplete={!isSearchMode && activeNav !== "ゴミ箱" ? handleToggleComplete : null}
-        onTrashTask={!isSearchMode && activeNav !== "ゴミ箱" && activeNav !== "完了" ? handleTrashTask : null}
-        onRestoreTask={activeNav === "ゴミ箱" ? handleRestoreTask : null}
-        onDeleteTask={activeNav === "ゴミ箱" ? handleDeleteTask : null}
-        onDuplicateTask={!isSearchMode && activeNav !== "ゴミ箱" && activeNav !== "完了" ? handleDuplicateTask : null}
-        onSetTaskList={!isSearchMode && activeNav !== "ゴミ箱" && activeNav !== "完了" ? handleSetTaskList : null}
-        onSetTaskDue={!isSearchMode && activeNav !== "ゴミ箱" ? handleSetTaskDue : null}
-        onReorderTask={!isSearchMode && activeNav !== "ゴミ箱" && activeNav !== "完了" && listSort.key === "order" ? handleReorderTask : null}
-        onSetTaskTags={!isSearchMode && activeNav !== "ゴミ箱" ? handleSetTaskTags : null}
-        lists={lists}
-        tags={tags}
-        isTrashed={activeNav === "ゴミ箱"}
-        isCompleted={activeNav === "完了"}
-        isSearchMode={isSearchMode}
-        searchKeyword={searchKeyword}
-        onSearchChange={setSearchKeyword}
-        searchSort={searchSort}
-        onSearchSortChange={setSearchSort}
-        listSort={listSort}
-        onListSortChange={setListSort}
-        showListSort={!isSearchMode && activeNav !== "ゴミ箱" && activeNav !== "完了"}
-      />
+      {!detailPaneExpanded && (
+        <MainPane
+          viewTitle={isSearchMode ? "検索" : (activeNav.startsWith(TAG_NAV_PREFIX) ? `タグ: #${activeNav.slice(TAG_NAV_PREFIX.length)}` : activeNav)}
+          tasks={visibleTasks}
+          sections={visibleSections}
+          progressSections={progressSections}
+          completedSectionTasks={completedSectionTasks}
+          selectedTaskId={selectedTask?.id}
+          onTaskClick={setSelectedTask}
+          onAddTask={!isSearchMode && activeNav !== "ゴミ箱" && activeNav !== "完了" ? handleAddTask : null}
+          onAddSubtask={!isSearchMode && activeNav !== "ゴミ箱" && activeNav !== "完了" ? handleAddSubtask : null}
+          onToggleComplete={!isSearchMode && activeNav !== "ゴミ箱" ? handleToggleComplete : null}
+          onTrashTask={!isSearchMode && activeNav !== "ゴミ箱" && activeNav !== "完了" ? handleTrashTask : null}
+          onRestoreTask={activeNav === "ゴミ箱" ? handleRestoreTask : null}
+          onDeleteTask={activeNav === "ゴミ箱" ? handleDeleteTask : null}
+          onDuplicateTask={!isSearchMode && activeNav !== "ゴミ箱" && activeNav !== "完了" ? handleDuplicateTask : null}
+          onSetTaskList={!isSearchMode && activeNav !== "ゴミ箱" && activeNav !== "完了" ? handleSetTaskList : null}
+          onSetTaskDue={!isSearchMode && activeNav !== "ゴミ箱" ? handleSetTaskDue : null}
+          onReorderTask={!isSearchMode && activeNav !== "ゴミ箱" && activeNav !== "完了" && listSort.key === "order" ? handleReorderTask : null}
+          onSetTaskTags={!isSearchMode && activeNav !== "ゴミ箱" ? handleSetTaskTags : null}
+          lists={lists}
+          tags={tags}
+          isTrashed={activeNav === "ゴミ箱"}
+          isCompleted={activeNav === "完了"}
+          isSearchMode={isSearchMode}
+          searchKeyword={searchKeyword}
+          onSearchChange={setSearchKeyword}
+          searchSort={searchSort}
+          onSearchSortChange={setSearchSort}
+          listSort={listSort}
+          onListSortChange={setListSort}
+          showListSort={!isSearchMode && activeNav !== "ゴミ箱" && activeNav !== "完了"}
+        />
+      )}
+      {!detailPaneExpanded && (
+        <div
+          className="resize-handle resize-handle--detail"
+          title="詳細ペインの幅を変更"
+          onMouseDown={(e) => {
+            e.preventDefault();
+            resizeDragRef.current = { type: "detail", startX: e.clientX, startWidth: detailWidth };
+          }}
+        />
+      )}
       <div
-        className="resize-handle resize-handle--detail"
-        title="詳細ペインの幅を変更"
-        onMouseDown={(e) => {
-          e.preventDefault();
-          resizeDragRef.current = { type: "detail", startX: e.clientX, startWidth: detailWidth };
-        }}
-      />
-      <div className="detail-pane-shell" style={{ width: detailWidth }}>
+        className={`detail-pane-shell${detailPaneExpanded ? " detail-pane-shell--expanded" : ""}`}
+        style={detailPaneExpanded ? undefined : { width: detailWidth }}
+      >
         <DetailPane
           key={selectedTask?.id ?? "none"}
           task={selectedTask}
           tasks={tasks}
-          onClose={() => setSelectedTask(null)}
+          onClose={() => {
+            setSelectedTask(null);
+            setDetailPaneExpanded(false);
+          }}
           onSelectTask={setSelectedTask}
           onSaved={handleSaved}
           onToggleComplete={handleToggleComplete}
@@ -933,6 +948,8 @@ function App() {
           tags={tags}
           onSetTaskTags={handleSetTaskTags}
           onAddTag={handleAddTag}
+          expanded={detailPaneExpanded}
+          onToggleExpanded={() => setDetailPaneExpanded((prev) => !prev)}
         />
       </div>
       {trashConfirm && (

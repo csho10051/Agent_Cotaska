@@ -12,6 +12,72 @@ const SUBTASK_PANEL_STORAGE_KEY = "cotaska.detailSubtasksHeight";
 
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 
+const escapeHtml = (value) =>
+  String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+
+function highlightInlineMarkdown(value) {
+  const source = String(value || "");
+  const tokenPattern = /(`[^`]+`|\*\*[^*\n]+?\*\*|\*[^*\s][^*\n]*?\*|\[[^\]\n]+\]\([^)]+\))/g;
+  let cursor = 0;
+  let html = "";
+
+  source.replace(tokenPattern, (match, _token, offset) => {
+    html += escapeHtml(source.slice(cursor, offset));
+    const className = match.startsWith("`")
+      ? "md-token-code"
+      : match.startsWith("**")
+        ? "md-token-strong"
+        : match.startsWith("[")
+          ? "md-token-link"
+          : "md-token-em";
+    html += `<span class="${className}">${escapeHtml(match)}</span>`;
+    cursor = offset + match.length;
+    return match;
+  });
+
+  html += escapeHtml(source.slice(cursor));
+  return html;
+}
+
+function renderMarkdownEditorLine(line) {
+  if (!line) return "&nbsp;";
+
+  const heading = line.match(/^(#{1,6})(\s+.*)?$/);
+  if (heading) {
+    const level = Math.min(heading[1].length, 6);
+    return `<span class="md-heading md-heading-${level}"><span class="md-marker">${escapeHtml(heading[1])}</span>${highlightInlineMarkdown(heading[2] || "")}</span>`;
+  }
+
+  const quote = line.match(/^(\s*>+\s?)(.*)$/);
+  if (quote) {
+    return `<span class="md-quote"><span class="md-marker">${escapeHtml(quote[1])}</span>${highlightInlineMarkdown(quote[2])}</span>`;
+  }
+
+  const unordered = line.match(/^(\s*)([-+*]\s+)(.*)$/);
+  if (unordered) {
+    return `${escapeHtml(unordered[1])}<span class="md-list-marker">${escapeHtml(unordered[2])}</span>${highlightInlineMarkdown(unordered[3])}`;
+  }
+
+  const ordered = line.match(/^(\s*)(\d+\.\s+)(.*)$/);
+  if (ordered) {
+    return `${escapeHtml(ordered[1])}<span class="md-list-marker">${escapeHtml(ordered[2])}</span>${highlightInlineMarkdown(ordered[3])}`;
+  }
+
+  return highlightInlineMarkdown(line);
+}
+
+function renderMarkdownEditorHtml(value) {
+  const lines = String(value || "").split("\n");
+  return lines
+    .map((line) => `<div class="markdown-editor-line">${renderMarkdownEditorLine(line)}</div>`)
+    .join("");
+}
+
 function formatDatetime(value) {
   if (!value) return "";
 
@@ -51,6 +117,8 @@ function DetailPane({
   tags = [],
   onSetTaskTags,
   onAddTag,
+  expanded = false,
+  onToggleExpanded,
 }) {
   if (!task) {
     return (
@@ -73,6 +141,8 @@ function DetailPane({
       tags={tags}
       onSetTaskTags={onSetTaskTags}
       onAddTag={onAddTag}
+      expanded={expanded}
+      onToggleExpanded={onToggleExpanded}
     />
   );
 }
@@ -88,6 +158,8 @@ function DetailPaneBody({
   tags = [],
   onSetTaskTags,
   onAddTag,
+  expanded = false,
+  onToggleExpanded,
 }) {
   const isInvalid = Boolean(task.is_invalid);
   const hierarchyWarning = !isInvalid ? String(task.hierarchyWarning || "") : "";
@@ -115,6 +187,7 @@ function DetailPaneBody({
   });
   const [subtaskNodeExpanded, setSubtaskNodeExpanded] = useState({});
   const subtaskResizeRef = useRef(null);
+  const markdownHighlightRef = useRef(null);
   const [openExternalError, setOpenExternalError] = useState("");
 
   const parentTask = tasks.find((candidate) =>
@@ -392,6 +465,14 @@ function DetailPaneBody({
     }
   };
 
+  const highlightedContentHtml = renderMarkdownEditorHtml(contentText);
+  const handleEditorScroll = (event) => {
+    if (markdownHighlightRef.current) {
+      markdownHighlightRef.current.scrollTop = event.currentTarget.scrollTop;
+      markdownHighlightRef.current.scrollLeft = event.currentTarget.scrollLeft;
+    }
+  };
+
   return (
     <div className="detail-pane">
       {/* === detail-header: チェック + タイトル + 右上アクション === */}
@@ -412,6 +493,16 @@ function DetailPaneBody({
         />
 
         <div className="detail-actions">
+          <button
+            type="button"
+            className={`icon-action-btn detail-expand-btn${expanded ? " is-active" : ""}`}
+            onClick={onToggleExpanded}
+            title={expanded ? "元のサイズに戻す" : "タスク詳細を拡大"}
+            aria-label={expanded ? "タスク詳細を元のサイズに戻す" : "タスク詳細を拡大"}
+            aria-pressed={expanded}
+          >
+            {expanded ? "↙" : "⛶"}
+          </button>
           <button
             type="button"
             className="icon-action-btn"
@@ -608,18 +699,28 @@ function DetailPaneBody({
             }}
           />
         ) : (
-          <textarea
-            className="detail-content"
-            value={contentText}
-            placeholder="メモを入力..."
-            readOnly={isInvalid}
-            onChange={(e) => {
-              if (isInvalid) return;
-              const nextContent = e.target.value;
-              setContentText(nextContent);
-              debouncedSave(titleText, nextContent);
-            }}
-          />
+          <div className={`markdown-editor-shell${isInvalid ? " markdown-editor-shell--readonly" : ""}`}>
+            <div
+              ref={markdownHighlightRef}
+              className="markdown-editor-highlight"
+              aria-hidden="true"
+              dangerouslySetInnerHTML={{ __html: highlightedContentHtml }}
+            />
+            <textarea
+              className="detail-content markdown-editor-input"
+              value={contentText}
+              placeholder="メモを入力..."
+              readOnly={isInvalid}
+              spellCheck={false}
+              onScroll={handleEditorScroll}
+              onChange={(e) => {
+                if (isInvalid) return;
+                const nextContent = e.target.value;
+                setContentText(nextContent);
+                debouncedSave(titleText, nextContent);
+              }}
+            />
+          </div>
         )}
       </div>
 

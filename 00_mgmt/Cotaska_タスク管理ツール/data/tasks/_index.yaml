@@ -1504,7 +1504,6 @@ tasks:
     list: null
     status: done
     priority: normal
-    progress: 0
     sort_order: 143
     tags: []
     due_date: '2026-05-13'
@@ -1560,7 +1559,117 @@ tasks:
       - AI連携
     due_date: null
     updated_at: '2026-05-15T01:44:58.017Z'
+  - id: T-0161
+    title: 仕様変更：タスク詳細画面の拡大ボタンの追加
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 151
+    tags:
+      - CHG-059
+      - 仕様変更
+    due_date: '2026-05-15'
+    updated_at: '2026-05-15T11:56:18+09:00'
+  - id: T-0162
+    title: 仕様変更：タスク詳細の文字の強調
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 152
+    tags:
+      - CHG-060
+      - 仕様変更
+    due_date: '2026-05-15'
+    updated_at: '2026-05-15T12:03:22+09:00'
+  - id: T-0163
+    title: 'CHG-059-01 設計反映: タスク詳細ペイン拡大ボタン追加'
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 153
+    tags:
+      - CHG-059
+      - 設計
+    due_date: '2026-05-15'
+    updated_at: '2026-05-15T11:32:01+09:00'
+  - id: T-0164
+    title: 'CHG-059-02 実装: 詳細ペイン拡大トグル追加'
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 154
+    tags:
+      - CHG-059
+      - 実装
+    due_date: '2026-05-15'
+    updated_at: '2026-05-15T11:32:01+09:00'
+  - id: T-0165
+    title: 'CHG-059-03 ユーザー確認: 詳細ペイン拡大ボタン追加'
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 155
+    tags:
+      - CHG-059
+      - ユーザー確認
+    due_date: '2026-05-15'
+    updated_at: '2026-05-15T11:56:18+09:00'
+  - id: T-0166
+    title: 'CHG-060-01 設計反映: タスク詳細 Markdown 編集ハイライト'
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 156
+    tags:
+      - CHG-060
+      - 設計
+    due_date: '2026-05-15'
+    updated_at: '2026-05-15T11:49:16+09:00'
+  - id: T-0167
+    title: 'CHG-060-02 実装: Markdown 対応エディタ導入と詳細本文置換'
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 157
+    tags:
+      - CHG-060
+      - 実装
+    due_date: '2026-05-15'
+    updated_at: '2026-05-15T11:49:16+09:00'
+  - id: T-0168
+    title: 'CHG-060-03 ユーザー確認: Markdown 編集ハイライト'
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 158
+    tags:
+      - CHG-060
+      - ユーザー確認
+    due_date: '2026-05-15'
+    updated_at: '2026-05-15T12:03:22+09:00'
+  - id: T-0169
+    title: Cotaska起動時の画面表示を高速化
+    list: Cotaska
+    status: done
+    priority: high
+    sort_order: 159
+    tags:
+      - 起動改善
+      - 性能改善
+    due_date: 2026-05-15T00:00:00.000Z
+    updated_at: 2026-05-15T03:08:39.000Z
+  - id: T-0170
+    title: Cotaska v0.1.1 ビルド・リリース
+    list: リリース
+    status: done
+    priority: high
+    sort_order: 170
+    tags:
+      - release
+      - v0.1.1
+    due_date: 2026-05-15T00:00:00.000Z
+    updated_at: 2026-05-15T03:44:27.000Z
 task_file_roots:
   - .
-next_task_id: 161
-last_updated: '2026-05-15T01:58:53.237Z'
+next_task_id: 171
+last_updated: '2026-05-15T04:27:28.952Z'

@@ -94,8 +94,7 @@ When a task is completed:
    - `status: done`
    - `completed_at`
    - `updated_at`
-2. Update task status in `00_mgmt/CURRENT_SPRINT.md`.
-3. Add key decision notes to `00_mgmt/DECISIONS.md` when relevant.
+2. Add key decision notes to `00_mgmt/DECISIONS.md` when relevant.
 
 ---
 
@@ -126,20 +125,6 @@ deleted_at: null
 
 ---
 
-## Sprint Status Labels
-
-Use the following labels in `00_mgmt/CURRENT_SPRINT.md`.
-
-- `[未着]`: not started yet
-- `[仕掛]`: currently in progress
-- `[完了]`: fully finished
-
-Subtask status must be consistent with parent task status:
-- If any subtask is in progress, parent should be `[仕掛]`.
-- If all subtasks are complete, parent should be `[完了]`.
-
----
-
 ## Bug Fix Reporting Workflow
 
 When fixing production-impacting defects, record the process with traceability.
@@ -147,8 +132,7 @@ When fixing production-impacting defects, record the process with traceability.
 Steps:
 1. Confirm the bug report in `10_docs/20_実装準備/10_運用ルール/バグレポート管理ルール.md`.
 2. Create a report file under `10_docs/30_実装・検証/10_不具合対応/`.
-3. Reflect the related entry in `00_mgmt/CURRENT_SPRINT.md`.
-4. After validation, update the report with final result and close condition.
+3. After validation, update the report with final result and close condition.
 
 Naming rule for bug reports:
 - `YYYYMMDD_連番_タイトル.md`
