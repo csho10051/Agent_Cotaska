@@ -308,6 +308,29 @@ body.is-resizing-detail-sections * {
   margin-top: 3px;
 }
 
+.update-progress {
+  width: min(360px, 100%);
+  height: 8px;
+  margin-top: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #dce8f5;
+}
+
+.update-progress-bar {
+  height: 100%;
+  border-radius: inherit;
+  background: #1f6fb2;
+  transition: width .2s ease;
+}
+
+.update-action-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 .settings-table {
   width: 100%;
   border-collapse: collapse;
@@ -463,6 +486,18 @@ body.is-resizing-detail-sections * {
   display: grid;
   gap: 12px;
   padding: 16px 18px;
+}
+
+.settings-subsection-title {
+  color: #253044;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.settings-divider {
+  height: 1px;
+  margin: 4px 0;
+  background: #eef2f6;
 }
 
 .backup-create-btn {

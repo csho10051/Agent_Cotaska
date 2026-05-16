@@ -210,7 +210,16 @@ $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $repoRoot = (Resolve-Path (Join-Path $scriptDir "..")).Path
 
 $releaseRoot = Join-Path $scriptDir "release\Cotaska-dist"
-$taskMasterRoot = Join-Path $repoRoot "00_mgmt\Cotaska_タスク管理ツール"
+$taskMasterRootItem = Get-ChildItem -LiteralPath (Join-Path $repoRoot "00_mgmt") -Directory |
+    Where-Object {
+        $_.Name -like "Cotaska_*" -and
+        (Test-Path -LiteralPath (Join-Path $_.FullName "data\tasks"))
+    } |
+    Select-Object -First 1
+if ($null -eq $taskMasterRootItem) {
+    throw "Task-master root not found under: $(Join-Path $repoRoot "00_mgmt")"
+}
+$taskMasterRoot = $taskMasterRootItem.FullName
 
 # リリース成果物側の Cotaska.exe、_app、tools、AIエージェント運用ルールを同期対象にする。
 $srcExe = Join-Path $releaseRoot "Cotaska.exe"

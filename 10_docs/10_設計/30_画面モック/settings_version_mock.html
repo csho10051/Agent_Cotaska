@@ -368,6 +368,65 @@
       font-size: 12px;
       line-height: 1.5;
     }
+    .backup-panel {
+      padding: 16px 18px 18px;
+    }
+    .backup-actions {
+      display: grid;
+      gap: 12px;
+    }
+    .subsection-title {
+      color: #253044;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .divider {
+      height: 1px;
+      margin: 4px 0;
+      background: #eef2f6;
+    }
+    .backup-targets {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .backup-target {
+      min-height: 86px;
+      padding: 12px;
+      border: 1px solid #e4eaf2;
+      border-radius: 8px;
+      background: #fbfcfe;
+    }
+    .backup-target-title {
+      margin: 0;
+      color: #253044;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .backup-target-path {
+      margin-top: 6px;
+      color: #667386;
+      font-family: "Consolas", "Courier New", monospace;
+      font-size: 11px;
+      line-height: 1.5;
+      word-break: break-all;
+    }
+    .backup-result {
+      margin-top: 14px;
+      padding: 12px;
+      border: 1px solid #cce6d5;
+      border-radius: 8px;
+      background: #f4fbf6;
+      color: #23643b;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+    .backup-result strong {
+      display: block;
+      margin-bottom: 3px;
+      font-size: 13px;
+    }
     .empty-state {
       padding: 44px 18px;
       text-align: center;
@@ -416,6 +475,7 @@
         padding-top: 4px;
       }
       .field-row { grid-template-columns: 1fr; }
+      .backup-targets { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -448,7 +508,7 @@
       </button>
       <button class="settings-item" type="button" data-target="backup">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="m17 8-5-5-5 5"/><path d="M5 21h14"/></svg>
-        バックアップ
+        バックアップと復元
       </button>
     </nav>
 
@@ -563,16 +623,60 @@
       <section class="panel" id="backup">
         <div class="page-head">
           <div>
-            <h2 class="page-title">バックアップ</h2>
-            <p class="page-subtitle">バックアップ機能の設定画面です。</p>
+            <h2 class="page-title">バックアップと復元</h2>
+            <p class="page-subtitle">タスク正本、リスト、設定ファイルを手動バックアップします。</p>
           </div>
           <button class="close-btn" title="閉じる">×</button>
         </div>
 
         <div class="section">
-          <div class="empty-state">
-            <p class="empty-state-title">未実装</p>
-            <p class="empty-state-text">バックアップ設定は今後の実装対象です。現時点では画面項目のみを確保します。</p>
+          <div class="section-head">
+            <h3 class="section-title">手動バックアップ</h3>
+            <p class="section-note">保存先を選択し、タイムスタンプ付きフォルダへ必要なデータをコピーします。</p>
+          </div>
+          <div class="backup-panel">
+            <div class="backup-actions">
+              <div class="subsection-title">バックアップ</div>
+              <div class="field-row">
+                <input class="path-input mono" type="text" value="D:\Apps\Cotaska\backup" aria-label="バックアップ保存先" />
+                <button class="secondary-btn" type="button">保存先</button>
+              </div>
+              <div class="help-text">既定では Cotaska.exe と同じフォルダに <span class="mono">backup</span> フォルダを作成し、その中へ保存します。</div>
+              <div>
+                <button class="primary-btn" type="button">バックアップ作成</button>
+              </div>
+              <div class="divider"></div>
+              <div class="subsection-title">復元</div>
+              <div class="field-row">
+                <input class="path-input mono" type="text" value="D:\Apps\Cotaska\backup\Cotaska-backup-2026-05-16T12-05-30-000Z" aria-label="復元元バックアップ" />
+                <button class="secondary-btn" type="button">復元元</button>
+              </div>
+              <div class="help-text">復元前に現在のデータを <span class="mono">backup</span> 配下へ退避してから、選択したバックアップのタスク正本、リスト、設定ファイルを戻します。</div>
+              <div>
+                <button class="secondary-btn" type="button">バックアップから復元</button>
+              </div>
+            </div>
+
+            <div class="backup-targets" aria-label="バックアップ対象">
+              <div class="backup-target">
+                <p class="backup-target-title">タスク正本</p>
+                <div class="backup-target-path">data/tasks/*.md</div>
+              </div>
+              <div class="backup-target">
+                <p class="backup-target-title">リストマスタ</p>
+                <div class="backup-target-path">data/lists.yaml</div>
+              </div>
+              <div class="backup-target">
+                <p class="backup-target-title">設定ファイル</p>
+                <div class="backup-target-path">data/settings.yaml</div>
+              </div>
+            </div>
+
+            <div class="backup-result">
+              <strong>バックアップを作成しました</strong>
+              D:\Apps\Cotaska\backup\Cotaska-backup-2026-05-16T12-05-30-000Z
+              <div class="muted">生成物のため、data/tasks/_index.yaml は対象外です。</div>
+            </div>
           </div>
         </div>
       </section>

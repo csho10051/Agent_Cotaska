@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 const SETTINGS_TABS = [
   { id: "app-info", label: "アプリ情報" },
   { id: "settings", label: "設定" },
-  { id: "backup", label: "バックアップ" },
+  { id: "backup", label: "バックアップと復元" },
 ];
 
 const DEFAULT_APP_INFO = {
@@ -11,6 +11,7 @@ const DEFAULT_APP_INFO = {
   currentVersion: "Cotaska 0.1.0",
   distributionFolder: "Cotaska-dist",
   updateGuidance: "利用者確認付きの手動ダウンロード案内",
+  backupDefaultDir: "",
 };
 
 const DEFAULT_SETTINGS = {
@@ -43,15 +44,29 @@ function SettingsPane() {
   const [updateStatus, setUpdateStatus] = useState("");
   const [updateUrl, setUpdateUrl] = useState("");
   const [checkingUpdate, setCheckingUpdate] = useState(false);
+  const [downloadingUpdate, setDownloadingUpdate] = useState(false);
+  const [updaterStatus, setUpdaterStatus] = useState({
+    status: "idle",
+    message: "",
+    hasUpdate: false,
+    downloaded: false,
+    progress: null,
+  });
   const [backupDir, setBackupDir] = useState("");
   const [backupStatus, setBackupStatus] = useState("");
   const [backupError, setBackupError] = useState("");
+  const [restoreDir, setRestoreDir] = useState("");
+  const [restoreStatus, setRestoreStatus] = useState("");
+  const [restoreError, setRestoreError] = useState("");
 
   const refreshAppInfo = async () => {
     const info = await window.cotaskaAPI?.app?.getInfo?.();
     if (info) {
       setAppInfo({ ...DEFAULT_APP_INFO, ...info });
       if (info.downloadPageUrl) setUpdateUrl(info.downloadPageUrl);
+      if (info.backupDefaultDir) {
+        setBackupDir((current) => current || info.backupDefaultDir);
+      }
     }
   };
 
@@ -74,6 +89,23 @@ function SettingsPane() {
     })();
     return () => {
       cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    const applyStatus = (status) => {
+      if (!status || cancelled) return;
+      setUpdaterStatus((current) => ({ ...current, ...status }));
+      if (status.message) setUpdateStatus(status.message);
+      setDownloadingUpdate(status.status === "downloading");
+    };
+
+    window.cotaskaAPI?.updates?.getStatus?.().then(applyStatus);
+    const unsubscribe = window.cotaskaAPI?.updates?.onStatus?.(applyStatus);
+    return () => {
+      cancelled = true;
+      if (typeof unsubscribe === "function") unsubscribe();
     };
   }, []);
 
@@ -118,15 +150,42 @@ function SettingsPane() {
     setUpdateStatus("");
     setErrorMessage("");
     try {
+      if (window.cotaskaAPI?.updates?.check) {
+        const result = await window.cotaskaAPI.updates.check();
+        if (result) {
+          setUpdaterStatus((current) => ({ ...current, ...result }));
+          setUpdateStatus(result.message || "更新確認が完了しました。");
+          return;
+        }
+      }
+
       const result = await window.cotaskaAPI?.app?.checkForUpdates?.();
       if (result?.downloadPageUrl) setUpdateUrl(result.downloadPageUrl);
-      if (result?.ok) {
-        setUpdateStatus(result.message || "更新確認が完了しました。");
-      } else {
-        setUpdateStatus(result?.error || "更新確認に失敗しました。");
-      }
+      setUpdateStatus(result?.ok
+        ? (result.message || "更新確認が完了しました。")
+        : (result?.error || "更新確認に失敗しました。"));
     } finally {
       setCheckingUpdate(false);
+    }
+  };
+
+  const downloadUpdate = async () => {
+    if (!window.confirm("更新ファイルをダウンロードしますか？")) return;
+    setDownloadingUpdate(true);
+    const result = await window.cotaskaAPI?.updates?.download?.();
+    if (result) {
+      setUpdaterStatus((current) => ({ ...current, ...result }));
+      setUpdateStatus(result.message || "更新ダウンロードを開始しました。");
+    }
+    setDownloadingUpdate(false);
+  };
+
+  const installUpdate = async () => {
+    if (!window.confirm("Cotaskaを再起動して更新を適用しますか？")) return;
+    const result = await window.cotaskaAPI?.updates?.install?.();
+    if (result) {
+      setUpdaterStatus((current) => ({ ...current, ...result }));
+      setUpdateStatus(result.message || "再起動して更新を適用します。");
     }
   };
 
@@ -147,6 +206,14 @@ function SettingsPane() {
     }
   };
 
+  const chooseRestoreDirectory = async () => {
+    const result = await window.cotaskaAPI?.backup?.chooseRestoreDirectory?.();
+    if (result?.ok && result.path) {
+      setRestoreDir(result.path);
+      setRestoreError("");
+    }
+  };
+
   const createBackup = async () => {
     setBackupStatus("");
     setBackupError("");
@@ -157,6 +224,27 @@ function SettingsPane() {
     }
     setBackupStatus(`バックアップを作成しました: ${result.backupPath}`);
   };
+
+  const restoreBackup = async () => {
+    setRestoreStatus("");
+    setRestoreError("");
+    if (!restoreDir.trim()) {
+      setRestoreError("復元元バックアップフォルダを選択してください。");
+      return;
+    }
+    if (!window.confirm("現在のタスク、リスト、設定を選択したバックアップで復元します。復元前バックアップを作成してから実行します。続行しますか？")) return;
+    const result = await window.cotaskaAPI?.backup?.restore?.(restoreDir);
+    if (!result?.ok) {
+      setRestoreError(result?.error || "バックアップを復元できませんでした。");
+      return;
+    }
+    setRestoreStatus(`復元しました: ${result.restoredFrom} / 復元前バックアップ: ${result.preRestoreBackupPath}`);
+    await loadSettings();
+  };
+
+  const canDownloadUpdate = updaterStatus.status === "available" && !downloadingUpdate;
+  const canInstallUpdate = updaterStatus.downloaded || updaterStatus.status === "downloaded";
+  const progressPercent = Math.max(0, Math.min(100, Math.round(updaterStatus.progress?.percent || 0)));
 
   return (
     <div className="settings-screen">
@@ -200,11 +288,34 @@ function SettingsPane() {
               <div>
                 <div className="update-guide-title">更新案内</div>
                 <div className="update-guide-text">{updateStatus || appInfo.updateGuidance}</div>
-                <div className="update-guide-note">自動更新は行わず、確認後にダウンロードページを開きます。</div>
+                {updaterStatus.status === "downloading" && (
+                  <div className="update-progress" aria-label="更新ダウンロード進捗">
+                    <div className="update-progress-bar" style={{ width: `${progressPercent}%` }} />
+                  </div>
+                )}
+                <div className="update-guide-note">確認後に更新をダウンロードし、再起動時に適用します。利用できない環境では手動ダウンロードを案内します。</div>
               </div>
-              <button type="button" className="settings-secondary-btn" onClick={openDownloadPage}>
-                ダウンロードページを開く
-              </button>
+              <div className="update-action-row">
+                <button
+                  type="button"
+                  className="settings-secondary-btn"
+                  onClick={downloadUpdate}
+                  disabled={!canDownloadUpdate}
+                >
+                  {downloadingUpdate ? "ダウンロード中..." : "更新をダウンロード"}
+                </button>
+                <button
+                  type="button"
+                  className="settings-primary-btn"
+                  onClick={installUpdate}
+                  disabled={!canInstallUpdate}
+                >
+                  再起動して更新
+                </button>
+                <button type="button" className="settings-secondary-btn" onClick={openDownloadPage}>
+                  ダウンロードページを開く
+                </button>
+              </div>
             </div>
           </section>
         )}
@@ -322,12 +433,13 @@ function SettingsPane() {
           <section className="settings-panel">
             <div className="settings-page-head">
               <div>
-                <h2 className="settings-page-title">バックアップ</h2>
+                <h2 className="settings-page-title">バックアップと復元</h2>
                 <p className="settings-page-subtitle">タスク正本、リスト、設定ファイルを手動バックアップします。</p>
               </div>
             </div>
 
             <div className="settings-section backup-panel">
+              <div className="settings-subsection-title">バックアップ</div>
               <div className="settings-field-row">
                 <input
                   className="settings-text-input settings-path-input"
@@ -339,7 +451,7 @@ function SettingsPane() {
                 <button type="button" className="settings-secondary-btn" onClick={chooseBackupDirectory}>保存先</button>
               </div>
               <div className="settings-help-text">
-                タイムスタンプ付きフォルダに `data/tasks`、`data/lists.yaml`、`data/settings.yaml` をコピーします。復元機能は初期実装には含めません。
+                既定では Cotaska.exe と同じフォルダの `backup` に保存します。タイムスタンプ付きフォルダに `data/tasks`、`data/lists.yaml`、`data/settings.yaml` をコピーします。
               </div>
               <button type="button" className="settings-primary-btn backup-create-btn" onClick={createBackup}>
                 バックアップ作成
@@ -347,6 +459,29 @@ function SettingsPane() {
               {(backupStatus || backupError) && (
                 <div className={`settings-message ${backupError ? "settings-message--error" : "settings-message--success"}`}>
                   {backupError || backupStatus}
+                </div>
+              )}
+              <div className="settings-divider" />
+              <div className="settings-subsection-title">復元</div>
+              <div className="settings-field-row">
+                <input
+                  className="settings-text-input settings-path-input"
+                  type="text"
+                  value={restoreDir}
+                  aria-label="復元元バックアップ"
+                  onChange={(e) => setRestoreDir(e.target.value)}
+                />
+                <button type="button" className="settings-secondary-btn" onClick={chooseRestoreDirectory}>復元元</button>
+              </div>
+              <div className="settings-help-text">
+                選択したバックアップ内の `data/tasks`、`data/lists.yaml`、`data/settings.yaml` を復元します。実行前に現在のデータを `backup` 配下へ退避します。
+              </div>
+              <button type="button" className="settings-secondary-btn backup-create-btn" onClick={restoreBackup}>
+                バックアップから復元
+              </button>
+              {(restoreStatus || restoreError) && (
+                <div className={`settings-message ${restoreError ? "settings-message--error" : "settings-message--success"}`}>
+                  {restoreError || restoreStatus}
                 </div>
               )}
             </div>

@@ -205,3 +205,16 @@ window.cotaskaAPI.tasks.update({
 ## Final Notes
 
 If any instruction conflicts with direct user requests, follow user requests first, then record the deviation in `00_mgmt/DECISIONS.md` when needed.
+
+---
+
+## GitHub Release Upload Rules
+
+Before uploading assets to GitHub Releases, always refer to:
+- `10_docs/20_実装準備/10_運用ルール/リリースプロセスルール.md`
+
+Upload both distribution lines when publishing a Cotaska release:
+- Portable/manual distribution: `20_app/release/Cotaska-dist.zip`
+- NSIS installer / auto-update distribution: `CotaskaCore-<version>-win-x64.exe`, `CotaskaCore-<version>-win-x64.exe.blockmap`, and `latest.yml`
+
+The NSIS `.exe`, `.blockmap`, and `latest.yml` must come from the same build and must be uploaded together.

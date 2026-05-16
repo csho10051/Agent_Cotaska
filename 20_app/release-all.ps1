@@ -5,6 +5,7 @@
 # ステップ 4: ランチャー EXE を配布ルートへコピー
 # ステップ 5: 出荷前検証
 # ステップ 6: Cotaska-dist.zip 作成
+# ステップ 7: NSIS インストーラ作成（自動更新用）
 # 追加: CotaskaCore.exe にアイコンと表示名メタデータを後書き
 #
 # 使い方:  cd 20_app  ;  .\release-all.ps1
@@ -64,7 +65,7 @@ Write-Host "=======================================" -ForegroundColor Green
 # -------------------------------------------------------
 # ステップ 1: レンダラービルド + Electron パッケージング
 # -------------------------------------------------------
-Write-Host "`n[Step 1/4] npm run dist:dir ..." -ForegroundColor Cyan
+Write-Host "`n[Step 1] npm run dist:dir ..." -ForegroundColor Cyan
 Set-Location $scriptDir
 npm run dist:dir
 if ($LASTEXITCODE -ne 0) {
@@ -81,7 +82,7 @@ Write-Host "  OK: Electron パッケージング完了" -ForegroundColor Green
 # -------------------------------------------------------
 # ステップ 2: Go ランチャービルド
 # -------------------------------------------------------
-Write-Host "`n[Step 2/4] Building Go launcher ..." -ForegroundColor Cyan
+Write-Host "`n[Step 2] Building Go launcher ..." -ForegroundColor Cyan
 $buildPs1 = Join-Path $launcherDir "build.ps1"
 if (-not (Test-Path $buildPs1)) {
     Write-Host "  [WARN] $buildPs1 not found. Skipping launcher build." -ForegroundColor Yellow
@@ -100,7 +101,7 @@ if (-not (Test-Path $buildPs1)) {
 # -------------------------------------------------------
 # ステップ 3: 配布フォルダの再構成
 # -------------------------------------------------------
-Write-Host "`n[Step 3/4] Organizing release folder ..." -ForegroundColor Cyan
+Write-Host "`n[Step 3] Organizing release folder ..." -ForegroundColor Cyan
 Set-Location $scriptDir
 & ".\organize-release.ps1" -Version $Version
 if ($LASTEXITCODE -ne 0) {
@@ -139,7 +140,7 @@ else {
 # -------------------------------------------------------
 # ステップ 4: ランチャー EXE を配布ルートへコピー
 # -------------------------------------------------------
-Write-Host "`n[Step 4/4] Copying launcher to dist root ..." -ForegroundColor Cyan
+Write-Host "`n[Step 4] Copying launcher to dist root ..." -ForegroundColor Cyan
 $launcherExe  = Join-Path $launcherDir "Cotaska.exe"
 $distLauncher = Join-Path $distRoot    "Cotaska.exe"
 if (Test-Path $launcherExe) {
@@ -408,11 +409,44 @@ if ($allOk) {
     $zipSizeMB = [math]::Round((Get-Item -LiteralPath $distZip).Length / 1MB, 1)
     Write-Host "  OK: Release zip created -> $distZip ($zipSizeMB MB)" -ForegroundColor Green
 
+    # -------------------------------------------------------
+    # ステップ 7: GitHub Releases 添付用 NSIS インストーラ作成
+    # -------------------------------------------------------
+    Write-Host "`n[Step 7] Creating NSIS installer for auto update ..." -ForegroundColor Cyan
+    Set-Location $scriptDir
+    npm run dist:installer
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "[FAILED] NSIS installer creation failed" -ForegroundColor Red
+        exit 1
+    }
+
+    $installerExe = Join-Path $scriptDir "release\CotaskaCore-$Version-win-x64.exe"
+    $installerBlockMap = "$installerExe.blockmap"
+    $latestYml = Join-Path $scriptDir "release\latest.yml"
+
+    $installerChecks = @(
+        @{ Path = $installerExe; Label = "NSIS installer" },
+        @{ Path = $installerBlockMap; Label = "NSIS blockmap" },
+        @{ Path = $latestYml; Label = "auto update metadata latest.yml" }
+    )
+    foreach ($check in $installerChecks) {
+        if (-not (Test-Path -LiteralPath $check.Path)) {
+            Write-Host "[FAILED] Missing $($check.Label): $($check.Path)" -ForegroundColor Red
+            exit 1
+        }
+    }
+
+    $installerSizeMB = [math]::Round((Get-Item -LiteralPath $installerExe).Length / 1MB, 1)
+    Write-Host "  OK: NSIS installer created -> $installerExe ($installerSizeMB MB)" -ForegroundColor Green
+    Write-Host "  OK: Auto update metadata created -> $latestYml" -ForegroundColor Green
+
     Write-Host "=======================================" -ForegroundColor Green
     Write-Host " Release v$Version Complete!" -ForegroundColor Green
     Write-Host "=======================================" -ForegroundColor Green
     Write-Host "  Dist: $distRoot" -ForegroundColor Cyan
     Write-Host "  Zip : $distZip" -ForegroundColor Cyan
+    Write-Host "  NSIS: $installerExe" -ForegroundColor Cyan
+    Write-Host "  Updater metadata: $latestYml" -ForegroundColor Cyan
     Write-Host "  Next: Launch $distRoot\Cotaska.exe and verify." -ForegroundColor Cyan
 } else {
     Write-Host "=======================================" -ForegroundColor Red

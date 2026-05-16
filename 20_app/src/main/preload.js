@@ -12,6 +12,19 @@ contextBridge.exposeInMainWorld("cotaskaAPI", {
     openDownloadPage: () => ipcRenderer.invoke("app:openDownloadPage"),
   },
 
+  updates: {
+    getStatus: () => ipcRenderer.invoke("updates:getStatus"),
+    check: () => ipcRenderer.invoke("updates:check"),
+    download: () => ipcRenderer.invoke("updates:download"),
+    install: () => ipcRenderer.invoke("updates:install"),
+    onStatus: (callback) => {
+      if (typeof callback !== "function") return () => {};
+      const listener = (_event, status) => callback(status);
+      ipcRenderer.on("updates:status", listener);
+      return () => ipcRenderer.removeListener("updates:status", listener);
+    },
+  },
+
   settings: {
     get: () => ipcRenderer.invoke("settings:get"),
     update: (patch) => ipcRenderer.invoke("settings:update", patch),
@@ -20,7 +33,9 @@ contextBridge.exposeInMainWorld("cotaskaAPI", {
 
   backup: {
     chooseDirectory: () => ipcRenderer.invoke("backup:chooseDirectory"),
+    chooseRestoreDirectory: () => ipcRenderer.invoke("backup:chooseRestoreDirectory"),
     create: (targetDir) => ipcRenderer.invoke("backup:create", targetDir),
+    restore: (sourceDir) => ipcRenderer.invoke("backup:restore", sourceDir),
   },
 
   // タスク操作（ファイルベース）

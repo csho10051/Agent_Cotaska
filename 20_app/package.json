@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "start": "electron .",
+    "dist:installer": "npm run build && electron-builder --win nsis --publish never",
     "dist:portable": "npm run build && electron-builder --win portable --publish never",
     "dist:dir": "npm run build && electron-builder --win dir --publish never"
   },
@@ -40,10 +41,24 @@
       }
     ],
     "asar": true,
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "csho10051",
+        "repo": "Agent_Cotaska",
+        "releaseType": "release"
+      }
+    ],
     "win": {
       "icon": "setup/launcher/icon.ico",
       "signAndEditExecutable": false,
       "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
         {
           "target": "portable",
           "arch": [
@@ -51,10 +66,17 @@
           ]
         }
       ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "deleteAppDataOnUninstall": false
     }
   },
   "dependencies": {
     "chokidar": "^3.6.0",
+    "electron-updater": "^6.8.3",
     "gray-matter": "^4.0.3",
     "js-yaml": "^4.1.1",
     "markdown-it": "^14.1.1",

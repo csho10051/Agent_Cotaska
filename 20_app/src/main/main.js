@@ -1,4 +1,5 @@
 const { app, BrowserWindow, ipcMain, Menu, dialog, globalShortcut, shell } = require("electron");
+const { autoUpdater } = require("electron-updater");
 const path = require("path");
 const crypto = require("crypto");
 const { spawn } = require("child_process");
@@ -14,6 +15,14 @@ const appLogger  = require("./appLogger");
 let mainWindow = null;
 let hasShownCloudSyncWarning = false;
 let hasShownLaunchFailedGuidance = false;
+let updaterState = {
+  status: "idle",
+  message: "更新確認を待機しています。",
+  hasUpdate: false,
+  downloaded: false,
+  progress: null,
+  version: null,
+};
 const APP_DISPLAY_NAME = "CotaskaCore";
 const APP_USER_MODEL_ID_BASE = "com.cotaska.app";
 const APP_USER_MODEL_ID_REVISION = "v3";
@@ -47,6 +56,18 @@ function getRuntimeRootPath() {
   return path.resolve(__dirname, "../..");
 }
 
+function getDefaultBackupDir() {
+  return path.join(getRuntimeRootPath(), "backup");
+}
+
+function copyDirectoryWithoutGeneratedFiles(from, to) {
+  fs.cpSync(from, to, {
+    recursive: true,
+    force: true,
+    filter: (source) => path.basename(source) !== "_index.yaml",
+  });
+}
+
 function getAppInfo() {
   const pkg = require("../../package.json");
   const settingsResult = settingsService.getSettings();
@@ -63,6 +84,7 @@ function getAppInfo() {
     updateGuidance: "利用者確認付きの手動ダウンロード案内",
     settingsPath: settingsResult.path,
     downloadPageUrl: settings.update.downloadPageUrl,
+    backupDefaultDir: getDefaultBackupDir(),
   };
 }
 
@@ -81,6 +103,169 @@ function compareVersions(a, b) {
     if (l < r) return -1;
   }
   return 0;
+}
+
+function getAutoUpdateUnsupportedReason() {
+  if (!app.isPackaged) {
+    return "開発実行中のため、自動更新は利用できません。";
+  }
+  if (process.env.PORTABLE_EXECUTABLE_DIR || process.env.PORTABLE_EXECUTABLE_FILE) {
+    return "portable版では自動更新は利用できません。インストール版を使用してください。";
+  }
+  return null;
+}
+
+function publishUpdaterState(patch) {
+  updaterState = {
+    ...updaterState,
+    ...patch,
+  };
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send("updates:status", updaterState);
+  }
+  return updaterState;
+}
+
+function setupAutoUpdater() {
+  autoUpdater.autoDownload = false;
+  autoUpdater.autoInstallOnAppQuit = false;
+
+  autoUpdater.on("checking-for-update", () => {
+    publishUpdaterState({
+      status: "checking",
+      message: "更新を確認しています...",
+      progress: null,
+      downloaded: false,
+    });
+  });
+
+  autoUpdater.on("update-available", (info) => {
+    publishUpdaterState({
+      status: "available",
+      message: `新しいバージョン ${info.version || ""} があります。`,
+      hasUpdate: true,
+      downloaded: false,
+      progress: null,
+      version: info.version || null,
+    });
+  });
+
+  autoUpdater.on("update-not-available", (info) => {
+    publishUpdaterState({
+      status: "not-available",
+      message: "現在のバージョンは最新版です。",
+      hasUpdate: false,
+      downloaded: false,
+      progress: null,
+      version: info.version || null,
+    });
+  });
+
+  autoUpdater.on("download-progress", (progress) => {
+    publishUpdaterState({
+      status: "downloading",
+      message: `更新をダウンロードしています... ${Math.round(progress.percent || 0)}%`,
+      progress: {
+        percent: progress.percent || 0,
+        transferred: progress.transferred || 0,
+        total: progress.total || 0,
+      },
+    });
+  });
+
+  autoUpdater.on("update-downloaded", (info) => {
+    publishUpdaterState({
+      status: "downloaded",
+      message: "更新の準備ができました。再起動すると適用されます。",
+      downloaded: true,
+      hasUpdate: true,
+      progress: null,
+      version: info.version || updaterState.version,
+    });
+  });
+
+  autoUpdater.on("error", (err) => {
+    logger.warn("autoUpdater error", { error: err.message });
+    publishUpdaterState({
+      status: "error",
+      message: err.message || "自動更新でエラーが発生しました。",
+      progress: null,
+    });
+  });
+}
+
+async function checkAutoUpdate() {
+  const unsupportedReason = getAutoUpdateUnsupportedReason();
+  if (unsupportedReason) {
+    return publishUpdaterState({
+      status: "unsupported",
+      message: unsupportedReason,
+      hasUpdate: false,
+      downloaded: false,
+      progress: null,
+    });
+  }
+
+  try {
+    await autoUpdater.checkForUpdates();
+    return updaterState;
+  } catch (err) {
+    logger.warn("updates:check failed", { error: err.message });
+    return publishUpdaterState({
+      status: "error",
+      message: err.message || "更新確認に失敗しました。",
+      progress: null,
+    });
+  }
+}
+
+async function downloadAutoUpdate() {
+  const unsupportedReason = getAutoUpdateUnsupportedReason();
+  if (unsupportedReason) {
+    return publishUpdaterState({
+      status: "unsupported",
+      message: unsupportedReason,
+      hasUpdate: false,
+      downloaded: false,
+      progress: null,
+    });
+  }
+  if (!updaterState.hasUpdate) {
+    return publishUpdaterState({
+      status: "not-available",
+      message: "ダウンロードできる更新はありません。",
+      progress: null,
+    });
+  }
+
+  try {
+    await autoUpdater.downloadUpdate();
+    return updaterState;
+  } catch (err) {
+    logger.warn("updates:download failed", { error: err.message });
+    return publishUpdaterState({
+      status: "error",
+      message: err.message || "更新のダウンロードに失敗しました。",
+      progress: null,
+    });
+  }
+}
+
+function installAutoUpdate() {
+  if (!updaterState.downloaded) {
+    return publishUpdaterState({
+      status: "available",
+      message: "更新を適用する前にダウンロードしてください。",
+      hasUpdate: true,
+    });
+  }
+
+  publishUpdaterState({
+    status: "installing",
+    message: "再起動して更新を適用します。",
+  });
+  setImmediate(() => autoUpdater.quitAndInstall(false, true));
+  return updaterState;
 }
 
 async function checkForUpdates() {
@@ -136,13 +321,14 @@ async function openDownloadPage(targetUrl = null) {
 }
 
 function createBackup(targetDir) {
-  const rawTargetDir = String(targetDir || "").trim();
-  if (!rawTargetDir) return { ok: false, error: "バックアップ保存先が未指定です。" };
+  const requestedTargetDir = String(targetDir || "").trim();
+  const rawTargetDir = requestedTargetDir || getDefaultBackupDir();
 
   const resolvedTargetDir = path.resolve(rawTargetDir);
-  if (!fs.existsSync(resolvedTargetDir) || !fs.statSync(resolvedTargetDir).isDirectory()) {
-    return { ok: false, error: "バックアップ保存先フォルダが見つかりません。" };
+  if (fs.existsSync(resolvedTargetDir) && !fs.statSync(resolvedTargetDir).isDirectory()) {
+    return { ok: false, error: "バックアップ保存先に同名のファイルが存在します。" };
   }
+  fs.mkdirSync(resolvedTargetDir, { recursive: true });
 
   const dataDir = settingsService.getDataDir();
   const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
@@ -150,19 +336,77 @@ function createBackup(targetDir) {
   fs.mkdirSync(backupRoot, { recursive: true });
 
   const copied = [];
-  const copyIfExists = (from, toRelative) => {
+  const copyIfExists = (from, toRelative, options = {}) => {
     if (!fs.existsSync(from)) return;
     const to = path.join(backupRoot, toRelative);
     fs.mkdirSync(path.dirname(to), { recursive: true });
-    fs.cpSync(from, to, { recursive: true, force: false, errorOnExist: true });
+    if (options.excludeGenerated) {
+      copyDirectoryWithoutGeneratedFiles(from, to);
+    } else {
+      fs.cpSync(from, to, { recursive: true, force: false, errorOnExist: true });
+    }
     copied.push(toRelative);
   };
 
-  copyIfExists(path.join(dataDir, "tasks"), path.join("data", "tasks"));
+  copyIfExists(path.join(dataDir, "tasks"), path.join("data", "tasks"), { excludeGenerated: true });
   copyIfExists(path.join(dataDir, "lists.yaml"), path.join("data", "lists.yaml"));
   copyIfExists(settingsService.getSettingsPath(), path.join("data", "settings.yaml"));
 
   return { ok: true, backupPath: backupRoot, copied };
+}
+
+function restoreBackup(sourceDir) {
+  const rawSourceDir = String(sourceDir || "").trim();
+  if (!rawSourceDir) return { ok: false, error: "復元元バックアップフォルダが未指定です。" };
+
+  const resolvedSourceDir = path.resolve(rawSourceDir);
+  if (!fs.existsSync(resolvedSourceDir) || !fs.statSync(resolvedSourceDir).isDirectory()) {
+    return { ok: false, error: "復元元バックアップフォルダが見つかりません。" };
+  }
+
+  const backupDataDir = path.join(resolvedSourceDir, "data");
+  const backupTasksDir = path.join(backupDataDir, "tasks");
+  if (!fs.existsSync(backupTasksDir) || !fs.statSync(backupTasksDir).isDirectory()) {
+    return { ok: false, error: "復元元に data/tasks フォルダがありません。" };
+  }
+
+  const dataDir = settingsService.getDataDir();
+  const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+  const preRestoreBackup = createBackup(path.join(getDefaultBackupDir(), `pre-restore-${timestamp}`));
+  if (!preRestoreBackup.ok) {
+    return { ok: false, error: `復元前バックアップを作成できませんでした: ${preRestoreBackup.error}` };
+  }
+
+  const restoreDirectory = (from, to) => {
+    if (!fs.existsSync(from)) return;
+    fs.rmSync(to, { recursive: true, force: true });
+    fs.mkdirSync(path.dirname(to), { recursive: true });
+    copyDirectoryWithoutGeneratedFiles(from, to);
+  };
+  const restoreFile = (from, to) => {
+    if (!fs.existsSync(from)) return;
+    fs.mkdirSync(path.dirname(to), { recursive: true });
+    fs.copyFileSync(from, to);
+  };
+
+  restoreDirectory(backupTasksDir, path.join(dataDir, "tasks"));
+  restoreFile(path.join(backupDataDir, "lists.yaml"), path.join(dataDir, "lists.yaml"));
+  restoreFile(path.join(backupDataDir, "settings.yaml"), settingsService.getSettingsPath());
+
+  const rebuild = taskService.rebuildCache();
+  if (!rebuild.success) {
+    return { ok: false, error: `復元後のタスク再読み込みに失敗しました: ${rebuild.error}` };
+  }
+  const indexService = require("./indexService");
+  const indexResult = indexService.rebuildIndex(taskService.getCache(), taskService.getTaskFileRoots());
+
+  return {
+    ok: true,
+    restoredFrom: resolvedSourceDir,
+    preRestoreBackupPath: preRestoreBackup.backupPath,
+    taskCount: rebuild.taskCount || 0,
+    index: indexResult,
+  };
 }
 
 async function maybeShowCloudSyncWarning() {
@@ -331,6 +575,14 @@ ipcMain.handle("app:checkForUpdates", async () => checkForUpdates());
 
 ipcMain.handle("app:openDownloadPage", async (_e, url) => openDownloadPage(url));
 
+ipcMain.handle("updates:getStatus", async () => updaterState);
+
+ipcMain.handle("updates:check", async () => checkAutoUpdate());
+
+ipcMain.handle("updates:download", async () => downloadAutoUpdate());
+
+ipcMain.handle("updates:install", async () => installAutoUpdate());
+
 ipcMain.handle("settings:get", async () => settingsService.getSettings());
 
 ipcMain.handle("settings:update", async (_e, patch) => {
@@ -363,7 +615,20 @@ ipcMain.handle("settings:chooseExternalEditor", async () => {
 ipcMain.handle("backup:chooseDirectory", async () => {
   const result = await dialog.showOpenDialog({
     title: "バックアップ保存先を選択",
+    defaultPath: getDefaultBackupDir(),
     properties: ["openDirectory", "createDirectory"],
+  });
+  if (result.canceled || !result.filePaths?.[0]) {
+    return { ok: false, canceled: true };
+  }
+  return { ok: true, path: result.filePaths[0] };
+});
+
+ipcMain.handle("backup:chooseRestoreDirectory", async () => {
+  const result = await dialog.showOpenDialog({
+    title: "復元元バックアップフォルダを選択",
+    defaultPath: getDefaultBackupDir(),
+    properties: ["openDirectory"],
   });
   if (result.canceled || !result.filePaths?.[0]) {
     return { ok: false, canceled: true };
@@ -377,6 +642,15 @@ ipcMain.handle("backup:create", async (_e, targetDir) => {
   } catch (err) {
     logger.error("backup:create failed", err);
     return { ok: false, error: err.message || "バックアップ作成に失敗しました。" };
+  }
+});
+
+ipcMain.handle("backup:restore", async (_e, sourceDir) => {
+  try {
+    return restoreBackup(sourceDir);
+  } catch (err) {
+    logger.error("backup:restore failed", err);
+    return { ok: false, error: err.message || "バックアップ復元に失敗しました。" };
   }
 });
 
@@ -1074,6 +1348,7 @@ app.whenReady().then(async () => {
     version: pkg.version,
     electronVersion: process.versions.electron,
   });
+  setupAutoUpdater();
 
   logger.info("App startup initiated", {
     nodeVersion: process.versions.node,

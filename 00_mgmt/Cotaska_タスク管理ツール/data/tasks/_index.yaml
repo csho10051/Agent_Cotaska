@@ -25,7 +25,7 @@ tasks:
     sort_order: 3
     tags: []
     due_date: null
-    updated_at: '2026-05-10T11:59:40.197Z'
+    updated_at: '2026-05-16T03:58:52.948Z'
   - id: T-0050
     title: 仕様変更：タスク入力時の入力補正
     list: Cotaska
@@ -2068,12 +2068,14 @@ tasks:
   - id: T-0211
     title: 仕様変更：自動更新の仕組みつくり
     list: null
-    status: todo
+    status: done
     priority: normal
     sort_order: 201
-    tags: []
-    due_date: null
-    updated_at: '2026-05-16T03:40:50.791Z'
+    tags:
+      - CHG-069
+      - 自動更新
+    due_date: '2026-05-16'
+    updated_at: '2026-05-16T13:30:00+09:00'
   - id: T-0202
     title: CHG-067-02 実装：更新確認と手動ダウンロード案内
     list: 仕様変更
@@ -2175,7 +2177,70 @@ tasks:
       - 文字サイズ
     due_date: null
     updated_at: '2026-05-16T12:08:46+09:00'
+  - id: T-0212
+    title: CHG-069-01 設計反映：確認付き自動更新
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 212
+    tags:
+      - CHG-069
+      - 設計
+      - 自動更新
+    due_date: '2026-05-16'
+    updated_at: '2026-05-16T04:14:30.402Z'
+  - id: T-0213
+    title: CHG-069-02 実装：NSIS配布とGitHub publish設定
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 213
+    tags:
+      - CHG-069
+      - 実装
+      - 自動更新
+      - 配布
+    due_date: '2026-05-16'
+    updated_at: '2026-05-16T04:14:33.828Z'
+  - id: T-0214
+    title: CHG-069-03 実装：自動更新IPCとmain process制御
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 214
+    tags:
+      - CHG-069
+      - 実装
+      - IPC
+      - 自動更新
+    due_date: '2026-05-16'
+    updated_at: '2026-05-16T04:14:37.303Z'
+  - id: T-0215
+    title: CHG-069-04 実装：アプリ情報の更新UI
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 215
+    tags:
+      - CHG-069
+      - 実装
+      - UI
+      - 自動更新
+    due_date: '2026-05-16'
+    updated_at: '2026-05-16T04:14:40.461Z'
+  - id: T-0216
+    title: CHG-069-05 確認：確認付き自動更新
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 216
+    tags:
+      - CHG-069
+      - ユーザー確認
+      - 自動更新
+    due_date: '2026-05-16'
+    updated_at: '2026-05-16T13:30:00+09:00'
 task_file_roots:
   - .
-next_task_id: 212
-last_updated: '2026-05-16T03:40:51.037Z'
+next_task_id: 228
+last_updated: '2026-05-16T04:18:17.346Z'
