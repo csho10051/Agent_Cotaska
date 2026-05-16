@@ -2583,7 +2583,46 @@ tasks:
       - 日付
     due_date: null
     updated_at: '2026-05-16T22:51:45+09:00'
+  - id: T-0245
+    title: CHG-076-01 設計：Portable版のみのリリース運用
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 245
+    tags:
+      - CHG-076
+      - 設計
+      - リリース
+      - Portable
+    due_date: null
+    updated_at: '2026-05-16T23:07:38+09:00'
+  - id: T-0246
+    title: CHG-076-02 実装：NSIS配布経路の削除
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 246
+    tags:
+      - CHG-076
+      - 実装
+      - リリース
+      - Portable
+    due_date: null
+    updated_at: '2026-05-16T23:07:38+09:00'
+  - id: T-0247
+    title: CHG-076-03 ユーザー確認：Portable版のみのリリース運用
+    list: 仕様変更
+    status: doing
+    priority: normal
+    sort_order: 247
+    tags:
+      - CHG-076
+      - ユーザー確認
+      - リリース
+      - Portable
+    due_date: null
+    updated_at: '2026-05-16T23:07:38+09:00'
 task_file_roots:
   - .
-next_task_id: 245
-last_updated: '2026-05-16T22:51:45+09:00'
+next_task_id: 248
+last_updated: '2026-05-16T14:12:06.717Z'
