@@ -2,8 +2,10 @@ const { app, BrowserWindow, ipcMain, Menu, dialog, globalShortcut, shell } = req
 const { autoUpdater } = require("electron-updater");
 const path = require("path");
 const crypto = require("crypto");
+const os = require("os");
 const { spawn } = require("child_process");
 const fs = require("fs");
+const AdmZip = require("adm-zip");
 const taskService = require("./taskService");
 const listService = require("./listService");
 const watcher = require("./watcher");
@@ -11,6 +13,7 @@ const reminderService = require("./reminderService");
 const settingsService = require("./settingsService");
 const logger     = require("./logger");
 const appLogger  = require("./appLogger");
+const packageInfo = require("../../package.json");
 
 let mainWindow = null;
 let hasShownCloudSyncWarning = false;
@@ -26,6 +29,7 @@ let updaterState = {
 const APP_DISPLAY_NAME = "CotaskaCore";
 const APP_USER_MODEL_ID_BASE = "com.cotaska.app";
 const APP_USER_MODEL_ID_REVISION = "v3";
+const BACKUP_FORMAT_VERSION = 1;
 
 const CLOUD_SYNC_PATH_MARKERS = [
   { token: "\\\\box\\\\", provider: "Box" },
@@ -68,8 +72,130 @@ function copyDirectoryWithoutGeneratedFiles(from, to) {
   });
 }
 
+function replaceDirectoryContents(from, to) {
+  fs.mkdirSync(to, { recursive: true });
+  for (const entry of fs.readdirSync(to, { withFileTypes: true })) {
+    const target = path.join(to, entry.name);
+    fs.rmSync(target, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
+  }
+  copyDirectoryWithoutGeneratedFiles(from, to);
+}
+
+function toZipPath(relativePath) {
+  return String(relativePath || "").replace(/\\/g, "/");
+}
+
+function addPathToZip(zip, sourcePath, archivePath) {
+  if (!fs.existsSync(sourcePath)) return;
+
+  const stat = fs.statSync(sourcePath);
+  if (stat.isDirectory()) {
+    for (const entry of fs.readdirSync(sourcePath, { withFileTypes: true })) {
+      if (entry.name === "_index.yaml") continue;
+      addPathToZip(zip, path.join(sourcePath, entry.name), path.join(archivePath, entry.name));
+    }
+    return;
+  }
+
+  zip.addFile(toZipPath(archivePath), fs.readFileSync(sourcePath));
+}
+
+function createBackupZip(targetDir, options = {}) {
+  const requestedTargetDir = String(targetDir || "").trim();
+  const rawTargetDir = requestedTargetDir || getDefaultBackupDir();
+
+  const resolvedTargetDir = path.resolve(rawTargetDir);
+  if (fs.existsSync(resolvedTargetDir) && !fs.statSync(resolvedTargetDir).isDirectory()) {
+    return { ok: false, error: "バックアップ保存先に同名のファイルが存在します。" };
+  }
+  fs.mkdirSync(resolvedTargetDir, { recursive: true });
+
+  const dataDir = settingsService.getDataDir();
+  const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+  const baseName = options.prefix ? `${options.prefix}-${timestamp}` : `Cotaska-backup-${timestamp}`;
+  const backupPath = path.join(resolvedTargetDir, `${baseName}.zip`);
+  const zip = new AdmZip();
+  const copied = [];
+
+  const manifest = {
+    app: "Cotaska",
+    productName: APP_DISPLAY_NAME,
+    format: "cotaska-backup",
+    formatVersion: BACKUP_FORMAT_VERSION,
+    createdAt: new Date().toISOString(),
+    appVersion: packageInfo.version,
+    excludes: ["data/tasks/_index.yaml"],
+  };
+  zip.addFile("manifest.json", Buffer.from(JSON.stringify(manifest, null, 2), "utf8"));
+
+  const addIfExists = (from, archivePath) => {
+    if (!fs.existsSync(from)) return;
+    addPathToZip(zip, from, archivePath);
+    copied.push(toZipPath(archivePath));
+  };
+
+  addIfExists(path.join(dataDir, "tasks"), path.join("data", "tasks"));
+  addIfExists(path.join(dataDir, "lists.yaml"), path.join("data", "lists.yaml"));
+  addIfExists(settingsService.getSettingsPath(), path.join("data", "settings.yaml"));
+
+  zip.writeZip(backupPath);
+
+  return { ok: true, backupPath, copied, format: "zip" };
+}
+
+function extractBackupZip(sourceZipPath) {
+  const zip = new AdmZip(sourceZipPath);
+  const entries = zip.getEntries();
+  const hasUnsafeEntry = entries.some((entry) => {
+    const entryName = entry.entryName.replace(/\\/g, "/");
+    return path.isAbsolute(entryName) || entryName.includes("../") || entryName.startsWith("../");
+  });
+  if (hasUnsafeEntry) {
+    throw new Error("バックアップzipに不正なパスが含まれています。");
+  }
+
+  const manifestEntry = zip.getEntry("manifest.json");
+  if (manifestEntry) {
+    const manifest = JSON.parse(zip.readAsText(manifestEntry));
+    if (manifest.format && manifest.format !== "cotaska-backup") {
+      throw new Error("Cotaskaのバックアップzipではありません。");
+    }
+  }
+
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cotaska-restore-"));
+  zip.extractAllTo(tempDir, true);
+  return tempDir;
+}
+
+function resolveBackupSource(sourcePath) {
+  const rawSourcePath = String(sourcePath || "").trim();
+  if (!rawSourcePath) return { ok: false, error: "復元元バックアップを選択してください。" };
+
+  const resolvedSourcePath = path.resolve(rawSourcePath);
+  if (!fs.existsSync(resolvedSourcePath)) {
+    return { ok: false, error: "復元元バックアップが見つかりません。" };
+  }
+
+  const stat = fs.statSync(resolvedSourcePath);
+  if (stat.isFile()) {
+    if (path.extname(resolvedSourcePath).toLowerCase() !== ".zip") {
+      return { ok: false, error: "復元元には Cotaska のバックアップzipを選択してください。" };
+    }
+    try {
+      return { ok: true, backupRoot: extractBackupZip(resolvedSourcePath), resolvedSourcePath, cleanup: true };
+    } catch (err) {
+      return { ok: false, error: err.message || "バックアップzipを展開できませんでした。" };
+    }
+  }
+
+  if (stat.isDirectory()) {
+    return { ok: true, backupRoot: resolvedSourcePath, resolvedSourcePath, cleanup: false };
+  }
+
+  return { ok: false, error: "復元元バックアップを選択してください。" };
+}
+
 function getAppInfo() {
-  const pkg = require("../../package.json");
   const settingsResult = settingsService.getSettings();
   const settings = settingsResult.settings;
   const distributionFolder = app.isPackaged
@@ -78,8 +204,8 @@ function getAppInfo() {
 
   return {
     productName: settings.displayName || "Cotaska",
-    currentVersion: `Cotaska ${pkg.version}`,
-    version: pkg.version,
+    currentVersion: `Cotaska ${packageInfo.version}`,
+    version: packageInfo.version,
     distributionFolder,
     updateGuidance: "利用者確認付きの手動ダウンロード案内",
     settingsPath: settingsResult.path,
@@ -321,92 +447,63 @@ async function openDownloadPage(targetUrl = null) {
 }
 
 function createBackup(targetDir) {
-  const requestedTargetDir = String(targetDir || "").trim();
-  const rawTargetDir = requestedTargetDir || getDefaultBackupDir();
-
-  const resolvedTargetDir = path.resolve(rawTargetDir);
-  if (fs.existsSync(resolvedTargetDir) && !fs.statSync(resolvedTargetDir).isDirectory()) {
-    return { ok: false, error: "バックアップ保存先に同名のファイルが存在します。" };
-  }
-  fs.mkdirSync(resolvedTargetDir, { recursive: true });
-
-  const dataDir = settingsService.getDataDir();
-  const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-  const backupRoot = path.join(resolvedTargetDir, `Cotaska-backup-${timestamp}`);
-  fs.mkdirSync(backupRoot, { recursive: true });
-
-  const copied = [];
-  const copyIfExists = (from, toRelative, options = {}) => {
-    if (!fs.existsSync(from)) return;
-    const to = path.join(backupRoot, toRelative);
-    fs.mkdirSync(path.dirname(to), { recursive: true });
-    if (options.excludeGenerated) {
-      copyDirectoryWithoutGeneratedFiles(from, to);
-    } else {
-      fs.cpSync(from, to, { recursive: true, force: false, errorOnExist: true });
-    }
-    copied.push(toRelative);
-  };
-
-  copyIfExists(path.join(dataDir, "tasks"), path.join("data", "tasks"), { excludeGenerated: true });
-  copyIfExists(path.join(dataDir, "lists.yaml"), path.join("data", "lists.yaml"));
-  copyIfExists(settingsService.getSettingsPath(), path.join("data", "settings.yaml"));
-
-  return { ok: true, backupPath: backupRoot, copied };
+  return createBackupZip(targetDir);
 }
 
-function restoreBackup(sourceDir) {
-  const rawSourceDir = String(sourceDir || "").trim();
-  if (!rawSourceDir) return { ok: false, error: "復元元バックアップフォルダが未指定です。" };
+async function restoreBackup(sourcePath) {
+  const source = resolveBackupSource(sourcePath);
+  if (!source.ok) return source;
 
-  const resolvedSourceDir = path.resolve(rawSourceDir);
-  if (!fs.existsSync(resolvedSourceDir) || !fs.statSync(resolvedSourceDir).isDirectory()) {
-    return { ok: false, error: "復元元バックアップフォルダが見つかりません。" };
-  }
-
-  const backupDataDir = path.join(resolvedSourceDir, "data");
+  const backupDataDir = path.join(source.backupRoot, "data");
   const backupTasksDir = path.join(backupDataDir, "tasks");
   if (!fs.existsSync(backupTasksDir) || !fs.statSync(backupTasksDir).isDirectory()) {
+    if (source.cleanup) {
+      fs.rmSync(source.backupRoot, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
+    }
     return { ok: false, error: "復元元に data/tasks フォルダがありません。" };
   }
 
   const dataDir = settingsService.getDataDir();
-  const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-  const preRestoreBackup = createBackup(path.join(getDefaultBackupDir(), `pre-restore-${timestamp}`));
+  const preRestoreBackup = createBackupZip(getDefaultBackupDir(), { prefix: "Cotaska-pre-restore" });
   if (!preRestoreBackup.ok) {
+    if (source.cleanup) {
+      fs.rmSync(source.backupRoot, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
+    }
     return { ok: false, error: `復元前バックアップを作成できませんでした: ${preRestoreBackup.error}` };
   }
 
-  const restoreDirectory = (from, to) => {
-    if (!fs.existsSync(from)) return;
-    fs.rmSync(to, { recursive: true, force: true });
-    fs.mkdirSync(path.dirname(to), { recursive: true });
-    copyDirectoryWithoutGeneratedFiles(from, to);
-  };
   const restoreFile = (from, to) => {
     if (!fs.existsSync(from)) return;
     fs.mkdirSync(path.dirname(to), { recursive: true });
     fs.copyFileSync(from, to);
   };
 
-  restoreDirectory(backupTasksDir, path.join(dataDir, "tasks"));
-  restoreFile(path.join(backupDataDir, "lists.yaml"), path.join(dataDir, "lists.yaml"));
-  restoreFile(path.join(backupDataDir, "settings.yaml"), settingsService.getSettingsPath());
+  await watcher.stopWatcher();
+  try {
+    replaceDirectoryContents(backupTasksDir, path.join(dataDir, "tasks"));
+    restoreFile(path.join(backupDataDir, "lists.yaml"), path.join(dataDir, "lists.yaml"));
+    restoreFile(path.join(backupDataDir, "settings.yaml"), settingsService.getSettingsPath());
 
-  const rebuild = taskService.rebuildCache();
-  if (!rebuild.success) {
-    return { ok: false, error: `復元後のタスク再読み込みに失敗しました: ${rebuild.error}` };
+    const rebuild = taskService.rebuildCache();
+    if (!rebuild.success) {
+      return { ok: false, error: `復元後のタスク再読み込みに失敗しました: ${rebuild.error}` };
+    }
+    const indexService = require("./indexService");
+    const indexResult = indexService.rebuildIndex(taskService.getCache(), taskService.getTaskFileRoots());
+
+    return {
+      ok: true,
+      restoredFrom: source.resolvedSourcePath,
+      preRestoreBackupPath: preRestoreBackup.backupPath,
+      taskCount: rebuild.taskCount || 0,
+      index: indexResult,
+    };
+  } finally {
+    await watcher.startWatcher(mainWindow);
+    if (source.cleanup) {
+      fs.rmSync(source.backupRoot, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
+    }
   }
-  const indexService = require("./indexService");
-  const indexResult = indexService.rebuildIndex(taskService.getCache(), taskService.getTaskFileRoots());
-
-  return {
-    ok: true,
-    restoredFrom: resolvedSourceDir,
-    preRestoreBackupPath: preRestoreBackup.backupPath,
-    taskCount: rebuild.taskCount || 0,
-    index: indexResult,
-  };
 }
 
 async function maybeShowCloudSyncWarning() {
@@ -626,9 +723,13 @@ ipcMain.handle("backup:chooseDirectory", async () => {
 
 ipcMain.handle("backup:chooseRestoreDirectory", async () => {
   const result = await dialog.showOpenDialog({
-    title: "復元元バックアップフォルダを選択",
+    title: "復元元バックアップzipを選択",
     defaultPath: getDefaultBackupDir(),
-    properties: ["openDirectory"],
+    properties: ["openFile"],
+    filters: [
+      { name: "Cotaskaバックアップ", extensions: ["zip"] },
+      { name: "すべてのファイル", extensions: ["*"] },
+    ],
   });
   if (result.canceled || !result.filePaths?.[0]) {
     return { ok: false, canceled: true };
@@ -647,7 +748,7 @@ ipcMain.handle("backup:create", async (_e, targetDir) => {
 
 ipcMain.handle("backup:restore", async (_e, sourceDir) => {
   try {
-    return restoreBackup(sourceDir);
+    return await restoreBackup(sourceDir);
   } catch (err) {
     logger.error("backup:restore failed", err);
     return { ok: false, error: err.message || "バックアップ復元に失敗しました。" };

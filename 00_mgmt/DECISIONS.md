@@ -213,3 +213,9 @@
 - portable版の配布フォルダ名は `Cotaska-dist` から `Cotaska-Portable` に変更する。
 - portable版のGitHub Releases添付ファイル名も、フォルダ名に合わせて `Cotaska-Portable.zip` とする。
 - NSISインストーラ用の `CotaskaCore-<version>-win-x64.exe`、`.blockmap`、`latest.yml` の命名は変更しない。
+
+## 2026-05-16 CHG-073 バックアップzip形式化
+
+- バックアップ作成結果はフォルダコピーではなく、`Cotaska-backup-*.zip` の単一ファイルとする。
+- zip内には `manifest.json`、`data/tasks`、`data/lists.yaml`、`data/settings.yaml` を含め、生成物の `data/tasks/_index.yaml` は除外する。
+- 復元時はzipを一時フォルダへ展開して構造を確認してから反映し、既存フォルダ形式バックアップも互換性のため復元可能なまま残す。

@@ -376,13 +376,21 @@
       gap: 12px;
     }
     .subsection-title {
+      min-height: 36px;
+      display: flex;
+      align-items: center;
+      padding: 8px 12px;
+      border-left: 4px solid var(--blue);
+      border-radius: 6px;
+      background: #f6f9fd;
       color: #253044;
-      font-size: 13px;
-      font-weight: 700;
+      font-size: 16px;
+      font-weight: 800;
+      line-height: 1.35;
     }
     .divider {
       height: 1px;
-      margin: 4px 0;
+      margin: 10px 0 4px;
       background: #eef2f6;
     }
     .backup-targets {
@@ -641,17 +649,17 @@
                 <input class="path-input mono" type="text" value="D:\Apps\Cotaska\backup" aria-label="バックアップ保存先" />
                 <button class="secondary-btn" type="button">保存先</button>
               </div>
-              <div class="help-text">既定では Cotaska.exe と同じフォルダに <span class="mono">backup</span> フォルダを作成し、その中へ保存します。</div>
+              <div class="help-text">既定では Cotaska.exe と同じフォルダに <span class="mono">backup</span> フォルダを作成し、バックアップをzipファイルとして保存します。</div>
               <div>
                 <button class="primary-btn" type="button">バックアップ作成</button>
               </div>
               <div class="divider"></div>
               <div class="subsection-title">復元</div>
               <div class="field-row">
-                <input class="path-input mono" type="text" value="D:\Apps\Cotaska\backup\Cotaska-backup-2026-05-16T12-05-30-000Z" aria-label="復元元バックアップ" />
-                <button class="secondary-btn" type="button">復元元</button>
+                <input class="path-input mono" type="text" value="D:\Apps\Cotaska\backup\Cotaska-backup-2026-05-16T12-05-30-000Z.zip" aria-label="復元元バックアップzip" />
+                <button class="secondary-btn" type="button">zip選択</button>
               </div>
-              <div class="help-text">復元前に現在のデータを <span class="mono">backup</span> 配下へ退避してから、選択したバックアップのタスク正本、リスト、設定ファイルを戻します。</div>
+              <div class="help-text">復元前に現在のデータを <span class="mono">backup</span> 配下へ退避してから、選択したバックアップzipのタスク正本、リスト、設定ファイルを戻します。</div>
               <div>
                 <button class="secondary-btn" type="button">バックアップから復元</button>
               </div>
@@ -674,7 +682,7 @@
 
             <div class="backup-result">
               <strong>バックアップを作成しました</strong>
-              D:\Apps\Cotaska\backup\Cotaska-backup-2026-05-16T12-05-30-000Z
+              D:\Apps\Cotaska\backup\Cotaska-backup-2026-05-16T12-05-30-000Z.zip
               <div class="muted">生成物のため、data/tasks/_index.yaml は対象外です。</div>
             </div>
           </div>

@@ -489,14 +489,22 @@ body.is-resizing-detail-sections * {
 }
 
 .settings-subsection-title {
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-left: 4px solid #1f6fb2;
+  border-radius: 6px;
+  background: #f6f9fd;
   color: #253044;
-  font-size: 13px;
-  font-weight: 700;
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.35;
 }
 
 .settings-divider {
   height: 1px;
-  margin: 4px 0;
+  margin: 10px 0 4px;
   background: #eef2f6;
 }
 

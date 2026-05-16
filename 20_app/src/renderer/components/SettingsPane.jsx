@@ -229,7 +229,7 @@ function SettingsPane() {
     setRestoreStatus("");
     setRestoreError("");
     if (!restoreDir.trim()) {
-      setRestoreError("復元元バックアップフォルダを選択してください。");
+      setRestoreError("復元元バックアップzipを選択してください。");
       return;
     }
     if (!window.confirm("現在のタスク、リスト、設定を選択したバックアップで復元します。復元前バックアップを作成してから実行します。続行しますか？")) return;
@@ -451,7 +451,7 @@ function SettingsPane() {
                 <button type="button" className="settings-secondary-btn" onClick={chooseBackupDirectory}>保存先</button>
               </div>
               <div className="settings-help-text">
-                既定では Cotaska.exe と同じフォルダの `backup` に保存します。タイムスタンプ付きフォルダに `data/tasks`、`data/lists.yaml`、`data/settings.yaml` をコピーします。
+                既定では Cotaska.exe と同じフォルダの `backup` に保存します。`data/tasks`、`data/lists.yaml`、`data/settings.yaml` をタイムスタンプ付きzipにまとめます。
               </div>
               <button type="button" className="settings-primary-btn backup-create-btn" onClick={createBackup}>
                 バックアップ作成
@@ -468,13 +468,13 @@ function SettingsPane() {
                   className="settings-text-input settings-path-input"
                   type="text"
                   value={restoreDir}
-                  aria-label="復元元バックアップ"
+                  aria-label="復元元バックアップzip"
                   onChange={(e) => setRestoreDir(e.target.value)}
                 />
-                <button type="button" className="settings-secondary-btn" onClick={chooseRestoreDirectory}>復元元</button>
+                <button type="button" className="settings-secondary-btn" onClick={chooseRestoreDirectory}>zip選択</button>
               </div>
               <div className="settings-help-text">
-                選択したバックアップ内の `data/tasks`、`data/lists.yaml`、`data/settings.yaml` を復元します。実行前に現在のデータを `backup` 配下へ退避します。
+                選択したバックアップzip内の `data/tasks`、`data/lists.yaml`、`data/settings.yaml` を復元します。実行前に現在のデータを `backup` 配下へ退避します。
               </div>
               <button type="button" className="settings-secondary-btn backup-create-btn" onClick={restoreBackup}>
                 バックアップから復元
