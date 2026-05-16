@@ -935,6 +935,22 @@ body.is-resizing-detail-sections * {
   font-size: var(--detail-content-font-size, 14px);
 }
 
+.detail-font-size-indicator {
+  position: absolute;
+  top: 54px;
+  right: 18px;
+  z-index: 40;
+  pointer-events: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: rgba(28, 35, 45, 0.88);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+}
+
 /* 詳細ペイン：タスク未選択状態 */
 .detail-pane--empty {
   align-items: center;

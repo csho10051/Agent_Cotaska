@@ -195,6 +195,9 @@ function DetailPaneBody({
     if (!Number.isFinite(saved)) return DETAIL_CONTENT_FONT_DEFAULT;
     return clamp(saved, DETAIL_CONTENT_FONT_MIN, DETAIL_CONTENT_FONT_MAX);
   });
+  const [fontSizeIndicator, setFontSizeIndicator] = useState(null);
+  const fontSizeIndicatorTimerRef = useRef(null);
+  const detailContentFontSizeRef = useRef(detailContentFontSize);
   const [subtaskNodeExpanded, setSubtaskNodeExpanded] = useState({});
   const subtaskResizeRef = useRef(null);
   const detailPaneRef = useRef(null);
@@ -231,6 +234,7 @@ function DetailPaneBody({
   }, [subtaskPanelHeight]);
 
   useEffect(() => {
+    detailContentFontSizeRef.current = detailContentFontSize;
     window.localStorage?.setItem(DETAIL_CONTENT_FONT_STORAGE_KEY, String(detailContentFontSize));
     window.cotaskaAPI?.settings?.update?.({ detailTextSize: detailContentFontSize });
   }, [detailContentFontSize]);
@@ -241,14 +245,18 @@ function DetailPaneBody({
       const result = await window.cotaskaAPI?.settings?.get?.();
       const configured = Number(result?.settings?.detailTextSize);
       if (!cancelled && Number.isFinite(configured)) {
-        setDetailContentFontSize(clamp(configured, DETAIL_CONTENT_FONT_MIN, DETAIL_CONTENT_FONT_MAX));
+        const next = clamp(configured, DETAIL_CONTENT_FONT_MIN, DETAIL_CONTENT_FONT_MAX);
+        detailContentFontSizeRef.current = next;
+        setDetailContentFontSize(next);
       }
     })();
 
     const handleSettingsFontSize = (event) => {
       const configured = Number(event.detail);
       if (Number.isFinite(configured)) {
-        setDetailContentFontSize(clamp(configured, DETAIL_CONTENT_FONT_MIN, DETAIL_CONTENT_FONT_MAX));
+        const next = clamp(configured, DETAIL_CONTENT_FONT_MIN, DETAIL_CONTENT_FONT_MAX);
+        detailContentFontSizeRef.current = next;
+        setDetailContentFontSize(next);
       }
     };
     window.addEventListener("cotaska:detailTextSizeChanged", handleSettingsFontSize);
@@ -256,6 +264,10 @@ function DetailPaneBody({
       cancelled = true;
       window.removeEventListener("cotaska:detailTextSizeChanged", handleSettingsFontSize);
     };
+  }, []);
+
+  useEffect(() => () => {
+    clearTimeout(fontSizeIndicatorTimerRef.current);
   }, []);
 
   useEffect(() => {
@@ -294,10 +306,23 @@ function DetailPaneBody({
     document.body.classList.add("is-resizing-detail-sections");
   };
 
+  const showFontSizeIndicator = (nextSize) => {
+    setFontSizeIndicator(nextSize);
+    clearTimeout(fontSizeIndicatorTimerRef.current);
+    fontSizeIndicatorTimerRef.current = setTimeout(() => {
+      setFontSizeIndicator(null);
+    }, 1200);
+  };
+
   const adjustDetailContentFontSize = (delta) => {
-    setDetailContentFontSize((current) =>
-      clamp(current + delta, DETAIL_CONTENT_FONT_MIN, DETAIL_CONTENT_FONT_MAX)
+    const next = clamp(
+      detailContentFontSizeRef.current + delta,
+      DETAIL_CONTENT_FONT_MIN,
+      DETAIL_CONTENT_FONT_MAX
     );
+    detailContentFontSizeRef.current = next;
+    setDetailContentFontSize(next);
+    showFontSizeIndicator(next);
   };
 
   useEffect(() => {
@@ -594,6 +619,11 @@ function DetailPaneBody({
       className="detail-pane"
       style={{ "--detail-content-font-size": `${detailContentFontSize}px` }}
     >
+      {fontSizeIndicator !== null && (
+        <div className="detail-font-size-indicator" aria-live="polite">
+          文字サイズ {fontSizeIndicator}px
+        </div>
+      )}
       {/* === detail-header: チェック + タイトル + 右上アクション === */}
       <div className="detail-header">
         <input type="checkbox" className="d-check" checked={completed} onChange={handleComplete} disabled={isInvalid} />
