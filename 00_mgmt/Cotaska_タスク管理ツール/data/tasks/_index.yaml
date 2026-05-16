@@ -1726,14 +1726,14 @@ tasks:
   - id: T-0176
     title: 仕様変更：設定画面の未実装項目を実装する
     list: 仕様変更
-    status: todo
+    status: done
     priority: normal
     sort_order: 176
     tags:
       - 設定画面
       - 仕様変更
     due_date: null
-    updated_at: '2026-05-15T14:11:08.476Z'
+    updated_at: '2026-05-16T11:58:27+09:00'
   - id: T-0177
     title: 設計反映：設定保存モデルと設定画面未実装項目
     list: 仕様変更
@@ -1748,98 +1748,389 @@ tasks:
   - id: T-0178
     title: 実装：設定値の保存基盤と IPC
     list: 仕様変更
-    status: todo
+    status: done
     priority: high
     sort_order: 178
     tags:
       - 設定画面
       - 実装
       - IPC
+      - CHG-062
     due_date: null
-    updated_at: '2026-05-15T23:15:00+09:00'
+    updated_at: '2026-05-16T11:58:27+09:00'
   - id: T-0179
     title: 実装：表示名設定の保存とアプリ表示反映
     list: 仕様変更
-    status: todo
+    status: done
     priority: normal
     sort_order: 179
     tags:
       - 設定画面
       - 実装
+      - CHG-063
     due_date: null
-    updated_at: '2026-05-15T23:15:00+09:00'
+    updated_at: '2026-05-16T11:58:27+09:00'
   - id: T-0180
     title: 実装：外部エディタ設定とタスクファイル起動
     list: 仕様変更
-    status: todo
+    status: done
     priority: high
     sort_order: 180
     tags:
       - 設定画面
       - 実装
       - 外部エディタ
+      - CHG-064
     due_date: null
-    updated_at: '2026-05-15T23:15:00+09:00'
+    updated_at: '2026-05-16T11:58:27+09:00'
   - id: T-0181
     title: 実装：通知時間設定を通知判定へ反映
     list: 仕様変更
-    status: todo
+    status: done
     priority: normal
     sort_order: 181
     tags:
       - 設定画面
       - 実装
       - 通知
+      - CHG-065
     due_date: null
-    updated_at: '2026-05-15T23:15:00+09:00'
+    updated_at: '2026-05-16T11:58:27+09:00'
   - id: T-0182
     title: 実装：文字サイズ設定をタスク詳細へ反映
     list: 仕様変更
-    status: todo
+    status: done
     priority: normal
     sort_order: 182
     tags:
       - 設定画面
       - 実装
       - 文字サイズ
+      - CHG-066
     due_date: null
-    updated_at: '2026-05-15T23:15:00+09:00'
+    updated_at: '2026-05-16T11:58:27+09:00'
   - id: T-0183
     title: 実装：アプリ情報の更新確認と手動ダウンロード案内
     list: 仕様変更
-    status: todo
+    status: done
     priority: normal
     sort_order: 183
     tags:
       - 設定画面
       - 実装
       - アプリ情報
+      - CHG-067
     due_date: null
-    updated_at: '2026-05-15T23:15:00+09:00'
+    updated_at: '2026-05-16T11:58:27+09:00'
   - id: T-0184
     title: 実装：バックアップ画面の初期機能
     list: 仕様変更
-    status: todo
+    status: done
     priority: normal
     sort_order: 184
     tags:
       - 設定画面
       - 実装
       - バックアップ
+      - CHG-068
     due_date: null
-    updated_at: '2026-05-15T23:15:00+09:00'
+    updated_at: '2026-05-16T11:58:27+09:00'
   - id: T-0185
     title: 確認：設定画面未実装項目のユーザー確認
     list: 仕様変更
-    status: todo
+    status: done
     priority: normal
     sort_order: 185
     tags:
       - 設定画面
       - ユーザー確認
     due_date: null
-    updated_at: '2026-05-15T23:15:00+09:00'
+    updated_at: '2026-05-16T11:58:27+09:00'
+  - id: T-0186
+    title: CHG-062-01 設計反映：settings.yaml 設定保存基盤
+    list: 仕様変更
+    status: done
+    priority: high
+    sort_order: 186
+    tags:
+      - 設定画面
+      - 設計
+      - CHG-062
+      - settings.yaml
+    due_date: null
+    updated_at: '2026-05-16T10:25:51+09:00'
+  - id: T-0187
+    title: CHG-062-02 実装：settings.yaml 保存基盤と IPC
+    list: 仕様変更
+    status: done
+    priority: high
+    sort_order: 187
+    tags:
+      - 設定画面
+      - 実装
+      - IPC
+      - CHG-062
+      - settings.yaml
+    due_date: null
+    updated_at: '2026-05-16T10:25:51+09:00'
+  - id: T-0188
+    title: CHG-062-03 確認：settings.yaml 設定保存基盤
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 188
+    tags:
+      - 設定画面
+      - ユーザー確認
+      - CHG-062
+      - settings.yaml
+    due_date: null
+    updated_at: '2026-05-16T11:58:27+09:00'
+  - id: T-0189
+    title: CHG-063-01 設計反映：表示名設定の保存と反映
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 189
+    tags:
+      - 設定画面
+      - 設計
+      - CHG-063
+      - 表示名
+    due_date: null
+    updated_at: '2026-05-16T10:19:54+09:00'
+  - id: T-0190
+    title: CHG-063-02 実装：表示名設定の保存と反映
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 190
+    tags:
+      - 設定画面
+      - 実装
+      - CHG-063
+      - 表示名
+    due_date: null
+    updated_at: '2026-05-16T10:25:51+09:00'
+  - id: T-0191
+    title: CHG-063-03 確認：表示名設定の保存と反映
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 191
+    tags:
+      - 設定画面
+      - ユーザー確認
+      - CHG-063
+      - 表示名
+    due_date: null
+    updated_at: '2026-05-16T11:58:27+09:00'
+  - id: T-0192
+    title: CHG-064-01 設計反映：外部エディタ設定と起動処理
+    list: 仕様変更
+    status: done
+    priority: high
+    sort_order: 192
+    tags:
+      - 設定画面
+      - 設計
+      - CHG-064
+      - 外部エディタ
+    due_date: null
+    updated_at: '2026-05-16T10:19:54+09:00'
+  - id: T-0193
+    title: CHG-064-02 実装：外部エディタ設定と起動処理
+    list: 仕様変更
+    status: done
+    priority: high
+    sort_order: 193
+    tags:
+      - 設定画面
+      - 実装
+      - CHG-064
+      - 外部エディタ
+    due_date: null
+    updated_at: '2026-05-16T10:25:51+09:00'
+  - id: T-0194
+    title: CHG-064-03 確認：外部エディタ設定と起動処理
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 194
+    tags:
+      - 設定画面
+      - ユーザー確認
+      - CHG-064
+      - 外部エディタ
+    due_date: null
+    updated_at: '2026-05-16T11:58:27+09:00'
+  - id: T-0195
+    title: CHG-065-01 設計反映：通知時間設定と通知判定
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 195
+    tags:
+      - 設定画面
+      - 設計
+      - CHG-065
+      - 通知
+    due_date: null
+    updated_at: '2026-05-16T10:19:54+09:00'
+  - id: T-0196
+    title: CHG-065-02 実装：通知時間設定と通知判定
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 196
+    tags:
+      - 設定画面
+      - 実装
+      - CHG-065
+      - 通知
+    due_date: null
+    updated_at: '2026-05-16T10:25:51+09:00'
+  - id: T-0197
+    title: CHG-065-03 確認：通知時間設定と通知判定
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 197
+    tags:
+      - 設定画面
+      - ユーザー確認
+      - CHG-065
+      - 通知
+    due_date: null
+    updated_at: '2026-05-16T11:58:27+09:00'
+  - id: T-0207
+    title: 不具合：時刻入力が３０分単位しかできない
+    list: 不具合修正
+    status: done
+    priority: normal
+    sort_order: 197
+    tags:
+      - BUG-20260516-01
+    due_date: null
+    updated_at: '2026-05-16T12:00:33+09:00'
+  - id: T-0198
+    title: CHG-066-01 設計反映：文字サイズ設定と詳細表示
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 198
+    tags:
+      - 設定画面
+      - 設計
+      - CHG-066
+      - 文字サイズ
+    due_date: null
+    updated_at: '2026-05-16T10:19:54+09:00'
+  - id: T-0199
+    title: CHG-066-02 実装：文字サイズ設定と詳細表示
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 199
+    tags:
+      - 設定画面
+      - 実装
+      - CHG-066
+      - 文字サイズ
+    due_date: null
+    updated_at: '2026-05-16T10:25:51+09:00'
+  - id: T-0200
+    title: CHG-066-03 確認：文字サイズ設定と詳細表示
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 200
+    tags:
+      - 設定画面
+      - ユーザー確認
+      - CHG-066
+      - 文字サイズ
+    due_date: null
+    updated_at: '2026-05-16T11:58:27+09:00'
+  - id: T-0201
+    title: CHG-067-01 設計反映：更新確認と手動ダウンロード案内
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 201
+    tags:
+      - 設定画面
+      - 設計
+      - CHG-067
+      - アプリ情報
+    due_date: '2026-05-16'
+    updated_at: '2026-05-16T10:19:47+09:00'
+  - id: T-0202
+    title: CHG-067-02 実装：更新確認と手動ダウンロード案内
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 202
+    tags:
+      - 設定画面
+      - 実装
+      - CHG-067
+      - アプリ情報
+    due_date: null
+    updated_at: '2026-05-16T10:25:51+09:00'
+  - id: T-0203
+    title: CHG-067-03 確認：更新確認と手動ダウンロード案内
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 203
+    tags:
+      - 設定画面
+      - ユーザー確認
+      - CHG-067
+      - アプリ情報
+    due_date: null
+    updated_at: '2026-05-16T11:58:27+09:00'
+  - id: T-0204
+    title: CHG-068-01 設計反映：バックアップ画面初期機能
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 204
+    tags:
+      - 設定画面
+      - 設計
+      - CHG-068
+      - バックアップ
+    due_date: '2026-05-16'
+    updated_at: '2026-05-16T10:19:47+09:00'
+  - id: T-0205
+    title: CHG-068-02 実装：バックアップ画面初期機能
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 205
+    tags:
+      - 設定画面
+      - 実装
+      - CHG-068
+      - バックアップ
+    due_date: null
+    updated_at: '2026-05-16T10:25:51+09:00'
+  - id: T-0206
+    title: CHG-068-03 確認：バックアップ画面初期機能
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 206
+    tags:
+      - 設定画面
+      - ユーザー確認
+      - CHG-068
+      - バックアップ
+    due_date: null
+    updated_at: '2026-05-16T11:58:27+09:00'
 task_file_roots:
   - .
-next_task_id: 186
-last_updated: '2026-05-15T14:16:11.158Z'
+next_task_id: 208
+last_updated: '2026-05-16T02:58:55.886Z'

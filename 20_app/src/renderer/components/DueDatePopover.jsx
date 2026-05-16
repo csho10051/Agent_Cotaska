@@ -77,7 +77,7 @@ function parseSummaryInput(inputValue) {
     if (!timeMatch) return { valid: false };
     const hour = Number(timeMatch[1]);
     const minute = Number(timeMatch[2]);
-    if (hour < 0 || hour > 23 || (minute !== 0 && minute !== 30)) return { valid: false };
+    if (hour < 0 || hour > 23 || minute < 0 || minute > 59) return { valid: false };
   }
 
   return {
@@ -210,7 +210,7 @@ function DueDatePopover({ value, onChange, onClear, onClose, className = "", pla
 
     const parsed = parseSummaryInput(nextValue);
     if (!parsed.valid) {
-      setInputError("YYYY-MM-DD または YYYY-MM-DD HH:MM で入力してください。時刻は30分単位です。");
+      setInputError("YYYY-MM-DD または YYYY-MM-DD HH:MM で入力してください。");
       return;
     }
 
@@ -235,7 +235,7 @@ function DueDatePopover({ value, onChange, onClear, onClose, className = "", pla
   const handleConfirm = () => {
     const parsed = parseSummaryInput(inputValue);
     if (!parsed.valid) {
-      setInputError("YYYY-MM-DD または YYYY-MM-DD HH:MM で入力してください。時刻は30分単位です。");
+      setInputError("YYYY-MM-DD または YYYY-MM-DD HH:MM で入力してください。");
       return;
     }
     onChange?.(toDueValue(selectedDatePart, timeEnabled ? timePart : ""));
