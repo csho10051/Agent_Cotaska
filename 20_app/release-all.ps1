@@ -23,6 +23,7 @@ $nodeDir     = Resolve-Path (Join-Path $scriptDir "..\..\v22.14.0")
 $launcherDir = Join-Path $scriptDir "setup\launcher"
 $distRoot    = Join-Path $scriptDir "release\Cotaska-Portable"
 $distZip     = Join-Path $scriptDir "release\Cotaska-Portable.zip"
+$distZipSha256 = "$distZip.sha256"
 $legacyDistRoot = Join-Path $scriptDir "release\Cotaska-dist"
 $legacyDistZip = Join-Path $scriptDir "release\Cotaska-dist.zip"
 $distCoreExe = Join-Path $distRoot "_app\CotaskaCore.exe"
@@ -367,6 +368,9 @@ if ($allOk) {
     if (Test-Path -LiteralPath $distZip) {
         Remove-Item -LiteralPath $distZip -Force
     }
+    if (Test-Path -LiteralPath $distZipSha256) {
+        Remove-Item -LiteralPath $distZipSha256 -Force
+    }
     Restore-CoreExeIfMissing
     if (-not (Test-Path -LiteralPath $distCoreExe)) {
         Write-Host "[FAILED] CotaskaCore.exe missing before zip creation" -ForegroundColor Red
@@ -419,6 +423,9 @@ if ($allOk) {
     }
     $zipSizeMB = [math]::Round((Get-Item -LiteralPath $distZip).Length / 1MB, 1)
     Write-Host "  OK: Release zip created -> $distZip ($zipSizeMB MB)" -ForegroundColor Green
+    $zipHash = (Get-FileHash -LiteralPath $distZip -Algorithm SHA256).Hash.ToLowerInvariant()
+    Set-Content -LiteralPath $distZipSha256 -Value "$zipHash  Cotaska-Portable.zip" -Encoding ASCII
+    Write-Host "  OK: Release zip SHA-256 created -> $distZipSha256" -ForegroundColor Green
 
     # -------------------------------------------------------
     # ステップ 7: GitHub Releases 添付用 NSIS インストーラ作成

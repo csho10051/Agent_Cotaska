@@ -16,6 +16,7 @@ import {
   FIXED_VIEWS,
   localDateString,
   mapFileTask,
+  normalizeProgressStatusValue,
   sortByTaskOrder,
   sortDisplayTasks,
   taskMatchesSearch,

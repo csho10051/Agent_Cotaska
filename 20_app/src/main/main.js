@@ -4,6 +4,7 @@ const path = require("path");
 const crypto = require("crypto");
 const { spawn } = require("child_process");
 const fs = require("fs");
+const AdmZip = require("adm-zip");
 const taskService = require("./taskService");
 const listService = require("./listService");
 const watcher = require("./watcher");
@@ -24,6 +25,13 @@ let updaterState = {
   downloaded: false,
   progress: null,
   version: null,
+  releaseUrl: null,
+  assetName: null,
+  assetUrl: null,
+  assetSize: null,
+  checksumAssetUrl: null,
+  downloadPath: null,
+  checksum: null,
 };
 const APP_DISPLAY_NAME = "CotaskaCore";
 const APP_USER_MODEL_ID_BASE = "com.cotaska.app";
@@ -56,6 +64,20 @@ function getRuntimeRootPath() {
     return path.dirname(process.execPath);
   }
   return path.resolve(__dirname, "../..");
+}
+
+function getPortableRootPath() {
+  const execDir = path.dirname(process.execPath);
+  if (path.basename(execDir).toLowerCase() === "_app") {
+    return path.dirname(execDir);
+  }
+  return execDir;
+}
+
+function isCotaskaPortableRuntime() {
+  if (!app.isPackaged) return false;
+  if (process.env.PORTABLE_EXECUTABLE_DIR || process.env.PORTABLE_EXECUTABLE_FILE) return true;
+  return path.basename(path.dirname(process.execPath)).toLowerCase() === "_app";
 }
 
 function getDefaultBackupDir() {
@@ -112,6 +134,9 @@ function getAutoUpdateUnsupportedReason() {
   if (!app.isPackaged) {
     return "開発実行中のため、自動更新は利用できません。";
   }
+  if (isCotaskaPortableRuntime()) {
+    return null;
+  }
   if (process.env.PORTABLE_EXECUTABLE_DIR || process.env.PORTABLE_EXECUTABLE_FILE) {
     return "portable版では自動更新は利用できません。インストール版を使用してください。";
   }
@@ -123,6 +148,399 @@ function getAutoUpdateUnsupportedReason() {
     return "自動更新の設定ファイル app-update.yml が見つかりません。インストール版で再起動してください。";
   }
   return null;
+}
+
+function getUpdateSettings() {
+  return settingsService.getSettings().settings.update || {};
+}
+
+function findReleaseAsset(release, assetName) {
+  const assets = Array.isArray(release?.assets) ? release.assets : [];
+  return assets.find((asset) => String(asset.name || "").toLowerCase() === assetName.toLowerCase()) || null;
+}
+
+function getPortableUpdateWorkDir(version) {
+  const safeVersion = normalizeVersion(version || "unknown").replace(/[^0-9A-Za-z._-]/g, "_") || "unknown";
+  return path.join(app.getPath("temp"), "Cotaska-updates", safeVersion);
+}
+
+function ensureDir(dirPath) {
+  fs.mkdirSync(dirPath, { recursive: true });
+}
+
+function parseSha256Text(text) {
+  const match = String(text || "").match(/[a-fA-F0-9]{64}/);
+  return match ? match[0].toLowerCase() : null;
+}
+
+function sha256File(filePath) {
+  const hash = crypto.createHash("sha256");
+  const data = fs.readFileSync(filePath);
+  hash.update(data);
+  return hash.digest("hex");
+}
+
+async function fetchJson(url) {
+  const response = await fetch(url, {
+    headers: {
+      Accept: "application/vnd.github+json, application/json",
+      "User-Agent": "Cotaska",
+    },
+  });
+  if (!response.ok) {
+    throw new Error(`GitHub Releases API の取得に失敗しました。HTTP ${response.status}`);
+  }
+  return response.json();
+}
+
+async function fetchText(url) {
+  const response = await fetch(url, {
+    headers: {
+      Accept: "application/octet-stream, text/plain, */*",
+      "User-Agent": "Cotaska",
+    },
+  });
+  if (!response.ok) {
+    throw new Error(`チェックサムの取得に失敗しました。HTTP ${response.status}`);
+  }
+  return response.text();
+}
+
+async function downloadFile(url, destinationPath, expectedSize = null) {
+  const response = await fetch(url, {
+    headers: {
+      Accept: "application/octet-stream",
+      "User-Agent": "Cotaska",
+    },
+  });
+  if (!response.ok) {
+    throw new Error(`更新ファイルのダウンロードに失敗しました。HTTP ${response.status}`);
+  }
+
+  const total = Number(response.headers.get("content-length") || expectedSize || 0);
+  const chunks = [];
+  let transferred = 0;
+  const reader = response.body?.getReader?.();
+  if (!reader) {
+    const buffer = Buffer.from(await response.arrayBuffer());
+    fs.writeFileSync(destinationPath, buffer);
+    return { transferred: buffer.length, total: buffer.length };
+  }
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    const chunk = Buffer.from(value);
+    chunks.push(chunk);
+    transferred += chunk.length;
+    publishUpdaterState({
+      status: "downloading",
+      message: `更新ファイルをダウンロードしています... ${total ? Math.round((transferred / total) * 100) : ""}%`,
+      progress: {
+        percent: total ? (transferred / total) * 100 : 0,
+        transferred,
+        total,
+      },
+    });
+  }
+  fs.writeFileSync(destinationPath, Buffer.concat(chunks));
+  return { transferred, total };
+}
+
+function verifyPortableZip(zipPath) {
+  const zip = new AdmZip(zipPath);
+  const entries = zip.getEntries().map((entry) => entry.entryName.replace(/\\/g, "/"));
+  const required = [
+    "Cotaska-Portable/Cotaska.exe",
+    "Cotaska-Portable/_app/CotaskaCore.exe",
+    "Cotaska-Portable/_app/resources/app.asar",
+  ];
+  const missing = required.filter((entry) => !entries.includes(entry));
+  if (missing.length > 0) {
+    throw new Error(`更新zipの構成が不正です。不足: ${missing.join(", ")}`);
+  }
+}
+
+function escapePowerShellSingleQuoted(value) {
+  return String(value || "").replace(/'/g, "''");
+}
+
+function createPortableUpdaterScript({ zipPath, portableRoot, version }) {
+  const workDir = getPortableUpdateWorkDir(version);
+  ensureDir(workDir);
+  const scriptPath = path.join(workDir, "apply-portable-update.ps1");
+  const q = (value) => `'${escapePowerShellSingleQuoted(value)}'`;
+  const script = `
+$ErrorActionPreference = "Stop"
+$ZipPath = ${q(zipPath)}
+$PortableRoot = ${q(portableRoot)}
+$Version = ${q(version || "")}
+$Timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
+$LogDir = Join-Path $PortableRoot "logs"
+$BackupDir = Join-Path $PortableRoot "backup"
+$ExtractRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("Cotaska-update-extract-" + $Timestamp)
+$LogPath = Join-Path $LogDir ("portable-update-" + $Timestamp + ".log")
+
+function Write-UpdateLog {
+    param([string]$Message)
+    New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
+    $line = "[" + (Get-Date -Format "yyyy-MM-dd HH:mm:ss") + "] " + $Message
+    Add-Content -LiteralPath $LogPath -Value $line -Encoding UTF8
+}
+
+function Copy-IfExists {
+    param([string]$Source, [string]$Destination)
+    if (Test-Path -LiteralPath $Source) {
+        Copy-Item -LiteralPath $Source -Destination $Destination -Recurse -Force
+    }
+}
+
+function Restore-FromBackup {
+    param([string]$BackupPath)
+    if (-not (Test-Path -LiteralPath $BackupPath)) { return }
+    Write-UpdateLog ("Restoring from backup: " + $BackupPath)
+    Copy-IfExists (Join-Path $BackupPath "Cotaska.exe") (Join-Path $PortableRoot "Cotaska.exe")
+    Copy-IfExists (Join-Path $BackupPath "_app") (Join-Path $PortableRoot "_app")
+    Copy-IfExists (Join-Path $BackupPath "tools") (Join-Path $PortableRoot "tools")
+    Get-ChildItem -LiteralPath $BackupPath -Filter "Cotaska_AI*.md" -File -ErrorAction SilentlyContinue | ForEach-Object {
+        Copy-Item -LiteralPath $_.FullName -Destination (Join-Path $PortableRoot $_.Name) -Force
+    }
+    Copy-IfExists (Join-Path $BackupPath "README.md") (Join-Path $PortableRoot "README.md")
+}
+
+try {
+    Write-UpdateLog ("Portable update started. Version=" + $Version)
+    New-Item -ItemType Directory -Force -Path $BackupDir | Out-Null
+
+    for ($i = 0; $i -lt 60; $i++) {
+        $running = Get-Process -Name "Cotaska","CotaskaCore" -ErrorAction SilentlyContinue
+        if (-not $running) { break }
+        Start-Sleep -Seconds 1
+    }
+    $running = Get-Process -Name "Cotaska","CotaskaCore" -ErrorAction SilentlyContinue
+    if ($running) {
+        throw "Cotaska process is still running. Close Cotaska and retry."
+    }
+
+    if (Test-Path -LiteralPath $ExtractRoot) {
+        Remove-Item -LiteralPath $ExtractRoot -Recurse -Force
+    }
+    New-Item -ItemType Directory -Force -Path $ExtractRoot | Out-Null
+    Expand-Archive -LiteralPath $ZipPath -DestinationPath $ExtractRoot -Force
+
+    $SourceRoot = Join-Path $ExtractRoot "Cotaska-Portable"
+    if (-not (Test-Path -LiteralPath $SourceRoot)) {
+        throw "Cotaska-Portable root was not found in update zip."
+    }
+    foreach ($required in @("Cotaska.exe", "_app", "_app\\resources\\app.asar")) {
+        if (-not (Test-Path -LiteralPath (Join-Path $SourceRoot $required))) {
+            throw ("Required update item was not found: " + $required)
+        }
+    }
+
+    $BackupPath = Join-Path $BackupDir ("portable-update-before-" + $Timestamp)
+    New-Item -ItemType Directory -Force -Path $BackupPath | Out-Null
+    Write-UpdateLog ("Creating backup: " + $BackupPath)
+    Copy-IfExists (Join-Path $PortableRoot "Cotaska.exe") (Join-Path $BackupPath "Cotaska.exe")
+    Copy-IfExists (Join-Path $PortableRoot "_app") (Join-Path $BackupPath "_app")
+    Copy-IfExists (Join-Path $PortableRoot "tools") (Join-Path $BackupPath "tools")
+    Get-ChildItem -LiteralPath $PortableRoot -Filter "Cotaska_AI*.md" -File -ErrorAction SilentlyContinue | ForEach-Object {
+        Copy-Item -LiteralPath $_.FullName -Destination (Join-Path $BackupPath $_.Name) -Force
+    }
+    Copy-IfExists (Join-Path $PortableRoot "README.md") (Join-Path $BackupPath "README.md")
+
+    Write-UpdateLog "Replacing application files"
+    Copy-Item -LiteralPath (Join-Path $SourceRoot "Cotaska.exe") -Destination (Join-Path $PortableRoot "Cotaska.exe") -Force
+    if (Test-Path -LiteralPath (Join-Path $PortableRoot "_app")) {
+        Remove-Item -LiteralPath (Join-Path $PortableRoot "_app") -Recurse -Force
+    }
+    Copy-Item -LiteralPath (Join-Path $SourceRoot "_app") -Destination (Join-Path $PortableRoot "_app") -Recurse -Force
+    if (Test-Path -LiteralPath (Join-Path $SourceRoot "tools")) {
+        if (Test-Path -LiteralPath (Join-Path $PortableRoot "tools")) {
+            Remove-Item -LiteralPath (Join-Path $PortableRoot "tools") -Recurse -Force
+        }
+        Copy-Item -LiteralPath (Join-Path $SourceRoot "tools") -Destination (Join-Path $PortableRoot "tools") -Recurse -Force
+    }
+    Get-ChildItem -LiteralPath $SourceRoot -Filter "Cotaska_AI*.md" -File -ErrorAction SilentlyContinue | ForEach-Object {
+        Copy-Item -LiteralPath $_.FullName -Destination (Join-Path $PortableRoot $_.Name) -Force
+    }
+    Copy-IfExists (Join-Path $SourceRoot "README.md") (Join-Path $PortableRoot "README.md")
+
+    Write-UpdateLog "Portable update completed"
+    Start-Process -FilePath (Join-Path $PortableRoot "Cotaska.exe") -WorkingDirectory $PortableRoot
+}
+catch {
+    Write-UpdateLog ("Portable update failed: " + $_.Exception.Message)
+    if ($BackupPath) {
+        try { Restore-FromBackup -BackupPath $BackupPath } catch { Write-UpdateLog ("Restore failed: " + $_.Exception.Message) }
+    }
+    throw
+}
+finally {
+    if (Test-Path -LiteralPath $ExtractRoot) {
+        Remove-Item -LiteralPath $ExtractRoot -Recurse -Force -ErrorAction SilentlyContinue
+    }
+}
+`;
+  fs.writeFileSync(scriptPath, script.trimStart(), "utf8");
+  return scriptPath;
+}
+
+async function checkPortableUpdate() {
+  const settings = getUpdateSettings();
+  const latestVersionUrl = String(settings.latestVersionUrl || "").trim();
+  if (!latestVersionUrl) {
+    return publishUpdaterState({
+      status: "error",
+      message: "更新確認URLが未設定です。",
+      hasUpdate: false,
+      downloaded: false,
+      progress: null,
+    });
+  }
+
+  try {
+    publishUpdaterState({
+      status: "checking",
+      message: "GitHub Releases の Portable版更新を確認しています...",
+      progress: null,
+      downloaded: false,
+    });
+    const release = await fetchJson(latestVersionUrl);
+    const latestVersion = normalizeVersion(release.tag_name || release.name || "");
+    if (!latestVersion) {
+      throw new Error("最新リリースのバージョンを取得できませんでした。");
+    }
+    const asset = findReleaseAsset(release, "Cotaska-Portable.zip");
+    if (!asset?.browser_download_url) {
+      throw new Error("最新リリースに Cotaska-Portable.zip が見つかりません。");
+    }
+    const checksumAsset = findReleaseAsset(release, "Cotaska-Portable.zip.sha256");
+    const hasUpdate = compareVersions(latestVersion, packageInfo.version) > 0;
+    return publishUpdaterState({
+      status: hasUpdate ? "available" : "not-available",
+      message: hasUpdate
+        ? `新しいPortable版 ${latestVersion} があります。`
+        : "現在のバージョンは最新です。",
+      hasUpdate,
+      downloaded: false,
+      progress: null,
+      version: latestVersion,
+      releaseUrl: release.html_url || settings.downloadPageUrl || null,
+      assetName: asset.name,
+      assetUrl: asset.browser_download_url,
+      assetSize: asset.size || null,
+      checksumAssetUrl: checksumAsset?.browser_download_url || null,
+      downloadPath: null,
+      checksum: null,
+    });
+  } catch (err) {
+    logger.warn("portable updates:check failed", { error: err.message });
+    return publishUpdaterState({
+      status: "error",
+      message: err.message || "Portable版の更新確認に失敗しました。",
+      hasUpdate: false,
+      downloaded: false,
+      progress: null,
+    });
+  }
+}
+
+async function downloadPortableUpdate() {
+  if (!updaterState.hasUpdate || !updaterState.assetUrl) {
+    return publishUpdaterState({
+      status: "not-available",
+      message: "ダウンロードできるPortable版更新はありません。",
+      progress: null,
+    });
+  }
+
+  try {
+    const workDir = getPortableUpdateWorkDir(updaterState.version);
+    ensureDir(workDir);
+    const zipPath = path.join(workDir, "Cotaska-Portable.zip");
+    if (fs.existsSync(zipPath)) {
+      fs.unlinkSync(zipPath);
+    }
+    publishUpdaterState({
+      status: "downloading",
+      message: "Portable版更新ファイルをダウンロードしています...",
+      downloaded: false,
+      progress: null,
+    });
+    await downloadFile(updaterState.assetUrl, zipPath, updaterState.assetSize);
+
+    let expectedSha = null;
+    if (updaterState.checksumAssetUrl) {
+      expectedSha = parseSha256Text(await fetchText(updaterState.checksumAssetUrl));
+      if (!expectedSha) {
+        throw new Error("Cotaska-Portable.zip.sha256 からSHA-256値を読み取れませんでした。");
+      }
+      const actualSha = sha256File(zipPath);
+      if (actualSha !== expectedSha) {
+        throw new Error("更新zipのSHA-256検証に失敗しました。");
+      }
+    } else if (updaterState.assetSize) {
+      const size = fs.statSync(zipPath).size;
+      if (size !== updaterState.assetSize) {
+        throw new Error(`更新zipのサイズ検証に失敗しました。expected=${updaterState.assetSize}, actual=${size}`);
+      }
+    }
+
+    verifyPortableZip(zipPath);
+    return publishUpdaterState({
+      status: "downloaded",
+      message: "Portable版更新ファイルの準備ができました。再起動して更新できます。",
+      downloaded: true,
+      progress: null,
+      downloadPath: zipPath,
+      checksum: expectedSha,
+    });
+  } catch (err) {
+    logger.warn("portable updates:download failed", { error: err.message });
+    return publishUpdaterState({
+      status: "error",
+      message: err.message || "Portable版更新ファイルのダウンロードに失敗しました。",
+      progress: null,
+      downloaded: false,
+    });
+  }
+}
+
+function installPortableUpdate() {
+  if (!updaterState.downloaded || !updaterState.downloadPath) {
+    return publishUpdaterState({
+      status: "available",
+      message: "更新を適用する前にPortable版更新ファイルをダウンロードしてください。",
+      hasUpdate: true,
+    });
+  }
+
+  const portableRoot = getPortableRootPath();
+  const scriptPath = createPortableUpdaterScript({
+    zipPath: updaterState.downloadPath,
+    portableRoot,
+    version: updaterState.version,
+  });
+  publishUpdaterState({
+    status: "installing",
+    message: "Cotaskaを終了してPortable版更新を適用します。",
+  });
+  const child = spawn("powershell.exe", [
+    "-NoProfile",
+    "-ExecutionPolicy",
+    "Bypass",
+    "-File",
+    scriptPath,
+  ], {
+    cwd: portableRoot,
+    detached: true,
+    stdio: "ignore",
+    windowsHide: true,
+  });
+  child.unref();
+  setTimeout(() => app.quit(), 500);
+  return updaterState;
 }
 
 function publishUpdaterState(patch) {
@@ -205,6 +623,9 @@ function setupAutoUpdater() {
 }
 
 async function checkAutoUpdate() {
+  if (isCotaskaPortableRuntime()) {
+    return checkPortableUpdate();
+  }
   const unsupportedReason = getAutoUpdateUnsupportedReason();
   if (unsupportedReason) {
     return publishUpdaterState({
@@ -230,6 +651,9 @@ async function checkAutoUpdate() {
 }
 
 async function downloadAutoUpdate() {
+  if (isCotaskaPortableRuntime()) {
+    return downloadPortableUpdate();
+  }
   const unsupportedReason = getAutoUpdateUnsupportedReason();
   if (unsupportedReason) {
     return publishUpdaterState({
@@ -262,6 +686,9 @@ async function downloadAutoUpdate() {
 }
 
 function installAutoUpdate() {
+  if (isCotaskaPortableRuntime()) {
+    return installPortableUpdate();
+  }
   if (!updaterState.downloaded) {
     return publishUpdaterState({
       status: "available",

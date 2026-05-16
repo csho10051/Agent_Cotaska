@@ -2466,7 +2466,70 @@ tasks:
       - portable
     due_date: '2026-05-16'
     updated_at: '2026-05-16T21:16:00+09:00'
+  - id: T-0236
+    title: 仕様変更：Portable版自動更新
+    list: 仕様変更
+    status: todo
+    priority: normal
+    sort_order: 236
+    tags:
+      - CHG-074
+      - 自動更新
+      - portable
+    due_date: '2026-05-16'
+    updated_at: '2026-05-16T13:11:58.687Z'
+  - id: T-0237
+    title: CHG-074-01 設計反映：Portable版自動更新
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 237
+    tags:
+      - CHG-074
+      - 設計
+      - 自動更新
+      - portable
+    due_date: '2026-05-16'
+    updated_at: '2026-05-16T22:20:00+09:00'
+  - id: T-0238
+    title: CHG-074-02 実装：Portable版自動更新
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 238
+    tags:
+      - CHG-074
+      - 実装
+      - 自動更新
+      - portable
+    due_date: '2026-05-16'
+    updated_at: '2026-05-16T22:25:00+09:00'
+  - id: T-0239
+    title: CHG-074-03 確認：Portable版自動更新
+    list: 仕様変更
+    status: todo
+    priority: normal
+    sort_order: 239
+    tags:
+      - CHG-074
+      - ユーザー確認
+      - 自動更新
+      - portable
+    due_date: '2026-05-16'
+    updated_at: '2026-05-16T21:40:00+09:00'
+  - id: T-0240
+    title: BUG-20260516-03 起動時に黒画面のままになる問題を修正
+    list: 不具合対応
+    status: done
+    priority: high
+    sort_order: 240
+    tags:
+      - BUG-20260516-03
+      - 起動
+      - renderer
+    due_date: '2026-05-16'
+    updated_at: '2026-05-16T22:05:00+09:00'
 task_file_roots:
   - .
-next_task_id: 236
-last_updated: '2026-05-16T10:29:52.056Z'
+next_task_id: 241
+last_updated: '2026-05-16T13:11:58.937Z'
