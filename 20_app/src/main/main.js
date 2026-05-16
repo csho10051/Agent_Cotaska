@@ -269,12 +269,20 @@ $LogDir = Join-Path $PortableRoot "logs"
 $BackupDir = Join-Path $PortableRoot "backup"
 $ExtractRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("Cotaska-update-extract-" + $Timestamp)
 $LogPath = Join-Path $LogDir ("portable-update-" + $Timestamp + ".log")
+$ScriptDir = Split-Path -Parent $PSCommandPath
+$WorkLogPath = Join-Path $ScriptDir ("portable-update-" + $Timestamp + ".log")
 
 function Write-UpdateLog {
     param([string]$Message)
-    New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
     $line = "[" + (Get-Date -Format "yyyy-MM-dd HH:mm:ss") + "] " + $Message
-    Add-Content -LiteralPath $LogPath -Value $line -Encoding UTF8
+    try {
+        New-Item -ItemType Directory -Force -Path $ScriptDir | Out-Null
+        Add-Content -LiteralPath $WorkLogPath -Value $line -Encoding UTF8
+    } catch {}
+    try {
+        New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
+        Add-Content -LiteralPath $LogPath -Value $line -Encoding UTF8
+    } catch {}
 }
 
 function Copy-IfExists {
@@ -282,6 +290,18 @@ function Copy-IfExists {
     if (Test-Path -LiteralPath $Source) {
         Copy-Item -LiteralPath $Source -Destination $Destination -Recurse -Force
     }
+}
+
+function Get-CotaskaUpdateProcesses {
+    $portableRootPrefix = $PortableRoot
+    if (-not $portableRootPrefix.EndsWith("\")) {
+        $portableRootPrefix = $portableRootPrefix + "\"
+    }
+    Get-CimInstance Win32_Process -Filter "Name = 'Cotaska.exe' OR Name = 'CotaskaCore.exe'" -ErrorAction SilentlyContinue |
+        Where-Object {
+            $_.ExecutablePath -and $_.ExecutablePath.StartsWith($portableRootPrefix, [System.StringComparison]::OrdinalIgnoreCase)
+        } |
+        Select-Object ProcessId, Name, ExecutablePath
 }
 
 function Restore-FromBackup {
@@ -299,16 +319,27 @@ function Restore-FromBackup {
 
 try {
     Write-UpdateLog ("Portable update started. Version=" + $Version)
+    Write-UpdateLog ("Portable root: " + $PortableRoot)
+    Write-UpdateLog ("Zip path: " + $ZipPath)
+    if (-not (Test-Path -LiteralPath $PortableRoot)) {
+        throw ("Portable root was not found: " + $PortableRoot)
+    }
+    if (-not (Test-Path -LiteralPath $ZipPath)) {
+        throw ("Update zip was not found: " + $ZipPath)
+    }
     New-Item -ItemType Directory -Force -Path $BackupDir | Out-Null
 
-    for ($i = 0; $i -lt 60; $i++) {
-        $running = Get-Process -Name "Cotaska","CotaskaCore" -ErrorAction SilentlyContinue
+    for ($i = 0; $i -lt 120; $i++) {
+        $running = @(Get-CotaskaUpdateProcesses)
         if (-not $running) { break }
+        if ($i -eq 0 -or $i % 10 -eq 0) {
+            Write-UpdateLog ("Waiting for Cotaska processes: " + (($running | ForEach-Object { $_.Name + "#" + $_.ProcessId }) -join ", "))
+        }
         Start-Sleep -Seconds 1
     }
-    $running = Get-Process -Name "Cotaska","CotaskaCore" -ErrorAction SilentlyContinue
+    $running = @(Get-CotaskaUpdateProcesses)
     if ($running) {
-        throw "Cotaska process is still running. Close Cotaska and retry."
+        throw ("Cotaska process is still running: " + (($running | ForEach-Object { $_.Name + "#" + $_.ProcessId }) -join ", "))
     }
 
     if (Test-Path -LiteralPath $ExtractRoot) {
@@ -357,6 +388,7 @@ try {
 
     Write-UpdateLog "Portable update completed"
     Start-Process -FilePath (Join-Path $PortableRoot "Cotaska.exe") -WorkingDirectory $PortableRoot
+    Write-UpdateLog "Cotaska restart requested"
 }
 catch {
     Write-UpdateLog ("Portable update failed: " + $_.Exception.Message)
@@ -371,7 +403,8 @@ finally {
     }
 }
 `;
-  fs.writeFileSync(scriptPath, script.trimStart(), "utf8");
+  // Windows PowerShell 5.1 treats UTF-8 without BOM as ANSI, which breaks Japanese paths.
+  fs.writeFileSync(scriptPath, `\uFEFF${script.trimStart()}`, "utf8");
   return scriptPath;
 }
 
@@ -511,6 +544,14 @@ function installPortableUpdate() {
     portableRoot,
     version: updaterState.version,
   });
+  const workLogDir = path.dirname(scriptPath);
+  appLogger.logInfo("Portable updater script created", {
+    scriptPath,
+    workLogDir,
+    portableRoot,
+    version: updaterState.version,
+    zipPath: updaterState.downloadPath,
+  });
   publishUpdaterState({
     status: "installing",
     message: "Cotaskaを終了してPortable版更新を適用します。",
@@ -526,6 +567,21 @@ function installPortableUpdate() {
     detached: true,
     stdio: "ignore",
     windowsHide: true,
+  });
+  appLogger.logInfo("Portable updater process started", {
+    pid: child.pid,
+    scriptPath,
+    portableRoot,
+  });
+  child.on("error", (err) => {
+    appLogger.logError("Portable updater process failed to start", err);
+  });
+  child.on("exit", (code, signal) => {
+    appLogger.logInfo("Portable updater process exited before app quit", {
+      code,
+      signal,
+      scriptPath,
+    });
   });
   child.unref();
   setTimeout(() => app.quit(), 500);
@@ -799,6 +855,18 @@ function startVite() {
 
 // ── IPC ハンドラ登録 ──────────────────────────────────────────
 ipcMain.handle("ping", () => "pong");
+
+ipcMain.on("diagnostics:rendererStartup", (_event, payload = {}) => {
+  const metric = {
+    name: String(payload.name || "unknown").slice(0, 80),
+    elapsedMs: Number.isFinite(payload.elapsedMs) ? Math.round(payload.elapsedMs) : null,
+    sinceModuleLoadedMs: Number.isFinite(payload.sinceModuleLoadedMs)
+      ? Math.round(payload.sinceModuleLoadedMs)
+      : null,
+    details: payload.details && typeof payload.details === "object" ? payload.details : {},
+  };
+  appLogger.logWarning("Renderer startup metric", metric);
+});
 
 ipcMain.handle("app:getInfo", () => getAppInfo());
 

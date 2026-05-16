@@ -254,3 +254,9 @@
 - Cotaska の配布・更新導線は `Cotaska-Portable.zip` と `.sha256` のみに一本化する。
 - NSISインストーラ、`.blockmap`、`latest.yml`、`electron-updater` 経路は生成・アップロード・実行対象から外す。
 - `release-all.ps1` は Portable フォルダと Portable zip / SHA-256 生成までをリリース完了条件とする。
+
+## 2026-05-16 BUG-20260516-04 Portable更新スクリプトの文字コード
+
+- Portable updater script は Windows PowerShell 5.1 で日本語パスを壊さないよう、UTF-8 BOM付きで生成する。
+- updater ログは Portable 側だけでなく temp 側にも残し、ログ出力先パス自体の問題を追跡できるようにする。
+- 更新前のプロセス待機は同じ PortableRoot 配下の Cotaska プロセスに限定し、別環境の Cotaska 起動に影響されないようにする。

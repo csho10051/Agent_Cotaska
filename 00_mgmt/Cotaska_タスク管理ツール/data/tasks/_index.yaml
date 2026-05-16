@@ -2505,6 +2505,18 @@ tasks:
       - portable
     due_date: '2026-05-16'
     updated_at: '2026-05-16T22:25:00+09:00'
+  - id: T-0248
+    title: 不具合：バージョンアップされない
+    list: 不具合修正
+    status: doing
+    priority: normal
+    sort_order: 238
+    tags:
+      - BUG-20260516-04
+      - 自動更新
+      - portable
+    due_date: '2026-05-16'
+    updated_at: '2026-05-16T23:28:11+09:00'
   - id: T-0239
     title: CHG-074-03 確認：Portable版自動更新
     list: 仕様変更
@@ -2624,5 +2636,5 @@ tasks:
     updated_at: '2026-05-16T23:07:38+09:00'
 task_file_roots:
   - .
-next_task_id: 248
-last_updated: '2026-05-16T14:12:06.717Z'
+next_task_id: 249
+last_updated: '2026-05-16T14:28:39.560Z'

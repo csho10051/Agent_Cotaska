@@ -23,6 +23,23 @@ import {
   toFileTaskPayload,
 } from "./lib/taskViewModel";
 
+const rendererStartupModuleLoadedAt = performance.now();
+const emitRendererStartupMetric = (name, details = {}) => {
+  const now = performance.now();
+  const payload = {
+    name,
+    elapsedMs: now,
+    sinceModuleLoadedMs: now - rendererStartupModuleLoadedAt,
+    details,
+  };
+  console.log("[StartupMetric]", payload);
+  window.cotaskaAPI?.diagnostics?.logRendererStartup?.(payload);
+};
+
+emitRendererStartupMetric("js-module-loaded", {
+  href: window.location.href,
+});
+
 const TAG_NAV_PREFIX = "tag:";
 const DETAIL_PANE_MIN_WIDTH = 320;
 const DETAIL_PANE_MAX_WIDTH = 720;
@@ -47,6 +64,7 @@ function App() {
   const [listSort, setListSort] = useState({ key: "order", direction: "asc" });
   const [tags, setTags] = useState([]);
   const [trashConfirm, setTrashConfirm] = useState(null);
+  const initialTasksLoadRef = useRef(true);
 
   // CHG-032: ペイン幅リサイズ
   const [navWidth,    setNavWidth]    = useState(240);
@@ -57,6 +75,13 @@ function App() {
   });
   const [detailPaneExpanded, setDetailPaneExpanded] = useState(false);
   const resizeDragRef = useRef(null);
+
+  useEffect(() => {
+    emitRendererStartupMetric("app-first-effect");
+    requestAnimationFrame(() => {
+      emitRendererStartupMetric("first-render-frame");
+    });
+  }, []);
 
   // T-005-02: DB からタスク一覧を読み込む
   // T-031: tasks:changed イベントリスナー登録（リアルタイム同期）
@@ -102,12 +127,36 @@ function App() {
   }, [selectedTask]);
 
   const loadTasks = useCallback(async () => {
+    const isInitialLoad = initialTasksLoadRef.current;
+    const loadStartedAt = performance.now();
+    if (isInitialLoad) {
+      emitRendererStartupMetric("initial-loadTasks-start");
+    }
     setLoading(true);
     try {
+      const getAllStartedAt = performance.now();
       let rows   = await window.cotaskaAPI?.tasks?.getAll() ?? [];
+      const getAllDurationMs = performance.now() - getAllStartedAt;
+      if (isInitialLoad) {
+        emitRendererStartupMetric("initial-tasks-getAll-done", {
+          durationMs: Math.round(getAllDurationMs),
+          rowCount: rows.length,
+        });
+      }
+
+      const mapStartedAt = performance.now();
       let mapped = enrichTaskHierarchy(rows.map(mapFileTask));
+      const mapDurationMs = performance.now() - mapStartedAt;
+      if (isInitialLoad) {
+        emitRendererStartupMetric("initial-tasks-map-done", {
+          durationMs: Math.round(mapDurationMs),
+          rowCount: rows.length,
+          mappedCount: mapped.length,
+        });
+      }
 
       // T-015-03: 親が未着の場合だけ、子タスク状態から進捗を自動開始する。
+      const parentSyncStartedAt = performance.now();
       const byParent = {};
       mapped.forEach((task) => {
         const pid = task.parent;
@@ -134,12 +183,29 @@ function App() {
         }
       }
 
+      const parentSyncDurationMs = performance.now() - parentSyncStartedAt;
+
       if (parentStatusUpdated) {
+        const refreshStartedAt = performance.now();
         rows = await window.cotaskaAPI?.tasks?.getAll() ?? [];
         mapped = enrichTaskHierarchy(rows.map(mapFileTask));
+        if (isInitialLoad) {
+          emitRendererStartupMetric("initial-tasks-refresh-after-parent-sync-done", {
+            durationMs: Math.round(performance.now() - refreshStartedAt),
+            rowCount: rows.length,
+          });
+        }
       }
 
       setTasks(sortByTaskOrder(mapped));
+      if (isInitialLoad) {
+        emitRendererStartupMetric("initial-tasks-state-set", {
+          parentStatusUpdated,
+          parentSyncDurationMs: Math.round(parentSyncDurationMs),
+          totalDurationMs: Math.round(performance.now() - loadStartedAt),
+          mappedCount: mapped.length,
+        });
+      }
 
       // 固定ビューのバッジ件数
       const today = localDateString();
@@ -158,7 +224,18 @@ function App() {
     } catch (err) {
       console.error("[loadTasks]", err);
     } finally {
+      if (isInitialLoad) {
+        emitRendererStartupMetric("initial-loadTasks-finished", {
+          totalDurationMs: Math.round(performance.now() - loadStartedAt),
+        });
+        initialTasksLoadRef.current = false;
+      }
       setLoading(false);
+      if (isInitialLoad) {
+        requestAnimationFrame(() => {
+          emitRendererStartupMetric("post-initial-tasks-render-frame");
+        });
+      }
     }
   }, []);
 
