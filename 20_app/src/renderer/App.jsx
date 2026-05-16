@@ -183,20 +183,26 @@ function App() {
   // T-005-03: クイック追加
   // BUG-20260317-01 修正: 「今日」「次の7日間」ビューでは due_date=null のタスクが
   // buildSections のフィルタで除外されるため、当日日付を自動設定する
-  const handleAddTask = useCallback(async (title) => {
-    if (!title.trim()) return;
+  const handleAddTask = useCallback(async (quickAddInput) => {
+    const payload = typeof quickAddInput === "string"
+      ? { title: quickAddInput }
+      : (quickAddInput || {});
+    const title = String(payload.title || "").trim();
+    if (!title) return;
     const today = localDateString();
     const tomorrow = addDays(today, 1);
-    const due_date = activeNav === "明日"
+    const defaultDueDate = activeNav === "明日"
       ? tomorrow
       : (activeNav === "今日" || activeNav === "次の7日間")
         ? today
         : null;
+    const due_date = payload.due_date || defaultDueDate;
     // T-031: list_id ではなく list（文字列）を使用
-    const list = FIXED_VIEWS.has(activeNav) || activeNav.startsWith(TAG_NAV_PREFIX) ? null : activeNav;
+    const defaultList = FIXED_VIEWS.has(activeNav) || activeNav.startsWith(TAG_NAV_PREFIX) ? null : activeNav;
+    const list = payload.list || defaultList;
     const defaultTags = activeNav.startsWith(TAG_NAV_PREFIX) ? [activeNav.slice(TAG_NAV_PREFIX.length)] : [];
     await window.cotaskaAPI?.tasks?.add({
-      title:    title.trim(),
+      title,
       status:   "todo",
       progress_status: "未着",
       priority: "normal",

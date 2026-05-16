@@ -668,6 +668,7 @@ body.is-resizing-detail-sections * {
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
+  position: relative;
 }
 
 .quick-add .qa-icon {
@@ -679,9 +680,72 @@ body.is-resizing-detail-sections * {
   border: none;
   background: transparent;
   flex: 1;
+  min-width: 80px;
   font-size: 14px;
   outline: none;
   color: #999;
+}
+
+.qa-date-chip {
+  border: 1px solid #f0c36d;
+  background: #fff6df;
+  color: #856117;
+  border-radius: 6px;
+  padding: 3px 7px;
+  font-size: 12px;
+  line-height: 1.2;
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.qa-list-chip {
+  border: 1px solid #d8dce8;
+  background: #fff;
+  color: #4d5c7a;
+  border-radius: 6px;
+  padding: 3px 7px;
+  font-size: 12px;
+  line-height: 1.2;
+  cursor: pointer;
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.qa-list-suggest {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 34px;
+  right: 12px;
+  z-index: 20;
+  background: #fff;
+  border: 1px solid #dfe3ec;
+  border-radius: 8px;
+  box-shadow: 0 10px 24px rgba(25, 31, 45, 0.14);
+  padding: 4px;
+}
+
+.qa-list-suggest-item {
+  display: block;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: #38445f;
+  text-align: left;
+  font-size: 13px;
+  padding: 7px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.qa-list-suggest-item:hover,
+.qa-list-suggest-item.active {
+  background: #eef3ff;
+  color: #2f55c7;
 }
 
 /* タスクリスト */

@@ -213,6 +213,7 @@
       gap: 8px;
       font-size: 14px;
       color: #888;
+      position: relative;
     }
     .quick-add input {
       border: none;
@@ -223,6 +224,45 @@
       font-size: 14px;
     }
     .qa-actions { display: flex; gap: 10px; }
+    .qa-date-chip {
+      border: 1px solid #f0c36d;
+      background: #fff6df;
+      color: #856117;
+      border-radius: 6px;
+      padding: 3px 7px;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+    .qa-list-chip {
+      border: 1px solid #d8dce8;
+      background: #fff;
+      color: #4d5c7a;
+      border-radius: 6px;
+      padding: 3px 7px;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+    .qa-list-suggest {
+      position: absolute;
+      left: 34px;
+      right: 12px;
+      top: calc(100% + 4px);
+      z-index: 20;
+      background: #fff;
+      border: 1px solid #dfe3ec;
+      border-radius: 8px;
+      box-shadow: 0 10px 24px rgba(25, 31, 45, 0.14);
+      padding: 4px;
+    }
+    .qa-list-suggest-item {
+      padding: 7px 8px;
+      border-radius: 6px;
+      color: #38445f;
+    }
+    .qa-list-suggest-item.active {
+      background: #eef3ff;
+      color: #2f55c7;
+    }
 
     .task-list {
       flex: 1;
@@ -685,8 +725,14 @@
 
       <div class="quick-add">
         <span>＋</span>
-        <input type="text" value="" placeholder="タスクを追加（確定キーで保存）" />
+        <input type="text" value="議事録作成 明日 ~開" placeholder="タスクを追加（確定キーで保存）" />
+        <span class="qa-date-chip">日付 明日</span>
+        <span class="qa-list-chip">開発タスク ×</span>
         <div class="qa-actions"><span>📅</span><span>⚑</span><span>📋</span><span>#</span></div>
+        <div class="qa-list-suggest">
+          <div class="qa-list-suggest-item active">開発タスク</div>
+          <div class="qa-list-suggest-item">個人メモ</div>
+        </div>
       </div>
 
       <div class="task-list">

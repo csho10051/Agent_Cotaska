@@ -9,6 +9,83 @@ const PRIORITY = {
 };
 const MAX_TASK_TREE_DEPTH = 5;
 
+function formatLocalDate(date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+function addLocalDays(date, days) {
+  const next = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  next.setDate(next.getDate() + days);
+  return next;
+}
+
+function normalizeDateParts(year, month, day) {
+  const y = Number(year);
+  const m = Number(month);
+  const d = Number(day);
+  if (!Number.isInteger(y) || !Number.isInteger(m) || !Number.isInteger(d)) return null;
+  const parsed = new Date(y, m - 1, d);
+  if (parsed.getFullYear() !== y || parsed.getMonth() !== m - 1 || parsed.getDate() !== d) return null;
+  return formatLocalDate(parsed);
+}
+
+function extractQuickAddDate(rawTitle) {
+  const raw = String(rawTitle || "");
+  const today = new Date();
+  const keywordPatterns = [
+    { pattern: /(^|\s)(今日)(?=\s|$)/, days: 0 },
+    { pattern: /(^|\s)(明日)(?=\s|$)/, days: 1 },
+    { pattern: /(^|\s)(明後日)(?=\s|$)/, days: 2 },
+  ];
+
+  for (const item of keywordPatterns) {
+    const match = raw.match(item.pattern);
+    if (!match) continue;
+    const dueDate = formatLocalDate(addLocalDays(today, item.days));
+    const title = raw.replace(match[0], match[1] || " ").replace(/\s+/g, " ").trim();
+    return { title, dueDate, dateLabel: match[2] };
+  }
+
+  const fullDateMatch = raw.match(/(^|\s)(\d{4})[/-](\d{1,2})[/-](\d{1,2})(?=\s|$)/);
+  if (fullDateMatch) {
+    const dueDate = normalizeDateParts(fullDateMatch[2], fullDateMatch[3], fullDateMatch[4]);
+    if (dueDate) {
+      const title = raw.replace(fullDateMatch[0], fullDateMatch[1] || " ").replace(/\s+/g, " ").trim();
+      return { title, dueDate, dateLabel: fullDateMatch[0].trim() };
+    }
+  }
+
+  const slashDateMatch = raw.match(/(^|\s)(\d{1,2})\/(\d{1,2})(?=\s|$)/);
+  if (slashDateMatch) {
+    const dueDate = normalizeDateParts(today.getFullYear(), slashDateMatch[2], slashDateMatch[3]);
+    if (dueDate) {
+      const title = raw.replace(slashDateMatch[0], slashDateMatch[1] || " ").replace(/\s+/g, " ").trim();
+      return { title, dueDate, dateLabel: slashDateMatch[0].trim() };
+    }
+  }
+
+  const jpDateMatch = raw.match(/(^|\s)(\d{1,2})月(\d{1,2})日?(?=\s|$)/);
+  if (jpDateMatch) {
+    const dueDate = normalizeDateParts(today.getFullYear(), jpDateMatch[2], jpDateMatch[3]);
+    if (dueDate) {
+      const title = raw.replace(jpDateMatch[0], jpDateMatch[1] || " ").replace(/\s+/g, " ").trim();
+      return { title, dueDate, dateLabel: jpDateMatch[0].trim() };
+    }
+  }
+
+  return { title: raw.trim(), dueDate: null, dateLabel: "" };
+}
+
+function getQuickAddListToken(rawTitle) {
+  return String(rawTitle || "").match(/(?:^|\s)~([^\s~]*)$/);
+}
+
+function normalizeListName(list) {
+  if (!list) return "";
+  if (typeof list === "string") return list;
+  return String(list.name || "").trim();
+}
+
 /**
  * MainPane — ヘッダー・クイック追加バー・タスクリスト表示（flex: 1）
  *
@@ -57,16 +134,99 @@ function MainPane({
   const [draggingTaskId, setDraggingTaskId] = useState(null);
   const [dropTargetTaskId, setDropTargetTaskId] = useState(null);
   const [hoveredSectionKey, setHoveredSectionKey] = useState(null);
+  const [quickAddValue, setQuickAddValue] = useState("");
+  const [quickAddList, setQuickAddList] = useState(null);
+  const [quickAddListIndex, setQuickAddListIndex] = useState(0);
   const dragEnabled = Boolean(onReorderTask) && !isTrashed && !isCompleted && !isSearchMode;
+  const listNames = useMemo(
+    () => Array.from(new Set((lists || []).map(normalizeListName).filter(Boolean))),
+    [lists]
+  );
+  const listToken = getQuickAddListToken(quickAddValue);
+  const listQuery = listToken ? listToken[1] || "" : "";
+  const quickAddListCandidates = useMemo(() => {
+    if (!listToken) return [];
+    const normalizedQuery = listQuery.toLowerCase();
+    return listNames
+      .filter((name) => !normalizedQuery || name.toLowerCase().includes(normalizedQuery))
+      .slice(0, 8);
+  }, [listNames, listQuery, listToken]);
+  const showQuickAddListCandidates = Boolean(listToken) && !quickAddList && quickAddListCandidates.length > 0;
+
+  const quickAddDatePreview = useMemo(() => {
+    const raw = quickAddValue.trim();
+    if (!raw) return { dueDate: null, dateLabel: "" };
+    const currentListToken = getQuickAddListToken(raw);
+    const titleWithoutList = currentListToken ? raw.slice(0, currentListToken.index).trim() : raw;
+    return extractQuickAddDate(titleWithoutList);
+  }, [quickAddValue]);
+
+  const selectQuickAddList = (name) => {
+    setQuickAddList(name);
+    setQuickAddListIndex(0);
+    inputRef.current?.focus();
+  };
+
+  const buildQuickAddPayload = () => {
+    const raw = quickAddValue.trim();
+    const currentListToken = getQuickAddListToken(raw);
+    const exactList = currentListToken
+      ? listNames.find((name) => name.toLowerCase() === (currentListToken[1] || "").toLowerCase())
+      : null;
+    const selectedList = quickAddList || exactList || null;
+    const titleWithoutList = selectedList && currentListToken
+      ? raw.slice(0, currentListToken.index).trim()
+      : raw;
+    const parsed = extractQuickAddDate(titleWithoutList);
+    const title = parsed.title || titleWithoutList || raw;
+    return {
+      title,
+      due_date: parsed.dueDate,
+      list: selectedList,
+    };
+  };
 
   const handleKeyDown = (e) => {
     if (e.key !== "Enter") return;
-    const val = inputRef.current?.value ?? "";
-    if (val.trim()) {
-      onAddTask?.(val.trim());
-      if (inputRef.current) inputRef.current.value = "";
+    if (e.nativeEvent?.isComposing || e.isComposing) return;
+    if (showQuickAddListCandidates && !quickAddList) {
+      e.preventDefault();
+      selectQuickAddList(quickAddListCandidates[quickAddListIndex] || quickAddListCandidates[0]);
+      return;
+    }
+    const payload = buildQuickAddPayload();
+    if (payload.title.trim()) {
+      onAddTask?.(payload);
+      setQuickAddValue("");
+      setQuickAddList(null);
     }
     inputRef.current?.blur();
+  };
+
+  const handleQuickAddKeyDown = (e) => {
+    if (e.key === "ArrowDown" && showQuickAddListCandidates) {
+      e.preventDefault();
+      setQuickAddListIndex((prev) => Math.min(prev + 1, quickAddListCandidates.length - 1));
+      return;
+    }
+    if (e.key === "ArrowUp" && showQuickAddListCandidates) {
+      e.preventDefault();
+      setQuickAddListIndex((prev) => Math.max(prev - 1, 0));
+      return;
+    }
+    if (e.key === "Escape") {
+      setQuickAddList(null);
+      setQuickAddListIndex(0);
+      return;
+    }
+    handleKeyDown(e);
+  };
+
+  const handleQuickAddChange = (e) => {
+    const next = e.target.value;
+    setQuickAddValue(next);
+    setQuickAddListIndex(0);
+    setQuickAddList(null);
   };
 
   // 検索インプット「debounce 300ms
@@ -579,8 +739,43 @@ function MainPane({
             ref={inputRef}
             type="text"
             placeholder="タスクを追加（確定キーで保存）"
-            onKeyDown={handleKeyDown}
+            value={quickAddValue}
+            onChange={handleQuickAddChange}
+            onKeyDown={handleQuickAddKeyDown}
           />
+          {quickAddDatePreview.dueDate && (
+            <span
+              className="qa-date-chip"
+              title={`保存予定の日付: ${quickAddDatePreview.dueDate}`}
+            >
+              日付 {quickAddDatePreview.dateLabel || quickAddDatePreview.dueDate}
+            </span>
+          )}
+          {quickAddList && (
+            <button
+              className="qa-list-chip"
+              type="button"
+              title="選択中のリストを解除"
+              onClick={() => setQuickAddList(null)}
+            >
+              {quickAddList} ×
+            </button>
+          )}
+          {showQuickAddListCandidates && (
+            <div className="qa-list-suggest" role="listbox" aria-label="リスト候補">
+              {quickAddListCandidates.map((name, index) => (
+                <button
+                  key={name}
+                  type="button"
+                  className={`qa-list-suggest-item${index === quickAddListIndex ? " active" : ""}`}
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => selectQuickAddList(name)}
+                >
+                  {name}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
