@@ -1,0 +1,23 @@
+# Cotaska 設定ファイル
+# このファイルは設定画面から更新されます。日本語コメントは保持されます。
+
+# 表示名: アプリ画面やタイトルに表示する名前
+displayName: "Cotaska"
+
+# 外部エディタ: タスクファイルを開くときに使うエディタの実行ファイルパス
+# 空欄の場合は .md ファイルの既定アプリで開きます
+externalEditorPath: ""
+
+notification:
+  # 通知時間: 予定時刻の何分前に通知するか
+  minutesBefore: 5
+
+# タスク詳細本文の文字サイズ(px)
+detailTextSize: 14
+
+update:
+  # 最新版確認に使うURL。GitHub Releases latest API互換のJSONを想定します
+  latestVersionUrl: "https://api.github.com/repos/csho10051/Agent_Cotaska/releases/latest"
+
+  # ダウンロードページ: 利用者確認後に開くURL
+  downloadPageUrl: "https://github.com/csho10051/Agent_Cotaska/releases"

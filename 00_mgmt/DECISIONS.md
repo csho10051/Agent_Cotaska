@@ -163,6 +163,7 @@
 
 - Markdownプレビューのテーブルは `markdown-it` の出力HTMLを活かし、renderer側CSSで罫線・セル余白・ヘッダー背景を定義する。
 - 変換処理は変更せず、`.detail-preview` 配下に限定した表示修正として扱う。
+- 2026-05-16追記: ソース修正だけでなく配布実行フォルダの `app.asar` 再生成までを完了条件とする。`release-all.ps1` で `Cotaska-dist` / zip を再生成して反映確認する。
 
 ## 2026-05-16 CHG-062 設定値保存基盤 IPC
 
