@@ -219,3 +219,10 @@
 - バックアップ作成結果はフォルダコピーではなく、`Cotaska-backup-*.zip` の単一ファイルとする。
 - zip内には `manifest.json`、`data/tasks`、`data/lists.yaml`、`data/settings.yaml` を含め、生成物の `data/tasks/_index.yaml` は除外する。
 - 復元時はzipを一時フォルダへ展開して構造を確認してから反映し、既存フォルダ形式バックアップも互換性のため復元可能なまま残す。
+
+## 2026-05-16 CHG-071 src構成整理
+
+- 挙動変更を避けるため、初回整理では純粋関数・補助処理・バックアップサービスの分離を優先する。
+- `App.jsx` のタスク変換・検索・日付・階層計算は `renderer/lib/taskViewModel.js` に集約する。
+- `main.js` のバックアップ/復元処理は `main/backupService.js` に分離し、既存IPC名は維持する。
+- `taskService.js` はデータ破損リスクが高いため、今回の分割対象から外し、検証観点を整理してから次段階で扱う。

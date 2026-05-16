@@ -20,12 +20,12 @@ tasks:
   - id: T-0028
     title: 仕様変更：バックアップ機能の実装
     list: 仕様変更
-    status: todo
+    status: done
     priority: normal
     sort_order: 3
     tags: []
-    due_date: null
-    updated_at: '2026-05-16T05:08:24.153Z'
+    due_date: '2026-05-16'
+    updated_at: '2026-05-16T10:22:35.035Z'
   - id: T-0050
     title: 仕様変更：タスク入力時の入力補正
     list: Cotaska
@@ -2105,7 +2105,7 @@ tasks:
   - id: T-0204
     title: CHG-068-01 設計反映：バックアップ画面初期機能
     list: 仕様変更
-    status: todo
+    status: done
     priority: normal
     sort_order: 204
     tags:
@@ -2113,8 +2113,8 @@ tasks:
       - 設計
       - CHG-068
       - バックアップ
-    due_date: null
-    updated_at: '2026-05-16T03:29:22.566Z'
+    due_date: '2026-05-16'
+    updated_at: '2026-05-16T10:22:28.590Z'
   - id: T-0205
     title: CHG-068-02 実装：バックアップ画面初期機能
     list: 仕様変更
@@ -2276,18 +2276,18 @@ tasks:
   - id: T-0220
     title: 仕様変更：src構成整理
     list: 仕様変更
-    status: todo
+    status: done
     priority: normal
     sort_order: 220
     tags:
       - CHG-071
       - リファクタリング
     due_date: null
-    updated_at: '2026-05-16T13:13:09+09:00'
+    updated_at: '2026-05-16T19:28:54+09:00'
   - id: T-0221
     title: CHG-071-00 設計反映要否の確認と構成方針整理
     list: 仕様変更
-    status: todo
+    status: done
     priority: normal
     sort_order: 221
     tags:
@@ -2295,11 +2295,11 @@ tasks:
       - 設計
       - リファクタリング
     due_date: null
-    updated_at: '2026-05-16T13:13:09+09:00'
+    updated_at: '2026-05-16T19:28:54+09:00'
   - id: T-0222
     title: CHG-071-01 実装：App.jsx のロジック分離
     list: 仕様変更
-    status: todo
+    status: done
     priority: normal
     sort_order: 222
     tags:
@@ -2308,11 +2308,11 @@ tasks:
       - renderer
       - App.jsx
     due_date: null
-    updated_at: '2026-05-16T13:13:09+09:00'
+    updated_at: '2026-05-16T19:28:54+09:00'
   - id: T-0223
     title: CHG-071-02 実装：MainPane.jsx のコンポーネント分割
     list: 仕様変更
-    status: todo
+    status: done
     priority: normal
     sort_order: 223
     tags:
@@ -2321,11 +2321,11 @@ tasks:
       - renderer
       - MainPane.jsx
     due_date: null
-    updated_at: '2026-05-16T13:13:09+09:00'
+    updated_at: '2026-05-16T19:28:54+09:00'
   - id: T-0224
     title: CHG-071-03 実装：DetailPane.jsx のコンポーネント分割
     list: 仕様変更
-    status: todo
+    status: done
     priority: normal
     sort_order: 224
     tags:
@@ -2334,11 +2334,11 @@ tasks:
       - renderer
       - DetailPane.jsx
     due_date: null
-    updated_at: '2026-05-16T13:13:09+09:00'
+    updated_at: '2026-05-16T19:28:54+09:00'
   - id: T-0225
     title: CHG-071-04 実装：main.js のIPC・サービス分離
     list: 仕様変更
-    status: todo
+    status: done
     priority: normal
     sort_order: 225
     tags:
@@ -2347,11 +2347,11 @@ tasks:
       - main
       - IPC
     due_date: null
-    updated_at: '2026-05-16T13:13:09+09:00'
+    updated_at: '2026-05-16T19:28:54+09:00'
   - id: T-0226
     title: CHG-071-05 実装：taskService.js 分割準備とテスト観点整理
     list: 仕様変更
-    status: todo
+    status: done
     priority: normal
     sort_order: 226
     tags:
@@ -2360,11 +2360,11 @@ tasks:
       - taskService
       - テスト
     due_date: null
-    updated_at: '2026-05-16T13:13:09+09:00'
+    updated_at: '2026-05-16T19:28:54+09:00'
   - id: T-0227
     title: CHG-071-06 確認：src構成整理後の主要導線確認
     list: 仕様変更
-    status: todo
+    status: done
     priority: normal
     sort_order: 227
     tags:
@@ -2372,7 +2372,7 @@ tasks:
       - ユーザー確認
       - リファクタリング
     due_date: null
-    updated_at: '2026-05-16T13:13:09+09:00'
+    updated_at: '2026-05-16T19:28:54+09:00'
   - id: T-0228
     title: 仕様変更：Portable配布フォルダ名変更
     list: 仕様変更
@@ -2457,4 +2457,4 @@ tasks:
 task_file_roots:
   - .
 next_task_id: 235
-last_updated: '2026-05-16T09:28:57.413Z'
+last_updated: '2026-05-16T10:29:52.056Z'

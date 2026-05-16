@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import DueDatePopover from "./DueDatePopover";
+import { buildTaskTree } from "../lib/taskTree";
 
 // 優先度アイコン定義
 const PRIORITY = {
@@ -133,25 +134,6 @@ function MainPane({
     if (!inlineInput) return;
     inlineInputRef.current?.focus();
   }, [inlineInput]);
-
-  const buildTaskTree = useMemo(() => {
-    return (list) => {
-      const byParent = {};
-      const idSet = new Set(list.map((t) => t.id));
-      list.forEach((task) => {
-        const pid = task.parent;
-        if (pid === null || pid === undefined || !idSet.has(pid)) return;
-        if (task.hierarchyOverLimit || task.hierarchyCycle) return;
-        if (!byParent[pid]) byParent[pid] = [];
-        byParent[pid].push(task);
-      });
-      const roots = list.filter((t) => {
-        const pid = t.parent;
-        return pid === null || pid === undefined || !idSet.has(pid) || t.hierarchyOverLimit || t.hierarchyCycle;
-      });
-      return { roots, byParent };
-    };
-  }, []);
 
   const renderInlineInput = (parentTask, depth = 1) => {
     if (!inlineInput || inlineInput.parentId !== parentTask.id) return null;
