@@ -1,13 +1,12 @@
 {
   "name": "cotaska",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Cotaska - ローカルタスク管理システム",
   "main": "src/main/main.js",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "start": "electron .",
-    "dist:installer": "npm run build && electron-builder --win nsis --publish never",
     "dist:portable": "npm run build && electron-builder --win portable --publish never",
     "dist:dir": "npm run build && electron-builder --win dir --publish never"
   },
@@ -54,30 +53,17 @@
       "signAndEditExecutable": false,
       "target": [
         {
-          "target": "nsis",
-          "arch": [
-            "x64"
-          ]
-        },
-        {
           "target": "portable",
           "arch": [
             "x64"
           ]
         }
       ]
-    },
-    "nsis": {
-      "oneClick": false,
-      "perMachine": false,
-      "allowToChangeInstallationDirectory": true,
-      "deleteAppDataOnUninstall": false
     }
   },
   "dependencies": {
     "adm-zip": "^0.5.17",
     "chokidar": "^3.6.0",
-    "electron-updater": "^6.8.3",
     "gray-matter": "^4.0.3",
     "js-yaml": "^4.1.1",
     "markdown-it": "^14.1.1",

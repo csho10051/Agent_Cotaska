@@ -1,5 +1,4 @@
 const { app, BrowserWindow, ipcMain, Menu, dialog, globalShortcut, shell } = require("electron");
-const { autoUpdater } = require("electron-updater");
 const path = require("path");
 const crypto = require("crypto");
 const { spawn } = require("child_process");
@@ -137,17 +136,7 @@ function getAutoUpdateUnsupportedReason() {
   if (isCotaskaPortableRuntime()) {
     return null;
   }
-  if (process.env.PORTABLE_EXECUTABLE_DIR || process.env.PORTABLE_EXECUTABLE_FILE) {
-    return "portable版では自動更新は利用できません。インストール版を使用してください。";
-  }
-  if (path.basename(path.dirname(process.execPath)).toLowerCase() === "_app") {
-    return "Cotaska-Portable版では自動更新は利用できません。インストール版を使用するか、手動で新版をダウンロードしてください。";
-  }
-  const appUpdateConfigPath = path.join(process.resourcesPath || "", "app-update.yml");
-  if (!fs.existsSync(appUpdateConfigPath)) {
-    return "自動更新の設定ファイル app-update.yml が見つかりません。インストール版で再起動してください。";
-  }
-  return null;
+  return "更新機能はCotaska-Portable版のみ対応しています。Cotaska-Portableから起動してください。";
 }
 
 function getUpdateSettings() {
@@ -555,71 +544,7 @@ function publishUpdaterState(patch) {
 }
 
 function setupAutoUpdater() {
-  autoUpdater.autoDownload = false;
-  autoUpdater.autoInstallOnAppQuit = false;
-
-  autoUpdater.on("checking-for-update", () => {
-    publishUpdaterState({
-      status: "checking",
-      message: "更新を確認しています...",
-      progress: null,
-      downloaded: false,
-    });
-  });
-
-  autoUpdater.on("update-available", (info) => {
-    publishUpdaterState({
-      status: "available",
-      message: `新しいバージョン ${info.version || ""} があります。`,
-      hasUpdate: true,
-      downloaded: false,
-      progress: null,
-      version: info.version || null,
-    });
-  });
-
-  autoUpdater.on("update-not-available", (info) => {
-    publishUpdaterState({
-      status: "not-available",
-      message: "現在のバージョンは最新版です。",
-      hasUpdate: false,
-      downloaded: false,
-      progress: null,
-      version: info.version || null,
-    });
-  });
-
-  autoUpdater.on("download-progress", (progress) => {
-    publishUpdaterState({
-      status: "downloading",
-      message: `更新をダウンロードしています... ${Math.round(progress.percent || 0)}%`,
-      progress: {
-        percent: progress.percent || 0,
-        transferred: progress.transferred || 0,
-        total: progress.total || 0,
-      },
-    });
-  });
-
-  autoUpdater.on("update-downloaded", (info) => {
-    publishUpdaterState({
-      status: "downloaded",
-      message: "更新の準備ができました。再起動すると適用されます。",
-      downloaded: true,
-      hasUpdate: true,
-      progress: null,
-      version: info.version || updaterState.version,
-    });
-  });
-
-  autoUpdater.on("error", (err) => {
-    logger.warn("autoUpdater error", { error: err.message });
-    publishUpdaterState({
-      status: "error",
-      message: err.message || "自動更新でエラーが発生しました。",
-      progress: null,
-    });
-  });
+  // 更新はCotaska-Portable.zipを使う独自Portable更新経路に一本化する。
 }
 
 async function checkAutoUpdate() {
@@ -627,27 +552,13 @@ async function checkAutoUpdate() {
     return checkPortableUpdate();
   }
   const unsupportedReason = getAutoUpdateUnsupportedReason();
-  if (unsupportedReason) {
-    return publishUpdaterState({
-      status: "unsupported",
-      message: unsupportedReason,
-      hasUpdate: false,
-      downloaded: false,
-      progress: null,
-    });
-  }
-
-  try {
-    await autoUpdater.checkForUpdates();
-    return updaterState;
-  } catch (err) {
-    logger.warn("updates:check failed", { error: err.message });
-    return publishUpdaterState({
-      status: "error",
-      message: err.message || "更新確認に失敗しました。",
-      progress: null,
-    });
-  }
+  return publishUpdaterState({
+    status: "unsupported",
+    message: unsupportedReason,
+    hasUpdate: false,
+    downloaded: false,
+    progress: null,
+  });
 }
 
 async function downloadAutoUpdate() {
@@ -655,54 +566,26 @@ async function downloadAutoUpdate() {
     return downloadPortableUpdate();
   }
   const unsupportedReason = getAutoUpdateUnsupportedReason();
-  if (unsupportedReason) {
-    return publishUpdaterState({
-      status: "unsupported",
-      message: unsupportedReason,
-      hasUpdate: false,
-      downloaded: false,
-      progress: null,
-    });
-  }
-  if (!updaterState.hasUpdate) {
-    return publishUpdaterState({
-      status: "not-available",
-      message: "ダウンロードできる更新はありません。",
-      progress: null,
-    });
-  }
-
-  try {
-    await autoUpdater.downloadUpdate();
-    return updaterState;
-  } catch (err) {
-    logger.warn("updates:download failed", { error: err.message });
-    return publishUpdaterState({
-      status: "error",
-      message: err.message || "更新のダウンロードに失敗しました。",
-      progress: null,
-    });
-  }
+  return publishUpdaterState({
+    status: "unsupported",
+    message: unsupportedReason,
+    hasUpdate: false,
+    downloaded: false,
+    progress: null,
+  });
 }
 
 function installAutoUpdate() {
   if (isCotaskaPortableRuntime()) {
     return installPortableUpdate();
   }
-  if (!updaterState.downloaded) {
-    return publishUpdaterState({
-      status: "available",
-      message: "更新を適用する前にダウンロードしてください。",
-      hasUpdate: true,
-    });
-  }
-
-  publishUpdaterState({
-    status: "installing",
-    message: "再起動して更新を適用します。",
+  return publishUpdaterState({
+    status: "unsupported",
+    message: getAutoUpdateUnsupportedReason(),
+    hasUpdate: false,
+    downloaded: false,
+    progress: null,
   });
-  setImmediate(() => autoUpdater.quitAndInstall(false, true));
-  return updaterState;
 }
 
 async function checkForUpdates() {

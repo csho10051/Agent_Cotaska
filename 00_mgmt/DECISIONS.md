@@ -248,3 +248,9 @@
 - `release-all.ps1` は `Cotaska-Portable.zip.sha256` を生成し、GitHub Releases へ同時アップロードできるようにする。
 - Portable updater は `.sha256` がある場合は SHA-256 検証、ない場合は GitHub asset size と実ファイルサイズの一致で最低限検証する。
 - 更新適用はアプリ本体ではなく detached PowerShell updater が担当し、`data/`, `logs/`, `backup/` を保持する。
+
+## 2026-05-16 CHG-076 Portable版のみのリリース運用
+
+- Cotaska の配布・更新導線は `Cotaska-Portable.zip` と `.sha256` のみに一本化する。
+- NSISインストーラ、`.blockmap`、`latest.yml`、`electron-updater` 経路は生成・アップロード・実行対象から外す。
+- `release-all.ps1` は Portable フォルダと Portable zip / SHA-256 生成までをリリース完了条件とする。
