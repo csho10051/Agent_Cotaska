@@ -226,3 +226,8 @@
 - `App.jsx` のタスク変換・検索・日付・階層計算は `renderer/lib/taskViewModel.js` に集約する。
 - `main.js` のバックアップ/復元処理は `main/backupService.js` に分離し、既存IPC名は維持する。
 - `taskService.js` はデータ破損リスクが高いため、今回の分割対象から外し、検証観点を整理してから次段階で扱う。
+
+## 2026-05-16 BUG-20260516-02 Portable版更新確認の自動更新対象外判定
+
+- Cotaska-Portable は `_app/CotaskaCore.exe` をランチャーから起動する独自portable構成のため、NSISインストール版向けの `electron-updater` 対象外とする。
+- `_app` 配下から起動している場合、または `resources/app-update.yml` が存在しない場合は、自動更新を呼ばず手動更新/インストール版利用の案内を返す。

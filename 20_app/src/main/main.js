@@ -115,6 +115,13 @@ function getAutoUpdateUnsupportedReason() {
   if (process.env.PORTABLE_EXECUTABLE_DIR || process.env.PORTABLE_EXECUTABLE_FILE) {
     return "portable版では自動更新は利用できません。インストール版を使用してください。";
   }
+  if (path.basename(path.dirname(process.execPath)).toLowerCase() === "_app") {
+    return "Cotaska-Portable版では自動更新は利用できません。インストール版を使用するか、手動で新版をダウンロードしてください。";
+  }
+  const appUpdateConfigPath = path.join(process.resourcesPath || "", "app-update.yml");
+  if (!fs.existsSync(appUpdateConfigPath)) {
+    return "自動更新の設定ファイル app-update.yml が見つかりません。インストール版で再起動してください。";
+  }
   return null;
 }
 

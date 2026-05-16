@@ -2454,7 +2454,19 @@ tasks:
       - バックアップ
     due_date: null
     updated_at: '2026-05-16T14:00:00+09:00'
+  - id: T-0235
+    title: BUG-20260516-02 Portable版更新確認でapp-update.ymlが見つからない
+    list: 不具合対応
+    status: done
+    priority: normal
+    sort_order: 235
+    tags:
+      - BUG-20260516-02
+      - 自動更新
+      - portable
+    due_date: '2026-05-16'
+    updated_at: '2026-05-16T21:16:00+09:00'
 task_file_roots:
   - .
-next_task_id: 235
+next_task_id: 236
 last_updated: '2026-05-16T10:29:52.056Z'
