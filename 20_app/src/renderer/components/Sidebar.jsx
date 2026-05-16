@@ -24,7 +24,7 @@ function Sidebar({ activeIcon, onIconClick }) {
       <div className="sb-spacer" />
       <div className="sb-bottom">
         <div
-          className={`sb-icon${activeIcon === "設定" ? " active" : ""}`}
+          className={`sb-icon sb-icon--settings${activeIcon === "設定" ? " active" : ""}`}
           title="設定"
           onClick={() => onIconClick?.("設定")}
         >

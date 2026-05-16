@@ -9,8 +9,8 @@ const SUBTASK_PANEL_MIN_HEIGHT = 120;
 const SUBTASK_PANEL_MAX_HEIGHT = 520;
 const SUBTASK_PANEL_DEFAULT_HEIGHT = 260;
 const SUBTASK_PANEL_STORAGE_KEY = "cotaska.detailSubtasksHeight";
-const DETAIL_CONTENT_FONT_MIN = 12;
-const DETAIL_CONTENT_FONT_MAX = 22;
+const DETAIL_CONTENT_FONT_MIN = 10;
+const DETAIL_CONTENT_FONT_MAX = 28;
 const DETAIL_CONTENT_FONT_DEFAULT = 14;
 const DETAIL_CONTENT_FONT_STORAGE_KEY = "cotaska.detailContentFontSize";
 
@@ -232,7 +232,31 @@ function DetailPaneBody({
 
   useEffect(() => {
     window.localStorage?.setItem(DETAIL_CONTENT_FONT_STORAGE_KEY, String(detailContentFontSize));
+    window.cotaskaAPI?.settings?.update?.({ detailTextSize: detailContentFontSize });
   }, [detailContentFontSize]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const result = await window.cotaskaAPI?.settings?.get?.();
+      const configured = Number(result?.settings?.detailTextSize);
+      if (!cancelled && Number.isFinite(configured)) {
+        setDetailContentFontSize(clamp(configured, DETAIL_CONTENT_FONT_MIN, DETAIL_CONTENT_FONT_MAX));
+      }
+    })();
+
+    const handleSettingsFontSize = (event) => {
+      const configured = Number(event.detail);
+      if (Number.isFinite(configured)) {
+        setDetailContentFontSize(clamp(configured, DETAIL_CONTENT_FONT_MIN, DETAIL_CONTENT_FONT_MAX));
+      }
+    };
+    window.addEventListener("cotaska:detailTextSizeChanged", handleSettingsFontSize);
+    return () => {
+      cancelled = true;
+      window.removeEventListener("cotaska:detailTextSizeChanged", handleSettingsFontSize);
+    };
+  }, []);
 
   useEffect(() => {
     const handleResizeMove = (event) => {

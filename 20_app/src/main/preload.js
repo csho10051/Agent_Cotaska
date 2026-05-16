@@ -8,6 +8,19 @@ contextBridge.exposeInMainWorld("cotaskaAPI", {
 
   app: {
     getInfo: () => ipcRenderer.invoke("app:getInfo"),
+    checkForUpdates: () => ipcRenderer.invoke("app:checkForUpdates"),
+    openDownloadPage: () => ipcRenderer.invoke("app:openDownloadPage"),
+  },
+
+  settings: {
+    get: () => ipcRenderer.invoke("settings:get"),
+    update: (patch) => ipcRenderer.invoke("settings:update", patch),
+    chooseExternalEditor: () => ipcRenderer.invoke("settings:chooseExternalEditor"),
+  },
+
+  backup: {
+    chooseDirectory: () => ipcRenderer.invoke("backup:chooseDirectory"),
+    create: (targetDir) => ipcRenderer.invoke("backup:create", targetDir),
   },
 
   // タスク操作（ファイルベース）

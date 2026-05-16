@@ -7,6 +7,7 @@ const taskService = require("./taskService");
 const listService = require("./listService");
 const watcher = require("./watcher");
 const reminderService = require("./reminderService");
+const settingsService = require("./settingsService");
 const logger     = require("./logger");
 const appLogger  = require("./appLogger");
 
@@ -48,16 +49,120 @@ function getRuntimeRootPath() {
 
 function getAppInfo() {
   const pkg = require("../../package.json");
+  const settingsResult = settingsService.getSettings();
+  const settings = settingsResult.settings;
   const distributionFolder = app.isPackaged
     ? path.basename(getRuntimeRootPath())
     : "Cotaska-dist";
 
   return {
-    productName: "Cotaska",
+    productName: settings.displayName || "Cotaska",
     currentVersion: `Cotaska ${pkg.version}`,
+    version: pkg.version,
     distributionFolder,
     updateGuidance: "利用者確認付きの手動ダウンロード案内",
+    settingsPath: settingsResult.path,
+    downloadPageUrl: settings.update.downloadPageUrl,
   };
+}
+
+function normalizeVersion(value) {
+  return String(value || "").trim().replace(/^v/i, "").replace(/^Cotaska\s+/i, "");
+}
+
+function compareVersions(a, b) {
+  const left = normalizeVersion(a).split(/[.-]/).map((part) => Number.parseInt(part, 10));
+  const right = normalizeVersion(b).split(/[.-]/).map((part) => Number.parseInt(part, 10));
+  const max = Math.max(left.length, right.length);
+  for (let i = 0; i < max; i += 1) {
+    const l = Number.isFinite(left[i]) ? left[i] : 0;
+    const r = Number.isFinite(right[i]) ? right[i] : 0;
+    if (l > r) return 1;
+    if (l < r) return -1;
+  }
+  return 0;
+}
+
+async function checkForUpdates() {
+  const pkg = require("../../package.json");
+  const settings = settingsService.getSettings().settings;
+  const latestVersionUrl = String(settings.update?.latestVersionUrl || "").trim();
+  if (!latestVersionUrl) {
+    return { ok: true, currentVersion: pkg.version, latestVersion: null, hasUpdate: false, message: "最新版確認URLが未設定です。" };
+  }
+
+  try {
+    const response = await fetch(latestVersionUrl, {
+      headers: {
+        Accept: "application/vnd.github+json, application/json",
+        "User-Agent": "Cotaska",
+      },
+    });
+    if (!response.ok) {
+      return { ok: false, currentVersion: pkg.version, error: `更新情報を取得できませんでした。HTTP ${response.status}` };
+    }
+    const data = await response.json();
+    const latestVersion = normalizeVersion(data.tag_name || data.version || data.name || "");
+    if (!latestVersion) {
+      return { ok: false, currentVersion: pkg.version, error: "更新情報にバージョンが含まれていません。" };
+    }
+    const hasUpdate = compareVersions(latestVersion, pkg.version) > 0;
+    return {
+      ok: true,
+      currentVersion: pkg.version,
+      latestVersion,
+      hasUpdate,
+      downloadPageUrl: data.html_url || settings.update.downloadPageUrl,
+      message: hasUpdate ? "新しいバージョンがあります。" : "現在のバージョンは最新です。",
+    };
+  } catch (err) {
+    logger.warn("app:checkForUpdates failed", { error: err.message });
+    return { ok: false, currentVersion: pkg.version, error: err.message || "更新確認に失敗しました。" };
+  }
+}
+
+async function openDownloadPage(targetUrl = null) {
+  const settings = settingsService.getSettings().settings;
+  const url = String(targetUrl || settings.update?.downloadPageUrl || "").trim();
+  if (!/^https?:\/\//i.test(url)) {
+    return { ok: false, error: "ダウンロードページURLが未設定です。" };
+  }
+  try {
+    await shell.openExternal(url);
+    return { ok: true, url };
+  } catch (err) {
+    return { ok: false, error: err.message || "ダウンロードページを開けませんでした。" };
+  }
+}
+
+function createBackup(targetDir) {
+  const rawTargetDir = String(targetDir || "").trim();
+  if (!rawTargetDir) return { ok: false, error: "バックアップ保存先が未指定です。" };
+
+  const resolvedTargetDir = path.resolve(rawTargetDir);
+  if (!fs.existsSync(resolvedTargetDir) || !fs.statSync(resolvedTargetDir).isDirectory()) {
+    return { ok: false, error: "バックアップ保存先フォルダが見つかりません。" };
+  }
+
+  const dataDir = settingsService.getDataDir();
+  const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+  const backupRoot = path.join(resolvedTargetDir, `Cotaska-backup-${timestamp}`);
+  fs.mkdirSync(backupRoot, { recursive: true });
+
+  const copied = [];
+  const copyIfExists = (from, toRelative) => {
+    if (!fs.existsSync(from)) return;
+    const to = path.join(backupRoot, toRelative);
+    fs.mkdirSync(path.dirname(to), { recursive: true });
+    fs.cpSync(from, to, { recursive: true, force: false, errorOnExist: true });
+    copied.push(toRelative);
+  };
+
+  copyIfExists(path.join(dataDir, "tasks"), path.join("data", "tasks"));
+  copyIfExists(path.join(dataDir, "lists.yaml"), path.join("data", "lists.yaml"));
+  copyIfExists(settingsService.getSettingsPath(), path.join("data", "settings.yaml"));
+
+  return { ok: true, backupPath: backupRoot, copied };
 }
 
 async function maybeShowCloudSyncWarning() {
@@ -221,6 +326,59 @@ function startVite() {
 ipcMain.handle("ping", () => "pong");
 
 ipcMain.handle("app:getInfo", () => getAppInfo());
+
+ipcMain.handle("app:checkForUpdates", async () => checkForUpdates());
+
+ipcMain.handle("app:openDownloadPage", async (_e, url) => openDownloadPage(url));
+
+ipcMain.handle("settings:get", async () => settingsService.getSettings());
+
+ipcMain.handle("settings:update", async (_e, patch) => {
+  try {
+    const result = settingsService.updateSettings(patch);
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.setTitle(result.settings.displayName || APP_DISPLAY_NAME);
+    }
+    return result;
+  } catch (err) {
+    logger.error("settings:update failed", err);
+    return { ok: false, error: err.message || "設定保存に失敗しました。" };
+  }
+});
+
+ipcMain.handle("settings:chooseExternalEditor", async () => {
+  const result = await dialog.showOpenDialog({
+    title: "外部エディタを選択",
+    properties: ["openFile"],
+    filters: process.platform === "win32"
+      ? [{ name: "実行ファイル", extensions: ["exe", "cmd", "bat"] }, { name: "すべてのファイル", extensions: ["*"] }]
+      : [{ name: "すべてのファイル", extensions: ["*"] }],
+  });
+  if (result.canceled || !result.filePaths?.[0]) {
+    return { ok: false, canceled: true };
+  }
+  return { ok: true, path: result.filePaths[0] };
+});
+
+ipcMain.handle("backup:chooseDirectory", async () => {
+  const result = await dialog.showOpenDialog({
+    title: "バックアップ保存先を選択",
+    properties: ["openDirectory", "createDirectory"],
+  });
+  if (result.canceled || !result.filePaths?.[0]) {
+    return { ok: false, canceled: true };
+  }
+  return { ok: true, path: result.filePaths[0] };
+});
+
+ipcMain.handle("backup:create", async (_e, targetDir) => {
+  try {
+    return createBackup(targetDir);
+  } catch (err) {
+    logger.error("backup:create failed", err);
+    return { ok: false, error: err.message || "バックアップ作成に失敗しました。" };
+  }
+});
 
 ipcMain.handle("tasks:getAll", async () => {
   await servicesReady;
@@ -607,6 +765,24 @@ ipcMain.handle("shell:openTaskFile", async (_e, taskId) => {
       return { ok: false, error: "対象ファイルが見つかりません。" };
     }
 
+    const settings = settingsService.getSettings().settings;
+    const editorPath = String(settings.externalEditorPath || "").trim();
+    if (editorPath) {
+      if (!fs.existsSync(editorPath)) {
+        logger.warn("shell:openTaskFile external editor not found", { taskId, editorPath });
+        return { ok: false, error: "外部エディタが見つかりません。設定画面でパスを確認してください。" };
+      }
+
+      const child = spawn(editorPath, [filePath], {
+        detached: true,
+        stdio: "ignore",
+        shell: false,
+      });
+      child.unref();
+      logger.info("shell:openTaskFile external editor success", { taskId, editorPath });
+      return { ok: true };
+    }
+
     const openResult = await shell.openPath(filePath);
     if (openResult) {
       logger.error("shell:openTaskFile failed", { taskId, path: filePath, detail: openResult });
@@ -727,7 +903,7 @@ function createWindow() {
     : path.join(__dirname, "../../setup/launcher/icon.ico");
 
   const win = new BrowserWindow({
-    title: APP_DISPLAY_NAME,
+    title: settingsService.getSettings().settings.displayName || APP_DISPLAY_NAME,
     show: true,
     width: 1280,
     height: 800,
@@ -743,7 +919,7 @@ function createWindow() {
   });
 
   let didShowWindow = false;
-  win.setTitle(APP_DISPLAY_NAME);
+  win.setTitle(settingsService.getSettings().settings.displayName || APP_DISPLAY_NAME);
 
   win.webContents.on("did-fail-load", (_event, errorCode, errorDescription, validatedURL) => {
     appLogger.logError(
@@ -870,7 +1046,10 @@ async function initializeServicesAfterWindowReady() {
     duration: svcDuration,
   });
 
-  reminderService.start(() => taskService.getAllTasks());
+  reminderService.start(
+    () => taskService.getAllTasks(),
+    () => settingsService.getSettings().settings,
+  );
 
   if (mainWindow && !mainWindow.isDestroyed()) {
     watcher.startWatcher(mainWindow).catch(err => {

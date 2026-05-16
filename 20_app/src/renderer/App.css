@@ -126,6 +126,19 @@ body.is-resizing-detail-sections * {
   background: rgba(255, 255, 255, 0.08);
 }
 
+.sidebar .sb-icon--settings {
+  color: #f8fafc;
+  opacity: 0.9;
+  background: rgba(255, 255, 255, 0.08);
+  text-shadow: 0 0 6px rgba(255, 255, 255, 0.28);
+}
+
+.sidebar .sb-icon--settings:hover,
+.sidebar .sb-icon--settings.active {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.16);
+}
+
 .sidebar .sb-spacer { flex: 1; }
 
 .sidebar .sb-bottom {
@@ -415,6 +428,51 @@ body.is-resizing-detail-sections * {
   place-items: center;
   color: #7b8798;
   font-size: 14px;
+}
+
+.settings-message {
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 1.5;
+  word-break: break-all;
+}
+
+.settings-message--success {
+  border: 1px solid #c6e6d2;
+  background: #f0fbf4;
+  color: #246b3c;
+}
+
+.settings-message--error {
+  border: 1px solid #f0c0c0;
+  background: #fff2f2;
+  color: #a33a3a;
+}
+
+.settings-file-path {
+  margin-top: 8px;
+  color: #7b8798;
+  font-size: 11px;
+  font-family: Consolas, "Courier New", monospace;
+  word-break: break-all;
+}
+
+.backup-panel {
+  display: grid;
+  gap: 12px;
+  padding: 16px 18px;
+}
+
+.backup-create-btn {
+  justify-self: start;
+}
+
+.settings-primary-btn:disabled,
+.settings-secondary-btn:disabled {
+  opacity: .55;
+  cursor: default;
 }
 
 /* =====================

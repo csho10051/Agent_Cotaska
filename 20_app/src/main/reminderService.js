@@ -1,10 +1,10 @@
 const { Notification } = require("electron");
 
-const REMINDER_MINUTES_BEFORE = 5;
 const CHECK_INTERVAL_MS = 30 * 1000;
 
 let timer = null;
 let taskProvider = null;
+let settingsProvider = null;
 let notifiedKeys = new Set();
 
 function parseDueDateTime(raw) {
@@ -33,13 +33,20 @@ function formatDueTime(date) {
   return `${hh}:${mm}`;
 }
 
+function getReminderMinutesBefore() {
+  const settings = settingsProvider?.();
+  const value = Number(settings?.notification?.minutesBefore);
+  if (!Number.isFinite(value)) return 5;
+  return Math.max(0, Math.min(1440, Math.round(value)));
+}
+
 function shouldNotifyTask(task, now) {
   if (!task || task.status === "done") return { notify: false };
 
   const dueAt = parseDueDateTime(task.due_date);
   if (!dueAt) return { notify: false };
 
-  const remindAt = new Date(dueAt.getTime() - REMINDER_MINUTES_BEFORE * 60 * 1000);
+  const remindAt = new Date(dueAt.getTime() - getReminderMinutesBefore() * 60 * 1000);
   const notify = now >= remindAt && now < dueAt;
 
   return { notify, dueAt };
@@ -67,7 +74,7 @@ function runCheck() {
 
     const notification = new Notification({
       title: `まもなく日付: ${task.title || "(無題タスク)"}`,
-      body: `${formatDueTime(dueAt)} の5分前です。`,
+      body: `${formatDueTime(dueAt)} の${getReminderMinutesBefore()}分前です。`,
       silent: false,
     });
     notification.show();
@@ -86,8 +93,9 @@ function runCheck() {
   }
 }
 
-function start(provider) {
+function start(provider, settingsProviderFn = null) {
   taskProvider = provider;
+  settingsProvider = settingsProviderFn;
   runCheck();
   if (timer) clearInterval(timer);
   timer = setInterval(runCheck, CHECK_INTERVAL_MS);
@@ -99,6 +107,7 @@ function stop() {
     timer = null;
   }
   taskProvider = null;
+  settingsProvider = null;
   notifiedKeys.clear();
 }
 

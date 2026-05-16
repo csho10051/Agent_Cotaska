@@ -1,0 +1,144 @@
+const fs = require("fs");
+const path = require("path");
+const yaml = require("js-yaml");
+
+const DEFAULT_SETTINGS = {
+  displayName: "Cotaska",
+  externalEditorPath: "",
+  notification: {
+    minutesBefore: 5,
+  },
+  detailTextSize: 14,
+  update: {
+    latestVersionUrl: "https://api.github.com/repos/csho10051/Agent_Cotaska/releases/latest",
+    downloadPageUrl: "https://github.com/csho10051/Agent_Cotaska/releases",
+  },
+};
+
+function clampNumber(value, min, max, fallback) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return fallback;
+  return Math.max(min, Math.min(max, Math.round(numeric)));
+}
+
+function getDataDir() {
+  return path.resolve(process.cwd(), "../data");
+}
+
+function getSettingsPath() {
+  return path.join(getDataDir(), "settings.yaml");
+}
+
+function mergeSettings(raw) {
+  const source = raw && typeof raw === "object" ? raw : {};
+  return {
+    ...DEFAULT_SETTINGS,
+    ...source,
+    displayName: String(source.displayName || DEFAULT_SETTINGS.displayName).trim() || DEFAULT_SETTINGS.displayName,
+    externalEditorPath: String(source.externalEditorPath || ""),
+    notification: {
+      ...DEFAULT_SETTINGS.notification,
+      ...(source.notification || {}),
+      minutesBefore: clampNumber(source.notification?.minutesBefore, 0, 1440, DEFAULT_SETTINGS.notification.minutesBefore),
+    },
+    detailTextSize: clampNumber(source.detailTextSize, 10, 28, DEFAULT_SETTINGS.detailTextSize),
+    update: {
+      ...DEFAULT_SETTINGS.update,
+      ...(source.update || {}),
+      latestVersionUrl: String(source.update?.latestVersionUrl || DEFAULT_SETTINGS.update.latestVersionUrl),
+      downloadPageUrl: String(source.update?.downloadPageUrl || DEFAULT_SETTINGS.update.downloadPageUrl),
+    },
+  };
+}
+
+function renderSettingsYaml(settings) {
+  const normalized = mergeSettings(settings);
+  const escaped = (value) => JSON.stringify(String(value ?? ""));
+  return [
+    "# Cotaska 設定ファイル",
+    "# このファイルは設定画面から更新されます。日本語コメントは保持されます。",
+    "",
+    "# 表示名: アプリ画面やタイトルに表示する名前",
+    `displayName: ${escaped(normalized.displayName)}`,
+    "",
+    "# 外部エディタ: タスクファイルを開くときに使うエディタの実行ファイルパス",
+    "# 空欄の場合は .md ファイルの既定アプリで開きます",
+    `externalEditorPath: ${escaped(normalized.externalEditorPath)}`,
+    "",
+    "notification:",
+    "  # 通知時間: 予定時刻の何分前に通知するか",
+    `  minutesBefore: ${normalized.notification.minutesBefore}`,
+    "",
+    "# タスク詳細本文の文字サイズ(px)",
+    `detailTextSize: ${normalized.detailTextSize}`,
+    "",
+    "update:",
+    "  # 最新版確認に使うURL。GitHub Releases latest API互換のJSONを想定します",
+    `  latestVersionUrl: ${escaped(normalized.update.latestVersionUrl)}`,
+    "",
+    "  # ダウンロードページ: 利用者確認後に開くURL",
+    `  downloadPageUrl: ${escaped(normalized.update.downloadPageUrl)}`,
+    "",
+  ].join("\n");
+}
+
+function ensureSettingsFile() {
+  fs.mkdirSync(getDataDir(), { recursive: true });
+  const settingsPath = getSettingsPath();
+  if (!fs.existsSync(settingsPath)) {
+    fs.writeFileSync(settingsPath, renderSettingsYaml(DEFAULT_SETTINGS), "utf8");
+  }
+}
+
+function getSettings() {
+  ensureSettingsFile();
+  const settingsPath = getSettingsPath();
+  try {
+    const content = fs.readFileSync(settingsPath, "utf8");
+    const parsed = yaml.load(content) || {};
+    return {
+      ok: true,
+      settings: mergeSettings(parsed),
+      path: settingsPath,
+    };
+  } catch (err) {
+    return {
+      ok: false,
+      settings: mergeSettings(DEFAULT_SETTINGS),
+      path: settingsPath,
+      error: err.message || "settings.yaml を読み込めませんでした。",
+    };
+  }
+}
+
+function updateSettings(patch) {
+  const current = getSettings().settings;
+  const next = mergeSettings({
+    ...current,
+    ...(patch || {}),
+    notification: {
+      ...current.notification,
+      ...((patch || {}).notification || {}),
+    },
+    update: {
+      ...current.update,
+      ...((patch || {}).update || {}),
+    },
+  });
+
+  fs.mkdirSync(getDataDir(), { recursive: true });
+  fs.writeFileSync(getSettingsPath(), renderSettingsYaml(next), "utf8");
+  return {
+    ok: true,
+    settings: next,
+    path: getSettingsPath(),
+  };
+}
+
+module.exports = {
+  DEFAULT_SETTINGS,
+  getDataDir,
+  getSettingsPath,
+  getSettings,
+  updateSettings,
+};
