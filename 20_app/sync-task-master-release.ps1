@@ -1,5 +1,5 @@
 # sync-task-master-release.ps1
-# release\Cotaska-dist に作成された最新リリース成果物を、
+# release\Cotaska-Portable に作成された最新リリース成果物を、
 # 00_mgmt 配下のタスクマスター用配布フォルダへ反映する同期スクリプト。
 # 既存の配布フォルダはタイムスタンプ付きでバックアップしてから置き換える。
 # 目的:
@@ -209,7 +209,7 @@ function Assert-PathExists {
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $repoRoot = (Resolve-Path (Join-Path $scriptDir "..")).Path
 
-$releaseRoot = Join-Path $scriptDir "release\Cotaska-dist"
+$releaseRoot = Join-Path $scriptDir "release\Cotaska-Portable"
 $taskMasterRootItem = Get-ChildItem -LiteralPath (Join-Path $repoRoot "00_mgmt") -Directory |
     Where-Object {
         $_.Name -like "Cotaska_*" -and

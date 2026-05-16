@@ -1,5 +1,5 @@
-# T-048-04: リリース配布フォルダ構成整理スクリプト
-# 目的: ビルド後の Cotaska-dist を新しい構成に整理
+﻿# T-048-04: リリース配布フォルダ構成整理スクリプト
+# 目的: ビルド後の Cotaska-Portable を新しい構成に整理
 # 用途: npm run dist:dir 後に実行し、_app の外へ data/, logs/ を抽出
 #
 # 使い方: .\organize-release.ps1 -BuildDir "release" -Version "0.1.1"
@@ -9,7 +9,8 @@ param(
   [string]$Version = "0.1.1"
 )
 
-$distDir = Join-Path $BuildDir "Cotaska-dist"
+$distDir = Join-Path $BuildDir "Cotaska-Portable"
+$legacyDistDir = Join-Path $BuildDir "Cotaska-dist"
 $appDir = Join-Path $distDir "_app"
 $dataDir = Join-Path $distDir "data"
 $logsDir = Join-Path $distDir "logs"
@@ -38,6 +39,11 @@ function Remove-PathWithRetry {
 Write-Host "=== Cotaska Release Structure Organization ===" -ForegroundColor Green
 Write-Host "Distribution Dir: $distDir" -ForegroundColor Gray
 Write-Host "App Dir: $appDir" -ForegroundColor Gray
+
+if (Test-Path $legacyDistDir) {
+  Write-Host "Removing legacy distribution dir: $legacyDistDir" -ForegroundColor Yellow
+  Remove-PathWithRetry -Path $legacyDistDir
+}
 
 # 0. _app を最新ビルドから再同期
 Write-Host "`n[Step 0] Refreshing _app from win-unpacked..."

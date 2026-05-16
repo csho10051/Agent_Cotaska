@@ -9,7 +9,7 @@ const SETTINGS_TABS = [
 const DEFAULT_APP_INFO = {
   productName: "Cotaska",
   currentVersion: "Cotaska 0.1.0",
-  distributionFolder: "Cotaska-dist",
+  distributionFolder: "Cotaska-Portable",
   updateGuidance: "利用者確認付きの手動ダウンロード案内",
   backupDefaultDir: "",
 };

@@ -2240,7 +2240,55 @@ tasks:
       - 自動更新
     due_date: '2026-05-16'
     updated_at: '2026-05-16T13:30:00+09:00'
+  - id: T-0228
+    title: 仕様変更：Portable配布フォルダ名変更
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 228
+    tags:
+      - CHG-072
+      - リリース
+      - portable
+    due_date: '2026-05-16'
+    updated_at: '2026-05-16T14:10:00+09:00'
+  - id: T-0229
+    title: CHG-072-01 設計反映：Portable配布フォルダ名
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 229
+    tags:
+      - CHG-072
+      - 設計
+      - リリース
+    due_date: '2026-05-16'
+    updated_at: '2026-05-16T14:10:00+09:00'
+  - id: T-0230
+    title: CHG-072-02 実装：リリースフォルダ名変更
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 230
+    tags:
+      - CHG-072
+      - 実装
+      - リリース
+    due_date: '2026-05-16'
+    updated_at: '2026-05-16T14:10:00+09:00'
+  - id: T-0231
+    title: CHG-072-03 確認：Portable配布フォルダ名
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 231
+    tags:
+      - CHG-072
+      - ユーザー確認
+      - リリース
+    due_date: '2026-05-16'
+    updated_at: '2026-05-16T14:20:00+09:00'
 task_file_roots:
   - .
-next_task_id: 228
-last_updated: '2026-05-16T04:18:17.346Z'
+next_task_id: 232
+last_updated: '2026-05-16T04:54:14.331Z'

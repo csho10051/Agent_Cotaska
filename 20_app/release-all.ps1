@@ -4,7 +4,7 @@
 # ステップ 3: organize-release.ps1 (配布フォルダの再構成)
 # ステップ 4: ランチャー EXE を配布ルートへコピー
 # ステップ 5: 出荷前検証
-# ステップ 6: Cotaska-dist.zip 作成
+# ステップ 6: Cotaska-Portable.zip 作成
 # ステップ 7: NSIS インストーラ作成（自動更新用）
 # 追加: CotaskaCore.exe にアイコンと表示名メタデータを後書き
 #
@@ -21,8 +21,10 @@ $scriptDir   = Split-Path -Parent $MyInvocation.MyCommand.Path
 $repoRoot    = (Resolve-Path (Join-Path $scriptDir "..")).Path
 $nodeDir     = Resolve-Path (Join-Path $scriptDir "..\..\v22.14.0")
 $launcherDir = Join-Path $scriptDir "setup\launcher"
-$distRoot    = Join-Path $scriptDir "release\Cotaska-dist"
-$distZip     = Join-Path $scriptDir "release\Cotaska-dist.zip"
+$distRoot    = Join-Path $scriptDir "release\Cotaska-Portable"
+$distZip     = Join-Path $scriptDir "release\Cotaska-Portable.zip"
+$legacyDistRoot = Join-Path $scriptDir "release\Cotaska-dist"
+$legacyDistZip = Join-Path $scriptDir "release\Cotaska-dist.zip"
 $distCoreExe = Join-Path $distRoot "_app\CotaskaCore.exe"
 $launcherIcon = Join-Path $launcherDir "icon.ico"
 $sourceDataDir = Join-Path $scriptDir "..\data"
@@ -61,6 +63,15 @@ Write-Host ""
 Write-Host "=======================================" -ForegroundColor Green
 Write-Host " Cotaska Release All  v$Version" -ForegroundColor Green
 Write-Host "=======================================" -ForegroundColor Green
+
+if (Test-Path -LiteralPath $legacyDistRoot) {
+    Write-Host "Removing legacy portable folder: $legacyDistRoot" -ForegroundColor Yellow
+    Remove-PathWithRetry -Path $legacyDistRoot
+}
+if (Test-Path -LiteralPath $legacyDistZip) {
+    Write-Host "Removing legacy portable zip: $legacyDistZip" -ForegroundColor Yellow
+    Remove-Item -LiteralPath $legacyDistZip -Force
+}
 
 # -------------------------------------------------------
 # ステップ 1: レンダラービルド + Electron パッケージング
@@ -391,9 +402,9 @@ if ($allOk) {
     }
     $zipListing = tar.exe -tf $distZip
     $requiredZipEntries = @(
-        "Cotaska-dist/Cotaska.exe",
-        "Cotaska-dist/_app/CotaskaCore.exe",
-        "Cotaska-dist/_app/resources/app.asar"
+        "Cotaska-Portable/Cotaska.exe",
+        "Cotaska-Portable/_app/CotaskaCore.exe",
+        "Cotaska-Portable/_app/resources/app.asar"
     )
     foreach ($entry in $requiredZipEntries) {
         if ($zipListing -notcontains $entry) {

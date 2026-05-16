@@ -208,3 +208,8 @@
 - `20_app/src` の整理は、挙動変更を目的にせず、肥大化したファイルの責務分離として段階的に行う。
 - 初期優先度は renderer 側の `App.jsx`、`MainPane.jsx`、`DetailPane.jsx` とし、データ正本に触る `taskService.js` はテスト観点を整理してから慎重に扱う。
 - 既存IPC名、タスク保存形式、主要UI挙動は維持し、分割後にビルドと主要導線確認を完了条件に含める。
+## 2026-05-16 CHG-072 portable配布フォルダ名
+
+- portable版の配布フォルダ名は `Cotaska-dist` から `Cotaska-Portable` に変更する。
+- portable版のGitHub Releases添付ファイル名も、フォルダ名に合わせて `Cotaska-Portable.zip` とする。
+- NSISインストーラ用の `CotaskaCore-<version>-win-x64.exe`、`.blockmap`、`latest.yml` の命名は変更しない。
