@@ -6,10 +6,6 @@ contextBridge.exposeInMainWorld("cotaskaAPI", {
   // 疎通確認
   ping: () => ipcRenderer.invoke("ping"),
 
-  diagnostics: {
-    logRendererStartup: (payload) => ipcRenderer.send("diagnostics:rendererStartup", payload),
-  },
-
   app: {
     getInfo: () => ipcRenderer.invoke("app:getInfo"),
     checkForUpdates: () => ipcRenderer.invoke("app:checkForUpdates"),

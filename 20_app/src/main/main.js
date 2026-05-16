@@ -856,18 +856,6 @@ function startVite() {
 // ── IPC ハンドラ登録 ──────────────────────────────────────────
 ipcMain.handle("ping", () => "pong");
 
-ipcMain.on("diagnostics:rendererStartup", (_event, payload = {}) => {
-  const metric = {
-    name: String(payload.name || "unknown").slice(0, 80),
-    elapsedMs: Number.isFinite(payload.elapsedMs) ? Math.round(payload.elapsedMs) : null,
-    sinceModuleLoadedMs: Number.isFinite(payload.sinceModuleLoadedMs)
-      ? Math.round(payload.sinceModuleLoadedMs)
-      : null,
-    details: payload.details && typeof payload.details === "object" ? payload.details : {},
-  };
-  appLogger.logWarning("Renderer startup metric", metric);
-});
-
 ipcMain.handle("app:getInfo", () => getAppInfo());
 
 ipcMain.handle("app:checkForUpdates", async () => checkForUpdates());
