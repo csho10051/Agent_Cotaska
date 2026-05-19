@@ -259,6 +259,7 @@ Assert-PathExists -Path $taskMasterRoot -Label "Task-master root"
 Assert-PathExists -Path $srcExe -Label "Release Cotaska.exe"
 Assert-PathExists -Path $srcApp -Label "Release _app folder"
 Assert-PathExists -Path (Join-Path $srcTools "validate-tasks.ps1") -Label "Release validate-tasks.ps1"
+Assert-PathExists -Path (Join-Path $srcTools "CotaskaUpdater.exe") -Label "Release CotaskaUpdater.exe"
 Assert-PathExists -Path $srcAiAgentRule -Label "Release AI agent rule"
 
 Write-Host "[3/6] Creating backup: $backupRoot"

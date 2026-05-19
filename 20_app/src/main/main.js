@@ -271,11 +271,33 @@ function escapePowerShellSingleQuoted(value) {
   return String(value || "").replace(/'/g, "''");
 }
 
+function quotePowerShellSingleQuoted(value) {
+  return `'${escapePowerShellSingleQuoted(value)}'`;
+}
+
+function getWindowsPowerShellPath() {
+  return path.join(
+    process.env.SystemRoot || "C:\\Windows",
+    "System32",
+    "WindowsPowerShell",
+    "v1.0",
+    "powershell.exe",
+  );
+}
+
+function getPortableUpdaterExePath(portableRoot) {
+  return path.join(portableRoot, "tools", "CotaskaUpdater.exe");
+}
+
+function encodePowerShellCommand(command) {
+  return Buffer.from(command, "utf16le").toString("base64");
+}
+
 function createPortableUpdaterScript({ zipPath, portableRoot, version }) {
   const workDir = getPortableUpdateWorkDir(version);
   ensureDir(workDir);
   const scriptPath = path.join(workDir, "apply-portable-update.ps1");
-  const q = (value) => `'${escapePowerShellSingleQuoted(value)}'`;
+  const q = quotePowerShellSingleQuoted;
   const script = `
 $ErrorActionPreference = "Stop"
 $ZipPath = ${q(zipPath)}
@@ -311,8 +333,9 @@ function Copy-IfExists {
 
 function Get-CotaskaUpdateProcesses {
     $portableRootPrefix = $PortableRoot
-    if (-not $portableRootPrefix.EndsWith("\")) {
-        $portableRootPrefix = $portableRootPrefix + "\"
+    $separator = [string][System.IO.Path]::DirectorySeparatorChar
+    if (-not $portableRootPrefix.EndsWith($separator)) {
+        $portableRootPrefix = $portableRootPrefix + $separator
     }
     Get-CimInstance Win32_Process -Filter "Name = 'Cotaska.exe' OR Name = 'CotaskaCore.exe'" -ErrorAction SilentlyContinue |
         Where-Object {
@@ -573,35 +596,91 @@ function installPortableUpdate() {
     status: "installing",
     message: "Cotaskaを終了してPortable版更新を適用します。",
   });
-  const child = spawn("powershell.exe", [
+  const updaterExePath = getPortableUpdaterExePath(portableRoot);
+  if (fs.existsSync(updaterExePath)) {
+    const updaterRunPath = path.join(workLogDir, "CotaskaUpdater.exe");
+    fs.copyFileSync(updaterExePath, updaterRunPath);
+    const child = spawn(updaterRunPath, [
+      "--zip",
+      updaterState.downloadPath,
+      "--portable-root",
+      portableRoot,
+      "--version",
+      updaterState.version || "",
+    ], {
+      cwd: portableRoot,
+      detached: true,
+      stdio: "ignore",
+      windowsHide: true,
+    });
+    appLogger.logInfo("Portable updater process started", {
+      pid: child.pid,
+      updaterExePath,
+      updaterRunPath,
+      portableRoot,
+      zipPath: updaterState.downloadPath,
+      version: updaterState.version,
+    });
+    child.on("error", (err) => {
+      appLogger.logError("Portable updater process failed to start", err);
+    });
+    child.on("exit", (code, signal) => {
+      appLogger.logInfo("Portable updater process exited before app quit", {
+        code,
+        signal,
+        updaterRunPath,
+      });
+    });
+    child.unref();
+    setTimeout(() => app.quit(), 500);
+    return updaterState;
+  }
+
+  appLogger.logWarning("Portable updater was not found. Falling back to PowerShell updater.", {
+    updaterExePath,
+  });
+  const powershellPath = getWindowsPowerShellPath();
+  const q = quotePowerShellSingleQuoted;
+  const launcherCommand = [
+    "$ErrorActionPreference = 'Stop'",
+    [
+      "Start-Process",
+      `-FilePath ${q(powershellPath)}`,
+      `-ArgumentList @('-NoProfile','-ExecutionPolicy','Bypass','-File',${q(scriptPath)})`,
+      `-WorkingDirectory ${q(portableRoot)}`,
+      "-WindowStyle Hidden",
+    ].join(" "),
+  ].join("\n");
+  const child = spawn(powershellPath, [
     "-NoProfile",
     "-ExecutionPolicy",
     "Bypass",
-    "-File",
-    scriptPath,
+    "-EncodedCommand",
+    encodePowerShellCommand(launcherCommand),
   ], {
     cwd: portableRoot,
-    detached: true,
+    detached: false,
     stdio: "ignore",
     windowsHide: true,
   });
-  appLogger.logInfo("Portable updater process started", {
+  appLogger.logInfo("Portable updater launcher process started", {
     pid: child.pid,
+    powershellPath,
     scriptPath,
     portableRoot,
   });
   child.on("error", (err) => {
-    appLogger.logError("Portable updater process failed to start", err);
+    appLogger.logError("Portable updater launcher process failed to start", err);
   });
   child.on("exit", (code, signal) => {
-    appLogger.logInfo("Portable updater process exited before app quit", {
+    appLogger.logInfo("Portable updater launcher process exited before app quit", {
       code,
       signal,
       scriptPath,
     });
   });
   child.unref();
-  setTimeout(() => app.quit(), 500);
+  setTimeout(() => app.quit(), 1000);
   return updaterState;
 }
 

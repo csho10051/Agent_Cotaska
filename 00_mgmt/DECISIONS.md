@@ -266,3 +266,10 @@
 - 起動直後の黒い空白対策は、`BrowserWindow` 背景色、Reactロード前の静的HTML、初回 `tasks:getAll` 完了までの renderer ロード画面で分担する。
 - ロード画面は起動中であることを示すだけの非操作UIとし、起動時間短縮やタスク読み込み処理の変更は対象外とする。
 - ロード画面の進捗率は main/renderer の起動段階から算出する目安とし、`startup:getProgress` と `startup:progress` で現在処理中の内容とともに表示する。
+
+## 2026-05-19 BUG-20260516-04 CotaskaUpdater.exe C# fallback
+
+- `Cotaska.exe` と `CotaskaUpdater.exe` は、どちらも C# fallback 実装を標準生成物として扱う。
+- updater ビルドは `20_app/setup/updater/UpdaterFallback.cs` を `csc.exe` でコンパイルし、`20_app/scripts/CotaskaUpdater.exe` に出力する。
+- Portable 配布時は `tools/CotaskaUpdater.exe` を同梱し、アプリ本体は実行前に temp 更新作業フォルダへコピーしてから起動する。
+- PowerShell updater は `CotaskaUpdater.exe` が存在しない場合の最終 fallback として残す。

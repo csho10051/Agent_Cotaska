@@ -1,6 +1,6 @@
 ﻿# Cotaska release-all.ps1
 # ステップ 1: npm run dist:dir (レンダラービルド + Electron パッケージング)
-# ステップ 2: Go ランチャービルド (setup/launcher/build.ps1)
+# ステップ 2: C# ランチャービルド (setup/launcher/build.ps1)
 # ステップ 3: organize-release.ps1 (配布フォルダの再構成)
 # ステップ 4: ランチャー EXE を配布ルートへコピー
 # ステップ 5: 出荷前検証
@@ -20,6 +20,7 @@ $scriptDir   = Split-Path -Parent $MyInvocation.MyCommand.Path
 $repoRoot    = (Resolve-Path (Join-Path $scriptDir "..")).Path
 $nodeDir     = Resolve-Path (Join-Path $scriptDir "..\..\v22.14.0")
 $launcherDir = Join-Path $scriptDir "setup\launcher"
+$updaterDir  = Join-Path $scriptDir "setup\updater"
 $distRoot    = Join-Path $scriptDir "release\Cotaska-Portable"
 $distZip     = Join-Path $scriptDir "release\Cotaska-Portable.zip"
 $distZipSha256 = "$distZip.sha256"
@@ -31,6 +32,7 @@ $sourceDataDir = Join-Path $scriptDir "..\data"
 $distDataDir = Join-Path $distRoot "data"
 $sourceToolsDir = Join-Path $scriptDir "scripts"
 $distToolsDir = Join-Path $distRoot "tools"
+$sourceUpdaterExe = Join-Path $sourceToolsDir "CotaskaUpdater.exe"
 $sourceAiAgentRule = Join-Path $repoRoot "10_docs\20_実装準備\10_運用ルール\Cotaska_AIエージェント運用ルール.md"
 $aiAgentRuleFileName = Split-Path -Leaf $sourceAiAgentRule
 $distAiAgentRule = Join-Path $distRoot $aiAgentRuleFileName
@@ -91,9 +93,9 @@ if (-not (Test-Path $winUnpackedCore)) {
 Write-Host "  OK: Electron パッケージング完了" -ForegroundColor Green
 
 # -------------------------------------------------------
-# ステップ 2: Go ランチャービルド
+# ステップ 2: C# ランチャービルド
 # -------------------------------------------------------
-Write-Host "`n[Step 2] Building Go launcher ..." -ForegroundColor Cyan
+Write-Host "`n[Step 2] Building C# launcher ..." -ForegroundColor Cyan
 $buildPs1 = Join-Path $launcherDir "build.ps1"
 if (-not (Test-Path $buildPs1)) {
     Write-Host "  [WARN] $buildPs1 not found. Skipping launcher build." -ForegroundColor Yellow
@@ -106,6 +108,28 @@ if (-not (Test-Path $buildPs1)) {
     }
     else {
         Write-Host "  OK: ランチャービルド完了" -ForegroundColor Green
+    }
+}
+
+# -------------------------------------------------------
+# ステップ 2.5: updater ビルド
+# -------------------------------------------------------
+Write-Host "`n[Step 2.5] Building updater ..." -ForegroundColor Cyan
+$updaterBuildPs1 = Join-Path $updaterDir "build.ps1"
+if (-not (Test-Path $updaterBuildPs1)) {
+    Write-Host "  [WARN] $updaterBuildPs1 not found. Skipping updater build." -ForegroundColor Yellow
+} else {
+    & powershell -ExecutionPolicy Bypass -File $updaterBuildPs1
+    $updaterBuildExitCode = $LASTEXITCODE
+    if ($updaterBuildExitCode -ne 0) {
+        Write-Host "  [WARN] Updater build failed. PowerShell updater fallback remains available." -ForegroundColor Yellow
+        $global:LASTEXITCODE = 0
+    }
+    elseif (Test-Path -LiteralPath $sourceUpdaterExe) {
+        Write-Host "  OK: updater build complete" -ForegroundColor Green
+    }
+    else {
+        Write-Host "  [WARN] Updater was not built. PowerShell updater fallback remains available." -ForegroundColor Yellow
     }
 }
 
@@ -139,7 +163,7 @@ if (Test-Path $distToolsDir) {
 }
 New-Item -ItemType Directory -Path $distToolsDir | Out-Null
 $toolScripts = Get-ChildItem -LiteralPath $sourceToolsDir -File -ErrorAction SilentlyContinue |
-    Where-Object { $_.Extension -in @(".ps1", ".cmd", ".bat") }
+    Where-Object { $_.Extension -in @(".ps1", ".cmd", ".bat") -or $_.Name -eq "CotaskaUpdater.exe" }
 if ($toolScripts.Count -gt 0) {
     $toolScripts | Copy-Item -Destination $distToolsDir -Force
     Write-Host "  OK: tools/ synced ($($toolScripts.Count) script(s))" -ForegroundColor Green
