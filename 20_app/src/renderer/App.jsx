@@ -34,6 +34,13 @@ function App() {
   const [activeNav,     setActiveNav]     = useState("今日");
   const [activeIcon,    setActiveIcon]    = useState("リスト");
   const [loading,       setLoading]       = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [startupError, setStartupError] = useState(null);
+  const [startupProgress, setStartupProgress] = useState({
+    percent: 0,
+    label: "起動を開始しています...",
+    detail: "Cotaska の準備を始めています。",
+  });
   const [allCount,      setAllCount]      = useState(0);
   const [todayCount,    setTodayCount]    = useState(0);
   const [tomorrowCount, setTomorrowCount] = useState(0);
@@ -60,6 +67,20 @@ function App() {
 
   // T-005-02: DB からタスク一覧を読み込む
   // T-031: tasks:changed イベントリスナー登録（リアルタイム同期）
+  useEffect(() => {
+    let cancelled = false;
+    window.cotaskaAPI?.startup?.getProgress?.().then((progress) => {
+      if (!cancelled && progress) setStartupProgress(progress);
+    });
+    const removeStartupProgressListener = window.cotaskaAPI?.startup?.onProgress?.((progress) => {
+      if (progress) setStartupProgress(progress);
+    });
+    return () => {
+      cancelled = true;
+      removeStartupProgressListener?.();
+    };
+  }, []);
+
   useEffect(() => {
     const handleTasksChanged = (data) => {
       console.log('[App] tasks:changed event received', data);
@@ -103,8 +124,20 @@ function App() {
 
   const loadTasks = useCallback(async () => {
     setLoading(true);
+    setStartupError(null);
+    let loaded = false;
     try {
+      setStartupProgress({
+        percent: 90,
+        label: "タスク一覧を取得しています...",
+        detail: "初回表示用のタスクデータを受け取っています。",
+      });
       let rows   = await window.cotaskaAPI?.tasks?.getAll() ?? [];
+      setStartupProgress({
+        percent: 96,
+        label: "画面を組み立てています...",
+        detail: "タスクの階層と件数を計算しています。",
+      });
       let mapped = enrichTaskHierarchy(rows.map(mapFileTask));
 
       // T-015-03: 親が未着の場合だけ、子タスク状態から進捗を自動開始する。
@@ -155,10 +188,18 @@ function App() {
       setSelectedTask(prev =>
         prev ? (mapped.find(t => t.id === prev.id) ?? null) : null
       );
+      loaded = true;
+      setStartupProgress({
+        percent: 100,
+        label: "準備ができました",
+        detail: "Cotaska を表示します。",
+      });
     } catch (err) {
       console.error("[loadTasks]", err);
+      setStartupError("タスクの読み込みに失敗しました。アプリを再起動してください。");
     } finally {
       setLoading(false);
+      if (loaded) setInitialLoading(false);
     }
   }, []);
 
@@ -571,6 +612,28 @@ function App() {
     if (merged.length > 0) progressSections.push({ label: "未着・仕掛", tasks: merged });
     if (onHold.length > 0) progressSections.push({ label: "保留", tasks: onHold });
     if (completedProg.length > 0) progressSections.push({ label: "完了", tasks: completedProg });
+  }
+
+  if (initialLoading) {
+    return (
+      <div className="startup-screen startup-screen--renderer">
+        <div className="startup-panel" role="status" aria-live="polite">
+          <div className="startup-logo" aria-hidden="true">C</div>
+          <div className="startup-title">Cotaska</div>
+          <div className="startup-message">
+            {startupError || startupProgress.label}
+          </div>
+          <div className="startup-detail">{startupProgress.detail}</div>
+          <div className="startup-progress-percent">{Math.round(startupProgress.percent)}%</div>
+          <div className="startup-progress startup-progress--determinate" aria-hidden="true">
+            <div
+              className="startup-progress-fill"
+              style={{ width: `${Math.round(startupProgress.percent)}%` }}
+            />
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (

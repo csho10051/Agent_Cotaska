@@ -8,9 +8,93 @@
       content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'"
     />
     <title>Cotaska</title>
+    <style>
+      html,
+      body,
+      #root {
+        height: 100%;
+        margin: 0;
+      }
+
+      body {
+        background: #f6f8fb;
+        color: #1d2530;
+        font-family: "Segoe UI", "Meiryo", -apple-system, BlinkMacSystemFont, sans-serif;
+      }
+
+      .startup-screen {
+        min-height: 100%;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, #f6f8fb 0%, #eef3f8 52%, #f8faf7 100%);
+      }
+
+      .startup-panel {
+        width: min(360px, calc(100% - 48px));
+        display: grid;
+        justify-items: center;
+        gap: 14px;
+        color: #263241;
+      }
+
+      .startup-logo {
+        width: 56px;
+        height: 56px;
+        border-radius: 14px;
+        display: grid;
+        place-items: center;
+        background: #263241;
+        color: #fff;
+        font-size: 24px;
+        font-weight: 700;
+        box-shadow: 0 14px 34px rgba(38, 50, 65, .18);
+      }
+
+      .startup-title {
+        font-size: 22px;
+        font-weight: 700;
+      }
+
+      .startup-message {
+        color: #647284;
+        font-size: 13px;
+      }
+
+      .startup-progress {
+        width: 180px;
+        height: 4px;
+        overflow: hidden;
+        border-radius: 999px;
+        background: #d9e1ea;
+      }
+
+      .startup-progress::after {
+        content: "";
+        display: block;
+        width: 44%;
+        height: 100%;
+        border-radius: inherit;
+        background: #4f8f8b;
+        animation: startup-loading 1.15s ease-in-out infinite;
+      }
+
+      @keyframes startup-loading {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(230%); }
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div class="startup-screen">
+        <div class="startup-panel" role="status" aria-live="polite">
+          <div class="startup-logo" aria-hidden="true">C</div>
+          <div class="startup-title">Cotaska</div>
+          <div class="startup-message">起動しています...</div>
+          <div class="startup-progress" aria-hidden="true"></div>
+        </div>
+      </div>
+    </div>
     <script type="module" src="./index.jsx"></script>
   </body>
 </html>

@@ -10,6 +10,106 @@ html, body, #root {
   color: #333;
 }
 
+/* =====================
+   起動ロード画面（CHG-077）
+   ===================== */
+.startup-screen {
+  min-height: 100%;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #f6f8fb 0%, #eef3f8 52%, #f8faf7 100%);
+}
+
+.startup-screen--renderer {
+  height: 100vh;
+}
+
+.startup-panel {
+  width: min(360px, calc(100% - 48px));
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  color: #263241;
+}
+
+.startup-logo {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: #263241;
+  color: #fff;
+  font-size: 24px;
+  font-weight: 700;
+  box-shadow: 0 14px 34px rgba(38, 50, 65, .18);
+}
+
+.startup-title {
+  color: #1d2530;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.startup-message {
+  color: #647284;
+  font-size: 13px;
+}
+
+.startup-detail {
+  min-height: 18px;
+  color: #7a8796;
+  font-size: 12px;
+  text-align: center;
+}
+
+.startup-progress-percent {
+  margin-top: 2px;
+  color: #263241;
+  font-size: 18px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.startup-progress {
+  width: 180px;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #d9e1ea;
+}
+
+.startup-progress--determinate {
+  width: 220px;
+}
+
+.startup-progress--determinate::after {
+  display: none;
+}
+
+.startup-progress-fill {
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: #4f8f8b;
+  transition: width .28s ease;
+}
+
+.startup-progress::after {
+  content: "";
+  display: block;
+  width: 44%;
+  height: 100%;
+  border-radius: inherit;
+  background: #4f8f8b;
+  animation: startup-loading 1.15s ease-in-out infinite;
+}
+
+@keyframes startup-loading {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(230%); }
+}
+
 body.is-resizing-detail-sections {
   cursor: row-resize;
   user-select: none;

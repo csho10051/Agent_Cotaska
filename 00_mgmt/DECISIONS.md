@@ -260,3 +260,9 @@
 - Portable updater script は Windows PowerShell 5.1 で日本語パスを壊さないよう、UTF-8 BOM付きで生成する。
 - updater ログは Portable 側だけでなく temp 側にも残し、ログ出力先パス自体の問題を追跡できるようにする。
 - 更新前のプロセス待機は同じ PortableRoot 配下の Cotaska プロセスに限定し、別環境の Cotaska 起動に影響されないようにする。
+
+## 2026-05-19 CHG-077 起動ロード画面
+
+- 起動直後の黒い空白対策は、`BrowserWindow` 背景色、Reactロード前の静的HTML、初回 `tasks:getAll` 完了までの renderer ロード画面で分担する。
+- ロード画面は起動中であることを示すだけの非操作UIとし、起動時間短縮やタスク読み込み処理の変更は対象外とする。
+- ロード画面の進捗率は main/renderer の起動段階から算出する目安とし、`startup:getProgress` と `startup:progress` で現在処理中の内容とともに表示する。

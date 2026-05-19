@@ -12,6 +12,16 @@ contextBridge.exposeInMainWorld("cotaskaAPI", {
     openDownloadPage: () => ipcRenderer.invoke("app:openDownloadPage"),
   },
 
+  startup: {
+    getProgress: () => ipcRenderer.invoke("startup:getProgress"),
+    onProgress: (callback) => {
+      if (typeof callback !== "function") return () => {};
+      const listener = (_event, progress) => callback(progress);
+      ipcRenderer.on("startup:progress", listener);
+      return () => ipcRenderer.removeListener("startup:progress", listener);
+    },
+  },
+
   updates: {
     getStatus: () => ipcRenderer.invoke("updates:getStatus"),
     check: () => ipcRenderer.invoke("updates:check"),

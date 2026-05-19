@@ -17,6 +17,11 @@ const packageInfo = require("../../package.json");
 let mainWindow = null;
 let hasShownCloudSyncWarning = false;
 let hasShownLaunchFailedGuidance = false;
+let startupProgress = {
+  percent: 0,
+  label: "起動を開始しています...",
+  detail: "Cotaska の準備を始めています。",
+};
 let updaterState = {
   status: "idle",
   message: "更新確認を待機しています。",
@@ -110,6 +115,18 @@ function getAppInfo() {
     downloadPageUrl: settings.update.downloadPageUrl,
     backupDefaultDir: getDefaultBackupDir(),
   };
+}
+
+function publishStartupProgress(progress) {
+  startupProgress = {
+    ...startupProgress,
+    ...progress,
+    percent: Math.max(0, Math.min(100, Number(progress?.percent ?? startupProgress.percent) || 0)),
+  };
+
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send("startup:progress", startupProgress);
+  }
 }
 
 function normalizeVersion(value) {
@@ -862,6 +879,8 @@ ipcMain.handle("app:checkForUpdates", async () => checkForUpdates());
 
 ipcMain.handle("app:openDownloadPage", async (_e, url) => openDownloadPage(url));
 
+ipcMain.handle("startup:getProgress", async () => startupProgress);
+
 ipcMain.handle("updates:getStatus", async () => updaterState);
 
 ipcMain.handle("updates:check", async () => checkAutoUpdate());
@@ -1456,6 +1475,12 @@ async function ensureDataDirectories() {
 // ──────────────────────────────────────────────────────────────
 
 function createWindow() {
+  publishStartupProgress({
+    percent: 35,
+    label: "ウィンドウを準備しています...",
+    detail: "表示領域と renderer を初期化しています。",
+  });
+
   appLogger.logWarning("createWindow invoked", {
     nodeEnv: process.env.NODE_ENV,
     execPath: process.execPath,
@@ -1474,7 +1499,7 @@ function createWindow() {
     height: 800,
     minWidth: 900,
     minHeight: 600,
-    backgroundColor: "#1c1c1c",
+    backgroundColor: "#f6f8fb",
     icon: windowIconPath,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
@@ -1493,6 +1518,11 @@ function createWindow() {
   });
 
   win.webContents.on("did-finish-load", () => {
+    publishStartupProgress({
+      percent: 82,
+      label: "画面を読み込んでいます...",
+      detail: "renderer の初期表示を準備しています。",
+    });
     appLogger.logWarning("Renderer did-finish-load", {
       url: win.webContents.getURL(),
     });
@@ -1532,6 +1562,11 @@ function createWindow() {
     // show: true で先に表示済みのため、ready-to-show ではフォーカスのみ行う
     // setAlwaysOnTop で Windows フォアグラウンドロックを回避
     didShowWindow = true;
+    publishStartupProgress({
+      percent: 88,
+      label: "画面を表示しています...",
+      detail: "初回データ取得へ進んでいます。",
+    });
     appLogger.logWarning("Window ready-to-show", {
       url: win.webContents.getURL(),
     });
@@ -1600,7 +1635,17 @@ async function initializeServicesAfterWindowReady() {
   logger.info("Initializing task/list services...");
   const svcStartTime = Date.now();
 
+  publishStartupProgress({
+    percent: 45,
+    label: "タスクデータを準備しています...",
+    detail: "タスクファイルを読み込んでいます。",
+  });
   await taskService.openTaskService();
+  publishStartupProgress({
+    percent: 62,
+    label: "リストを準備しています...",
+    detail: "リストとタグの設定を読み込んでいます。",
+  });
   await listService.openListService();
 
   const svcDuration = Date.now() - svcStartTime;
@@ -1615,12 +1660,22 @@ async function initializeServicesAfterWindowReady() {
     () => taskService.getAllTasks(),
     () => settingsService.getSettings().settings,
   );
+  publishStartupProgress({
+    percent: 74,
+    label: "通知機能を準備しています...",
+    detail: "リマインダーとファイル監視を起動しています。",
+  });
 
   if (mainWindow && !mainWindow.isDestroyed()) {
     watcher.startWatcher(mainWindow).catch(err => {
       logger.error("Failed to start watcher:", err);
     });
   }
+  publishStartupProgress({
+    percent: 80,
+    label: "アプリの準備が整いました...",
+    detail: "初回画面表示を待機しています。",
+  });
 }
 
 app.whenReady().then(async () => {
@@ -1629,6 +1684,11 @@ app.whenReady().then(async () => {
   }
 
   app.setName(APP_DISPLAY_NAME);
+  publishStartupProgress({
+    percent: 8,
+    label: "アプリを初期化しています...",
+    detail: "Cotaska の実行環境を確認しています。",
+  });
   const appUserModelId = getAppUserModelId();
   app.setAppUserModelId(appUserModelId);
   logger.info("AppUserModelID configured", { appUserModelId, appName: app.getName(), instanceHash });
@@ -1640,6 +1700,11 @@ app.whenReady().then(async () => {
     electronVersion: process.versions.electron,
   });
   setupAutoUpdater();
+  publishStartupProgress({
+    percent: 16,
+    label: "設定を確認しています...",
+    detail: "アプリ設定と更新設定を読み込んでいます。",
+  });
 
   logger.info("App startup initiated", {
     nodeVersion: process.versions.node,
@@ -1651,6 +1716,11 @@ app.whenReady().then(async () => {
   logger.info("Ensuring data directories...");
   await ensureDataDirectories();
   appLogger.logInfo("Data directories ensured");
+  publishStartupProgress({
+    percent: 24,
+    label: "データフォルダを確認しています...",
+    detail: "タスクとリストの保存場所を準備しています。",
+  });
 
   // 恒久対策: クラウド同期配下実行の検知と事前警告
   await maybeShowCloudSyncWarning();
@@ -1658,9 +1728,19 @@ app.whenReady().then(async () => {
   // 開発時は Vite を子プロセスで起動してから BrowserWindow を開く
   if (process.env.NODE_ENV === "development") {
     logger.info("Starting Vite dev server...");
+    publishStartupProgress({
+      percent: 28,
+      label: "開発サーバーを起動しています...",
+      detail: "Vite dev server の準備を待っています。",
+    });
     appLogger.logViteServerStart(5173);
     await startVite();
     logger.info("Vite dev server started");
+    publishStartupProgress({
+      percent: 32,
+      label: "開発サーバーの準備ができました...",
+      detail: "ウィンドウを開いています。",
+    });
   }
 
   // サービスを初期化
