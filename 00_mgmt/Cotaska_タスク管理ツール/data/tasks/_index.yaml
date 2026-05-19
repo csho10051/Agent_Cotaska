@@ -29,15 +29,15 @@ tasks:
   - id: T-0050
     title: 仕様変更：タスク入力時の入力補正
     list: Cotaska
-    status: todo
+    status: done
     priority: normal
     sort_order: 4
     tags:
       - 仕様変更
       - Agent_Hisyo移管
       - CHG-075
-    due_date: null
-    updated_at: '2026-05-16T13:41:30.324Z'
+    due_date: '2026-05-19'
+    updated_at: '2026-05-19T11:59:32.121Z'
   - id: T-0021
     title: 仕様変更：設定画面の実装
     list: 仕様変更
@@ -2516,7 +2516,7 @@ tasks:
       - 自動更新
       - portable
     due_date: '2026-05-16'
-    updated_at: '2026-05-16T23:28:11+09:00'
+    updated_at: '2026-05-19T22:17:17+09:00'
   - id: T-0239
     title: CHG-074-03 確認：Portable版自動更新
     list: 仕様変更
@@ -2571,7 +2571,7 @@ tasks:
   - id: T-0243
     title: CHG-075-03 確認：タスク入力補正
     list: 仕様変更
-    status: todo
+    status: done
     priority: normal
     sort_order: 243
     tags:
@@ -2579,8 +2579,8 @@ tasks:
       - ユーザー確認
       - タスク入力
       - 入力補正
-    due_date: null
-    updated_at: '2026-05-16T22:17:18+09:00'
+    due_date: '2026-05-19'
+    updated_at: '2026-05-19T11:59:31.239Z'
   - id: T-0244
     title: CHG-075-04 実装：日付入力補正の強調表示
     list: 仕様変更
@@ -2634,7 +2634,58 @@ tasks:
       - Portable
     due_date: null
     updated_at: '2026-05-16T23:07:38+09:00'
+  - id: T-0249
+    title: CHG-077 ロード画面追加
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 249
+    tags:
+      - CHG-077
+      - 起動
+      - ロード画面
+    due_date: null
+    updated_at: '2026-05-19T22:06:27+09:00'
+  - id: T-0250
+    title: CHG-077-01 設計：起動ロード画面の表示仕様整理
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 250
+    tags:
+      - CHG-077
+      - 設計
+      - 起動
+      - ロード画面
+    due_date: null
+    updated_at: '2026-05-19T21:50:45+09:00'
+  - id: T-0251
+    title: CHG-077-02 実装：起動ロード画面の追加
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 251
+    tags:
+      - CHG-077
+      - 実装
+      - 起動
+      - ロード画面
+    due_date: null
+    updated_at: '2026-05-19T21:50:45+09:00'
+  - id: T-0252
+    title: CHG-077-03 ユーザー確認：起動ロード画面の表示確認
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 252
+    tags:
+      - CHG-077
+      - ユーザー確認
+      - 起動
+      - ロード画面
+    due_date: null
+    updated_at: '2026-05-19T22:06:27+09:00'
 task_file_roots:
   - .
-next_task_id: 249
-last_updated: '2026-05-16T14:28:39.560Z'
+next_task_id: 253
+last_updated: '2026-05-19T13:17:49.065Z'
