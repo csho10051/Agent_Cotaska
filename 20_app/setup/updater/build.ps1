@@ -27,8 +27,10 @@ $args = @(
     "/nologo",
     "/target:winexe",
     "/out:$outputExe",
+    "/reference:System.Drawing.dll",
     "/reference:System.IO.Compression.dll",
     "/reference:System.IO.Compression.FileSystem.dll",
+    "/reference:System.Windows.Forms.dll",
     $sourcePath
 )
 

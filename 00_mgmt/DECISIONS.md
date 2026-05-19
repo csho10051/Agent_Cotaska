@@ -273,3 +273,9 @@
 - updater ビルドは `20_app/setup/updater/UpdaterFallback.cs` を `csc.exe` でコンパイルし、`20_app/scripts/CotaskaUpdater.exe` に出力する。
 - Portable 配布時は `tools/CotaskaUpdater.exe` を同梱し、アプリ本体は実行前に temp 更新作業フォルダへコピーしてから起動する。
 - PowerShell updater は `CotaskaUpdater.exe` が存在しない場合の最終 fallback として残す。
+
+## 2026-05-19 BUG-20260516-04 updater 状態表示
+
+- `CotaskaUpdater.exe` 実行中に無反応に見える不安を減らすため、C# updater 側で小さな更新中ウィンドウを表示する。
+- 表示は不定進捗バーと現在処理中の内容に限定し、正確な進捗率は出さない。
+- 表示対象は終了待ち、展開、検証、バックアップ、差し替え、再起動、失敗時の復元とする。

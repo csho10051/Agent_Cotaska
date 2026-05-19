@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Threading;
+using System.Windows.Forms;
 
 internal static class UpdaterFallback
 {
@@ -16,7 +19,10 @@ internal static class UpdaterFallback
 
     private static string workLogPath;
     private static string portableLogPath;
+    private static UpdaterStatusWindow statusWindow;
+    private static Thread statusThread;
 
+    [STAThread]
     private static int Main(string[] args)
     {
         string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
@@ -25,6 +31,8 @@ internal static class UpdaterFallback
 
         try
         {
+            StartStatusWindow();
+            SetStatus("更新を開始しています...");
             Options options = ParseOptions(args);
             string exeDir = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName) ?? AppDomain.CurrentDomain.BaseDirectory;
             string logDir = Path.Combine(options.PortableRoot, "logs");
@@ -44,15 +52,19 @@ internal static class UpdaterFallback
                 throw new FileNotFoundException("Update zip was not found: " + options.ZipPath);
             }
 
+            SetStatus("Cotaska の終了を待っています...");
             WaitForCotaskaExit(options.PortableRoot);
 
+            SetStatus("更新ファイルを展開しています...");
             DeleteDirectoryIfExists(extractRoot);
             Directory.CreateDirectory(extractRoot);
             ZipFile.ExtractToDirectory(options.ZipPath, extractRoot);
 
+            SetStatus("更新内容を確認しています...");
             string sourceRoot = Path.Combine(extractRoot, "Cotaska-Portable");
             ValidateSourceRoot(sourceRoot);
 
+            SetStatus("現在のファイルをバックアップしています...");
             string backupDir = Path.Combine(options.PortableRoot, "backup");
             Directory.CreateDirectory(backupDir);
             backupPath = Path.Combine(backupDir, "portable-update-before-" + timestamp);
@@ -60,21 +72,27 @@ internal static class UpdaterFallback
             WriteLog("Creating backup: " + backupPath);
             BackupCurrentFiles(options.PortableRoot, backupPath);
 
+            SetStatus("アプリを差し替えています...");
             WriteLog("Replacing application files");
             ReplaceApplicationFiles(options.PortableRoot, sourceRoot);
 
+            SetStatus("Cotaska を再起動しています...");
             WriteLog("Portable update completed");
             RestartCotaska(options.PortableRoot);
             WriteLog("Cotaska restart requested");
+            SetStatus("更新が完了しました。");
+            Thread.Sleep(600);
             return 0;
         }
         catch (Exception ex)
         {
+            SetStatus("更新に失敗しました。ログを確認してください。");
             WriteLog("Portable update failed: " + ex.Message);
             if (!string.IsNullOrEmpty(backupPath))
             {
                 try
                 {
+                    SetStatus("バックアップから復元しています...");
                     RestoreFromBackup(backupPath, GetPortableRootFromArgs(args));
                 }
                 catch (Exception restoreEx)
@@ -82,11 +100,76 @@ internal static class UpdaterFallback
                     WriteLog("Restore failed: " + restoreEx.Message);
                 }
             }
+            CloseStatusWindow();
+            MessageBox.Show(ex.Message, "Cotaska Update Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             return 1;
         }
         finally
         {
             DeleteDirectoryIfExists(extractRoot);
+            CloseStatusWindow();
+        }
+    }
+
+    private static void StartStatusWindow()
+    {
+        using (var ready = new ManualResetEvent(false))
+        {
+            statusThread = new Thread(() =>
+            {
+                Application.EnableVisualStyles();
+                Application.SetCompatibleTextRenderingDefault(false);
+                statusWindow = new UpdaterStatusWindow();
+                statusWindow.Shown += delegate { ready.Set(); };
+                Application.Run(statusWindow);
+            });
+            statusThread.SetApartmentState(ApartmentState.STA);
+            statusThread.IsBackground = true;
+            statusThread.Start();
+            ready.WaitOne(3000);
+        }
+    }
+
+    private static void SetStatus(string message)
+    {
+        UpdaterStatusWindow window = statusWindow;
+        if (window == null || window.IsDisposed)
+        {
+            return;
+        }
+        try
+        {
+            if (window.InvokeRequired)
+            {
+                window.BeginInvoke(new Action<string>(SetStatus), message);
+                return;
+            }
+            window.SetStatus(message);
+        }
+        catch
+        {
+            // The update itself must continue even if the status window is unavailable.
+        }
+    }
+
+    private static void CloseStatusWindow()
+    {
+        UpdaterStatusWindow window = statusWindow;
+        if (window == null || window.IsDisposed)
+        {
+            return;
+        }
+        try
+        {
+            if (window.InvokeRequired)
+            {
+                window.BeginInvoke(new Action(CloseStatusWindow));
+                return;
+            }
+            window.Close();
+        }
+        catch
+        {
         }
     }
 
@@ -361,6 +444,80 @@ internal static class UpdaterFallback
         if (!string.IsNullOrEmpty(path) && Directory.Exists(path))
         {
             Directory.Delete(path, true);
+        }
+    }
+
+    private sealed class UpdaterStatusWindow : Form
+    {
+        private readonly Label statusLabel;
+        private readonly ProgressBar progressBar;
+
+        public UpdaterStatusWindow()
+        {
+            Text = "Cotaska を更新しています";
+            StartPosition = FormStartPosition.CenterScreen;
+            FormBorderStyle = FormBorderStyle.FixedDialog;
+            MaximizeBox = false;
+            MinimizeBox = false;
+            ShowInTaskbar = true;
+            TopMost = true;
+            ClientSize = new Size(420, 150);
+            BackColor = Color.White;
+
+            var titleLabel = new Label
+            {
+                AutoSize = false,
+                Text = "Cotaska を更新しています",
+                Font = new Font("Yu Gothic UI", 13F, FontStyle.Bold),
+                Location = new Point(24, 18),
+                Size = new Size(372, 28)
+            };
+            Controls.Add(titleLabel);
+
+            statusLabel = new Label
+            {
+                AutoSize = false,
+                Text = "更新ファイルを適用しています。しばらくお待ちください。",
+                Font = new Font("Yu Gothic UI", 9F, FontStyle.Regular),
+                Location = new Point(24, 56),
+                Size = new Size(372, 24)
+            };
+            Controls.Add(statusLabel);
+
+            progressBar = new ProgressBar
+            {
+                Location = new Point(24, 92),
+                Size = new Size(372, 18),
+                Style = ProgressBarStyle.Marquee,
+                MarqueeAnimationSpeed = 35
+            };
+            Controls.Add(progressBar);
+
+            var noteLabel = new Label
+            {
+                AutoSize = false,
+                Text = "このウィンドウは更新完了後に自動で閉じます。",
+                Font = new Font("Yu Gothic UI", 8F, FontStyle.Regular),
+                ForeColor = Color.DimGray,
+                Location = new Point(24, 118),
+                Size = new Size(372, 20)
+            };
+            Controls.Add(noteLabel);
+        }
+
+        public void SetStatus(string message)
+        {
+            statusLabel.Text = message;
+        }
+
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            if (e.CloseReason == CloseReason.UserClosing)
+            {
+                e.Cancel = true;
+                return;
+            }
+            base.OnFormClosing(e);
         }
     }
 }
