@@ -603,7 +603,7 @@ function MainPane({
     const totalCount = sections.reduce((s, sec) => s + sec.tasks.length, 0);
     return (
       <>
-        {totalCount === 0 && (
+        {totalCount === 0 && !progressSections && (
           <div className="task-empty">タスクがありません</div>
         )}
         {sections.map((section) => (
@@ -781,7 +781,12 @@ function MainPane({
 
       {/* タスクリスト */}
       <div className="task-list">
-        {sections ? renderSections() : (progressSections ? renderProgressSections() : renderFlatList())}
+        {sections ? (
+          <>
+            {renderSections()}
+            {progressSections && progressSections.length > 0 && renderProgressSections()}
+          </>
+        ) : (progressSections ? renderProgressSections() : renderFlatList())}
         {/* CHG-011: 完了セクション */}
         {!isTrashed && !isCompleted && completedSectionTasks.length > 0 && (
           <>

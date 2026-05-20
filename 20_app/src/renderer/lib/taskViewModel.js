@@ -26,6 +26,14 @@ function normalizeProgressStatusValue(progressStatus, status = "todo") {
   return status === "done" ? "完了" : (value || "未着");
 }
 
+function isOnHoldTask(task) {
+  return normalizeProgressStatusValue(task?.progressStatus, task?.status) === "保留";
+}
+
+function isActiveDateTask(task) {
+  return task?.status !== "done" && !isOnHoldTask(task);
+}
+
 // T-031: frontmatterフィールドに対応（file-first architecture）
 function mapFileTask(taskData) {
   const today = localDateString();
@@ -265,7 +273,7 @@ function buildSections(allTasks, view) {
   const today = localDateString();
   if (view === "今日") {
     const filtered = allTasks.filter(
-      (t) => dueDatePart(t.due_date) && dueDatePart(t.due_date) <= today && t.status !== "done"
+      (t) => dueDatePart(t.due_date) && dueDatePart(t.due_date) <= today && isActiveDateTask(t)
     );
     const sections = [];
     const overdue    = sortByTaskOrder(filtered.filter((t) => dueDatePart(t.due_date) < today));
@@ -279,7 +287,7 @@ function buildSections(allTasks, view) {
     const day1   = addDays(today, 1);
     const day2   = addDays(today, 2);
     const filtered = allTasks.filter(
-      (t) => dueDatePart(t.due_date) && dueDatePart(t.due_date) <= today7 && t.status !== "done"
+      (t) => dueDatePart(t.due_date) && dueDatePart(t.due_date) <= today7 && isActiveDateTask(t)
     );
     
     const sections  = [];
@@ -302,6 +310,8 @@ export {
   formatDue,
   dueDatePart,
   normalizeProgressStatusValue,
+  isOnHoldTask,
+  isActiveDateTask,
   mapFileTask,
   calcParentProgress,
   toFileTaskPayload,

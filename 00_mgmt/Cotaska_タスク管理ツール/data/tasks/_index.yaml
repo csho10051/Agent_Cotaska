@@ -2470,7 +2470,7 @@ tasks:
   - id: T-0236
     title: 仕様変更：Portable版自動更新
     list: 仕様変更
-    status: todo
+    status: done
     priority: normal
     sort_order: 236
     tags:
@@ -2478,7 +2478,7 @@ tasks:
       - 自動更新
       - portable
     due_date: '2026-05-16'
-    updated_at: '2026-05-16T13:11:58.687Z'
+    updated_at: '2026-05-20T01:03:59.084Z'
   - id: T-0237
     title: CHG-074-01 設計反映：Portable版自動更新
     list: 仕様変更
@@ -2508,7 +2508,7 @@ tasks:
   - id: T-0248
     title: 不具合：バージョンアップされない
     list: 不具合修正
-    status: doing
+    status: done
     priority: normal
     sort_order: 238
     tags:
@@ -2516,11 +2516,11 @@ tasks:
       - 自動更新
       - portable
     due_date: '2026-05-16'
-    updated_at: '2026-05-19T22:17:17+09:00'
+    updated_at: '2026-05-20T01:03:59.794Z'
   - id: T-0239
     title: CHG-074-03 確認：Portable版自動更新
     list: 仕様変更
-    status: todo
+    status: done
     priority: normal
     sort_order: 239
     tags:
@@ -2529,7 +2529,7 @@ tasks:
       - 自動更新
       - portable
     due_date: '2026-05-16'
-    updated_at: '2026-05-16T21:40:00+09:00'
+    updated_at: '2026-05-20T01:03:58.363Z'
   - id: T-0240
     title: BUG-20260516-03 起動時に黒画面のままになる問題を修正
     list: 不具合対応
@@ -2581,6 +2581,19 @@ tasks:
       - 入力補正
     due_date: '2026-05-19'
     updated_at: '2026-05-19T11:59:31.239Z'
+  - id: T-0253
+    title: CHG-078 今日/明日保留タスク移動
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 243
+    tags:
+      - CHG-078
+      - 今日
+      - 明日
+      - 保留
+    due_date: '2026-05-20'
+    updated_at: '2026-05-20T11:29:28+09:00'
   - id: T-0244
     title: CHG-075-04 実装：日付入力補正の強調表示
     list: 仕様変更
@@ -2685,7 +2698,64 @@ tasks:
       - ロード画面
     due_date: null
     updated_at: '2026-05-19T22:06:27+09:00'
+  - id: T-0254
+    title: CHG-078-01 設計：今日/明日保留タスク移動の表示仕様整理
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 254
+    tags:
+      - CHG-078
+      - 設計
+      - 今日
+      - 明日
+      - 保留
+    due_date: null
+    updated_at: '2026-05-20T10:18:35+09:00'
+  - id: T-0255
+    title: CHG-078-02 実装：今日/明日の保留タスクを保留セッションへ移動
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 255
+    tags:
+      - CHG-078
+      - 実装
+      - 今日
+      - 明日
+      - 保留
+    due_date: null
+    updated_at: '2026-05-20T10:18:35+09:00'
+  - id: T-0256
+    title: CHG-078-03 ユーザー確認：今日/明日保留タスクの表示確認
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 256
+    tags:
+      - CHG-078
+      - ユーザー確認
+      - 今日
+      - 明日
+      - 保留
+    due_date: null
+    updated_at: '2026-05-20T11:29:28+09:00'
+  - id: T-0257
+    title: CHG-078-04 実装：日付ビュー保留セクションに遅延保留を表示
+    list: 仕様変更
+    status: done
+    priority: normal
+    sort_order: 257
+    tags:
+      - CHG-078
+      - 実装
+      - 今日
+      - 明日
+      - 保留
+      - 遅延
+    due_date: null
+    updated_at: '2026-05-20T10:42:12+09:00'
 task_file_roots:
   - .
-next_task_id: 253
-last_updated: '2026-05-19T13:17:49.065Z'
+next_task_id: 258
+last_updated: '2026-05-20T02:30:34.011Z'

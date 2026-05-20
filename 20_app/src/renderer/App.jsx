@@ -17,6 +17,8 @@ import {
   localDateString,
   mapFileTask,
   normalizeProgressStatusValue,
+  isOnHoldTask,
+  isActiveDateTask,
   sortByTaskOrder,
   sortDisplayTasks,
   taskMatchesSearch,
@@ -24,9 +26,27 @@ import {
 } from "./lib/taskViewModel";
 
 const TAG_NAV_PREFIX = "tag:";
+const DATE_VIEWS_WITH_ON_HOLD_SECTION = new Set(["今日", "明日", "次の7日間"]);
 const DETAIL_PANE_MIN_WIDTH = 320;
 const DETAIL_PANE_MAX_WIDTH = 720;
 const DETAIL_PANE_DEFAULT_WIDTH = 380;
+
+function getOnHoldTasksForDateView(tasks, view, sortState) {
+  const today = localDateString();
+  const cutoffDate = view === "明日"
+    ? addDays(today, 1)
+    : view === "次の7日間"
+      ? addDays(today, 7)
+      : today;
+
+  return sortDisplayTasks(
+    tasks.filter((t) => {
+      const date = dueDatePart(t.due_date);
+      return date && date <= cutoffDate && t.status !== "done" && isOnHoldTask(t);
+    }),
+    sortState
+  );
+}
 
 function App() {
   const [tasks,         setTasks]         = useState([]);
@@ -179,9 +199,9 @@ function App() {
       const tomorrow = addDays(today, 1);
       const next7 = addDays(today, 7);
       setAllCount(mapped.filter((t) => t.status !== "done").length);
-      setTodayCount(mapped.filter(t => dueDatePart(t.due_date) && dueDatePart(t.due_date) <= today && t.status !== "done").length);
-      setTomorrowCount(mapped.filter((t) => dueDatePart(t.due_date) === tomorrow && t.status !== "done").length);
-      setNext7DaysCount(mapped.filter((t) => dueDatePart(t.due_date) && dueDatePart(t.due_date) <= next7 && t.status !== "done").length);
+      setTodayCount(mapped.filter((t) => dueDatePart(t.due_date) && dueDatePart(t.due_date) <= today && isActiveDateTask(t)).length);
+      setTomorrowCount(mapped.filter((t) => dueDatePart(t.due_date) === tomorrow && isActiveDateTask(t)).length);
+      setNext7DaysCount(mapped.filter((t) => dueDatePart(t.due_date) && dueDatePart(t.due_date) <= next7 && isActiveDateTask(t)).length);
       setNoListCount(mapped.filter((t) => (t.list === null || t.list === undefined) && t.status !== "done").length);
 
       // 選択中タスクがまだ存在する場合は最新データで上書き
@@ -537,17 +557,24 @@ function App() {
   } else if (activeNav === "仕掛") {
     visibleTasks = sortDisplayTasks(tasks.filter((t) => t.progressStatus === "仕掛" && t.status !== "done"), listSort);
   } else if (activeNav === "保留") {
-    visibleTasks = sortDisplayTasks(tasks.filter((t) => t.progressStatus === "保留" && t.status !== "done"), listSort);
+    visibleTasks = sortDisplayTasks(tasks.filter((t) => isOnHoldTask(t) && t.status !== "done"), listSort);
   } else if (activeNav === "明日") {
     const tomorrow = addDays(localDateString(), 1);
-    visibleTasks = sortDisplayTasks(tasks.filter((t) => dueDatePart(t.due_date) === tomorrow && t.status !== "done"), listSort);
+    const dateTasks = sortDisplayTasks(
+      tasks.filter((t) => dueDatePart(t.due_date) === tomorrow && isActiveDateTask(t)),
+      listSort
+    );
+    const onHoldTasks = getOnHoldTasksForDateView(tasks, activeNav, listSort);
+    visibleTasks = [...dateTasks, ...onHoldTasks];
   } else if (activeNav === "今日" || activeNav === "次の7日間") {
     visibleSections = buildSections(tasks, activeNav);
     visibleSections = visibleSections.map((section) => ({
       ...section,
       tasks: sortDisplayTasks(section.tasks, listSort),
     }));
-    visibleTasks    = visibleSections.flatMap((s) => s.tasks);
+    const sectionTasks = visibleSections.flatMap((s) => s.tasks);
+    const onHoldTasks = getOnHoldTasksForDateView(tasks, activeNav, listSort);
+    visibleTasks = [...sectionTasks, ...onHoldTasks];
   } else if (activeNav === "受信トレイ" || activeNav === "リストなし") {
     // T-007-05: 完了済みタスクは完了ビューへ
     // T-031: list_id を list に変更
@@ -596,9 +623,10 @@ function App() {
   const useProgressSections = !isSearchMode && activeNav !== "ゴミ箱";
 
   if (useProgressSections) {
+    const isDateView = DATE_VIEWS_WITH_ON_HOLD_SECTION.has(activeNav);
     const merged = visibleTasks.filter((t) => {
       const progressStatus = normalizeProgressStatusValue(t.progressStatus, t.status);
-      return t.status !== "done" && progressStatus !== "保留" && progressStatus !== "完了";
+      return !isDateView && t.status !== "done" && progressStatus !== "保留" && progressStatus !== "完了";
     });
     const onHold = visibleTasks.filter((t) => {
       const progressStatus = normalizeProgressStatusValue(t.progressStatus, t.status);
@@ -606,7 +634,7 @@ function App() {
     });
     const completedProg = visibleTasks.filter((t) => {
       const progressStatus = normalizeProgressStatusValue(t.progressStatus, t.status);
-      return progressStatus === "完了";
+      return !isDateView && progressStatus === "完了";
     });
     progressSections = [];
     if (merged.length > 0) progressSections.push({ label: "未着・仕掛", tasks: merged });
